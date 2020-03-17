@@ -15,12 +15,12 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     private AWSGlobalAccelerator agaClient;
     private AmazonWebServicesClientProxy clientProxy;
 
-    // Number of poll retries 60 tries each 100 ms (Pending design discussion)
-    private static final int NUMBER_OF_STATE_POLL_RETRIES = 60;
-    private static final int POLL_RETRY_DELAY_IN_MS = 100;
+    // Number of poll retries 120 tries each 1s 
+    private static final int NUMBER_OF_STATE_POLL_RETRIES = 120;
+    private static final int POLL_RETRY_DELAY_IN_MS = 1000;
 
     private static final String GLOBALACCELERATOR_DEPLOYED_STATE = "DEPLOYED";
-    private static final String TIMED_OUT_MESSAGE = "Timed out waiting for global accelerator to be Deployed.";
+    private static final String TIMED_OUT_MESSAGE = "Timed out waiting for global accelerator to be deployed.";
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -29,20 +29,20 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger) {
 
-        final ResourceModel model = request.getDesiredResourceState();
-        clientProxy = proxy;
+	    final ResourceModel model = request.getDesiredResourceState();
+            clientProxy = proxy;
 
-        logger.log(String.format("Create accelerator handler is called with [%s] desired state", model));
+            logger.log(String.format("Create accelerator handler is called with [%s] desired state", model));
 
-        final CallbackContext currentContext = callbackContext == null ?
+            final CallbackContext currentContext = callbackContext == null ?
                 CallbackContext.builder().stabilizationRetriesRemaining(NUMBER_OF_STATE_POLL_RETRIES).build() :
                 callbackContext;
 
-        agaClient = AcceleratorClientBuilder.getClient();
-        return createAcceleratorAndUpdateProgress(model, logger, currentContext);
+            agaClient = AcceleratorClientBuilder.getClient();
+            return createAcceleratorAndUpdateProgress(model, logger, currentContext);
         }
 
-        private ProgressEvent<ResourceModel, CallbackContext>  createAcceleratorAndUpdateProgress(ResourceModel model, final Logger logger,
+        private ProgressEvent<ResourceModel, CallbackContext> createAcceleratorAndUpdateProgress(ResourceModel model, final Logger logger,
                                                                                                   final CallbackContext currentContext) {
             if (currentContext.getStabilizationRetriesRemaining() == 0) {
                 throw new RuntimeException(TIMED_OUT_MESSAGE);
@@ -52,7 +52,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
             if (existingAccelerator == null) {
                 logger.log("Creating new accelerator.");
-                Accelerator acc = createAcccelerator(model);
+                Accelerator acc = createAccelerator(model);
                 CallbackContext callbackContext = CallbackContext.builder()
                         .accelerator(acc)
                         .stabilizationRetriesRemaining(NUMBER_OF_STATE_POLL_RETRIES)
@@ -84,7 +84,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
             }
         }
 
-        private Accelerator createAcccelerator(ResourceModel model) {
+        private Accelerator createAccelerator(ResourceModel model) {
             final CreateAcceleratorRequest createAcceleratorRequest =
                     new CreateAcceleratorRequest()
                             .withName(model.getName())
