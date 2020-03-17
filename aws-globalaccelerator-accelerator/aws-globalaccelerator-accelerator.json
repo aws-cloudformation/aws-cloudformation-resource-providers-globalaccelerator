@@ -1,20 +1,24 @@
 {
     "typeName": "AWS::GlobalAccelerator::Accelerator",
     "description": "Resource schema for AWS::GlobalAccelerator::Accelerator.",
-    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-aga",
+    "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-globalaccelerator",
 
     "definitions": {
         "Tag": {
-            "description": "Tag is a key-value pairs assocaited with accelerator.",
+            "description": "Tag is a key-value pair associated with accelerator.",
             "type": "object",
             "properties": {
                 "Key": {
                     "description": "Key of the Tag. You can specify a value that is 1 to 127 characters.",
-                    "type": "string"
+                    "type": "string",
+	            "minLength": 1,
+                    "maxLength": 127
                 },
                 "Value": {
                     "description": "Value for the Tag. You can specify a value that is 1 to 255 characters.",
-                    "type": "string"
+                    "type": "string",
+	            "minLength": 1,
+                    "maxLength": 255
                 }
             },
             "required": [
