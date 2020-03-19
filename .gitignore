@@ -1,0 +1,32 @@
+# IDE configurations
+*.swp
+*.iml
+.idea
+
+# auto-generated files
+target/
+
+#logs
+rpdk.log
+
+# macOS
+.DS_Store
+._*
+
+# Maven outputs
+.classpath
+
+# IntelliJ
+*.iml
+.idea
+out.java
+out/
+.settings
+.project
+
+# auto-generated files
+target/
+
+# test files
+sam-tests/
+stack.json
