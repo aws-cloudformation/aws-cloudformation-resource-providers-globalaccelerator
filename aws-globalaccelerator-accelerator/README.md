@@ -9,7 +9,7 @@
 # How to test locally
 2 ways of testing:
 1. Sam local invoke
-2. Deploy stack in your local (cfn submit and aws cfn create-stack)
+2. Deploy stack in your local (cfn submit and create-stack)
 
 Please don't modify files under `target/generated-sources/rpdk`, as they will be
 automatically overwritten.
