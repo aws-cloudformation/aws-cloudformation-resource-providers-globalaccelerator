@@ -15,7 +15,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     private AWSGlobalAccelerator agaClient;
     private AmazonWebServicesClientProxy clientProxy;
 
-    // Number of poll retries 120 tries each 1s 
+    // Number of poll retries 120 tries each 1s
     private static final int NUMBER_OF_STATE_POLL_RETRIES = 120;
     private static final int POLL_RETRY_DELAY_IN_MS = 1000;
 

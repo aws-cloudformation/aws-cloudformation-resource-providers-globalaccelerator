@@ -20,4 +20,3 @@ Resources:
       Handler: software.amazon.globalaccelerator.accelerator.HandlerWrapper::testEntrypoint
       Runtime: java8
       CodeUri: ./target/aws-globalaccelerator-accelerator-handler-1.0-SNAPSHOT.jar
-
