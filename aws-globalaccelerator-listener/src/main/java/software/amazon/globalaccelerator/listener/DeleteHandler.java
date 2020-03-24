@@ -6,10 +6,6 @@ import lombok.val;
 import software.amazon.cloudformation.proxy.*;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
-    private AWSGlobalAccelerator agaClient;
-    private AmazonWebServicesClientProxy clientProxy;
-    private Logger logger;
-
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
@@ -17,35 +13,26 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger) {
 
-        clientProxy = proxy;
-        agaClient = AcceleratorClientBuilder.getClient();
-        this.logger = logger;
+        val agaClient = AcceleratorClientBuilder.getClient();
+        val inferredCallbackContext = callbackContext != null ?
+                callbackContext :
+                CallbackContext.builder()
+                        .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
+                        .build();
+
         final ResourceModel model = request.getDesiredResourceState();
-
-        val acceleratorArn = request.getDesiredResourceState().getListenerArn();
-        val foundListener = getListener(acceleratorArn);
-
+        val foundListener = HandlerCommons.getListener(model.getListenerArn(), proxy, agaClient, logger);
         if (foundListener != null) {
-            deleteListener(foundListener.getListenerArn());
+            deleteListener(foundListener.getListenerArn(), proxy, agaClient, logger);
         }
 
-        return ProgressEvent.defaultSuccessHandler(model);
+        return HandlerCommons.WaitForSynchronziedStep(inferredCallbackContext, model, proxy, agaClient, logger);
     }
 
-    private void deleteListener(String listenerArn) {
+    private void deleteListener(final String listenerArn,
+                                final AmazonWebServicesClientProxy proxy,
+                                final AWSGlobalAccelerator agaClient, final Logger logger) {
         val request = new DeleteListenerRequest().withListenerArn(listenerArn);
-        clientProxy.injectCredentialsAndInvoke(request, agaClient::deleteListener);
-    }
-
-    private Listener getListener(String listenerArn) {
-        Listener listener = null;
-        try {
-            val request = new DescribeListenerRequest().withListenerArn(listenerArn);
-            listener =  clientProxy.injectCredentialsAndInvoke(request, agaClient::describeListener).getListener();
-        }
-        catch (ListenerNotFoundException ex) {
-            logger.log(String.format("Did not find listener with arn [%s]", listenerArn));
-        }
-        return listener;
+        proxy.injectCredentialsAndInvoke(request, agaClient::deleteListener);
     }
 }
