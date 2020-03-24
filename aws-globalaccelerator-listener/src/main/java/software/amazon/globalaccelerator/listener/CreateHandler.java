@@ -6,7 +6,6 @@ import com.amazonaws.services.globalaccelerator.model.PortRange;
 import lombok.val;
 import software.amazon.cloudformation.proxy.*;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
