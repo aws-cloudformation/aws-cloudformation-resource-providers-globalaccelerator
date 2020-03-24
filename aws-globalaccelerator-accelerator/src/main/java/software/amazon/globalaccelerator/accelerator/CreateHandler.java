@@ -2,102 +2,136 @@ package software.amazon.globalaccelerator.accelerator;
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator;
 import com.amazonaws.services.globalaccelerator.model.Accelerator;
+import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus;
 import com.amazonaws.services.globalaccelerator.model.CreateAcceleratorRequest;
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest;
+import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException;
+import com.amazonaws.services.globalaccelerator.model.Tag;
+import lombok.val;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
-import software.amazon.cloudformation.proxy.HandlerErrorCode;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
-import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 public class CreateHandler extends BaseHandler<CallbackContext> {
+    private static final int CALLBACK_DELAY_IN_SECONDS = 1;
+    private static final int NUMBER_OF_STATE_POLL_RETRIES = (60 / CALLBACK_DELAY_IN_SECONDS) * 60 * 4; // 4 hours
+    private static final String TIMED_OUT_MESSAGE = "Timed out waiting for global accelerator to be deployed.";
+
     private AWSGlobalAccelerator agaClient;
     private AmazonWebServicesClientProxy clientProxy;
-
-    // Number of poll retries 120 tries each 1s
-    private static final int NUMBER_OF_STATE_POLL_RETRIES = 120;
-    private static final int POLL_RETRY_DELAY_IN_MS = 1000;
-
-    private static final String GLOBALACCELERATOR_DEPLOYED_STATE = "DEPLOYED";
-    private static final String TIMED_OUT_MESSAGE = "Timed out waiting for global accelerator to be deployed.";
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
-        final Logger logger) {
+        final Logger logger
+    ) {
+        clientProxy = proxy;
+        agaClient = AcceleratorClientBuilder.getClient();
 
-	    final ResourceModel model = request.getDesiredResourceState();
-            clientProxy = proxy;
-
-            logger.log(String.format("Create accelerator handler is called with [%s] desired state", model));
-
-            final CallbackContext currentContext = callbackContext == null ?
+        // create a context if we don't have one yet.
+        val currentContext = callbackContext == null ?
                 CallbackContext.builder().stabilizationRetriesRemaining(NUMBER_OF_STATE_POLL_RETRIES).build() :
                 callbackContext;
 
-            agaClient = AcceleratorClientBuilder.getClient();
-            return createAcceleratorAndUpdateProgress(model, logger, currentContext);
+        // If we run out of stabilization attempts, then we quit
+        if (currentContext.getStabilizationRetriesRemaining() <= 0) {
+            throw new RuntimeException(TIMED_OUT_MESSAGE);
         }
 
-        private ProgressEvent<ResourceModel, CallbackContext> createAcceleratorAndUpdateProgress(ResourceModel model, final Logger logger,
-                                                                                                  final CallbackContext currentContext) {
-            if (currentContext.getStabilizationRetriesRemaining() == 0) {
-                throw new RuntimeException(TIMED_OUT_MESSAGE);
-            }
+        val model = request.getDesiredResourceState();
+        if (callbackContext == null) {
+            return CreateAcceleratorStep(model, logger);
+        } else {
+            return WaitForSynchronziedStep(currentContext, model, logger);
+        }
+    }
 
-            final Accelerator existingAccelerator = currentContext.getAccelerator();
+    /**
+     * Create an accelerator and create the correct progress continuation context
+     */
+    private ProgressEvent<ResourceModel, CallbackContext> CreateAcceleratorStep(
+            ResourceModel model, Logger logger
+    ) {
+        logger.log("Creating new accelerator.");
+        val acc = createAccelerator(model);
+        model.setAcceleratorArn(acc.getAcceleratorArn());
 
-            if (existingAccelerator == null) {
-                logger.log("Creating new accelerator.");
-                Accelerator acc = createAccelerator(model);
-                CallbackContext callbackContext = CallbackContext.builder()
-                        .accelerator(acc)
-                        .stabilizationRetriesRemaining(NUMBER_OF_STATE_POLL_RETRIES)
-                        .build();
-                return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                        .resourceModel(model)
-                        .errorCode(HandlerErrorCode.NotStabilized)
-                        .status(OperationStatus.IN_PROGRESS)
-                        .callbackContext(callbackContext).build();
-            } else if (getAcceleratorState(existingAccelerator).equals(GLOBALACCELERATOR_DEPLOYED_STATE)) {
-                logger.log("Accelerator is in deployed state.");
-                model.setName(existingAccelerator.getName());
-                model.setAcceleratorArn(existingAccelerator.getAcceleratorArn());
-                return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                        .resourceModel(model)
-                        .status(OperationStatus.SUCCESS)
-                        .build();
-            } else {
-                logger.log("Accelerator is still deploying.");
-                try {
-                    Thread.sleep(POLL_RETRY_DELAY_IN_MS);
-                } catch (InterruptedException ex) {
-                    throw new RuntimeException(ex);
+        val allAddresses = new ArrayList<String>();
+        val ipSets = acc.getIpSets();
+        if (ipSets != null) {
+            for (int i = 0; i != ipSets.size(); ++i) {
+                val ipSetAddresses = ipSets.get(i).getIpAddresses();
+                for (int j = 0; j != ipSetAddresses.size(); ++j) {
+                    allAddresses.add(ipSetAddresses.get(j));
                 }
-                return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                        .resourceModel(model)
-                        .status(OperationStatus.IN_PROGRESS)
-                        .build();
             }
         }
+        model.setIpAddresses(allAddresses);
 
-        private Accelerator createAccelerator(ResourceModel model) {
-            final CreateAcceleratorRequest createAcceleratorRequest =
-                    new CreateAcceleratorRequest()
-                            .withName(model.getName())
-                            .withIdempotencyToken(model.getName()); //Pending design discussion.
-            return clientProxy.injectCredentialsAndInvoke(createAcceleratorRequest, agaClient::createAccelerator)
-                    .getAccelerator();
-        }
+        val callbackContext = CallbackContext.builder()
+                .stabilizationRetriesRemaining(NUMBER_OF_STATE_POLL_RETRIES)
+                .build();
 
-        private String getAcceleratorState(Accelerator existingAccelerator) {
-            final DescribeAcceleratorRequest describeAcceleratorRequest =
-                    new DescribeAcceleratorRequest().withAcceleratorArn(existingAccelerator.getAcceleratorArn());
-            String status = clientProxy.injectCredentialsAndInvoke(describeAcceleratorRequest, agaClient::describeAccelerator).
-                    getAccelerator().getStatus();
-            return status;
+        return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model);
+    }
+
+    /**
+     * Check to see if accelerator creation is complete and create the correct progress continuation context
+     */
+    private ProgressEvent<ResourceModel, CallbackContext> WaitForSynchronziedStep(
+            CallbackContext context, ResourceModel model, Logger logger
+    ) {
+        logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", model.getAcceleratorArn()));
+
+        val accelerator = getAccelerator(model.getAcceleratorArn());
+        if (accelerator.getStatus().equals(AcceleratorStatus.DEPLOYED.toString())) {
+            return ProgressEvent.defaultSuccessHandler(model);
+        } else {
+            val callbackContext = CallbackContext.builder()
+                    .stabilizationRetriesRemaining(context.getStabilizationRetriesRemaining()-1)
+                    .build();
+            return ProgressEvent.defaultInProgressHandler(callbackContext, CALLBACK_DELAY_IN_SECONDS, model);
         }
+    }
+
+    /**
+     * Create the accelerator based on the provided ResourceModel
+     */
+    private Accelerator createAccelerator(ResourceModel model) {
+        val convertedTags = model.getTags().stream()
+                .map(x -> new Tag().withKey(x.getKey()).withValue(x.getValue()))
+                .collect(Collectors.toList());
+
+        val request = new CreateAcceleratorRequest()
+                        .withName(model.getName())
+                        .withEnabled(model.getEnabled())
+                        .withIpAddresses(model.getIpAddresses())
+                        .withTags(convertedTags)
+                        .withIdempotencyToken(model.getName()); //Pending design discussion.
+
+        return clientProxy.injectCredentialsAndInvoke(request, agaClient::createAccelerator).getAccelerator();
+    }
+
+    /**
+     * Get the accelerator with the specified ARN.
+     * @param arn ARN of the accelerator
+     * @return NULL if the accelerator does not exist
+     */
+    private Accelerator getAccelerator(String arn) {
+        Accelerator accelerator = null;
+        try {
+            val request = new DescribeAcceleratorRequest().withAcceleratorArn(arn);
+            accelerator =  clientProxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).getAccelerator();
+        }
+        catch (AcceleratorNotFoundException ex) {
+            // TODO: Log here?
+        }
+        return accelerator;
+    }
 }

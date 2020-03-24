@@ -13,5 +13,4 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class CallbackContext {
     private Integer stabilizationRetriesRemaining;
-    private Accelerator accelerator;
 }
