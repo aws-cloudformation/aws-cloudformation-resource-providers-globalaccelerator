@@ -1,105 +1,98 @@
 {
   "typeName": "AWS::GlobalAccelerator::Listener",
-  "description": "An example resource schema demonstrating some basic constructs and validation rules.",
+  "description": "A listener to process inbound connections from clients",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
   "definitions": {
-    "InitechDateFormat": {
-      "$comment": "Use the `definitions` block to provide shared resource property schemas",
-      "type": "string",
-      "format": "date-time"
+    "Port": {
+      "description": "A network port number",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
     },
-    "Memo": {
+    "PortRange": {
+      "description": "A port range to support for connections from  clients  to your accelerator.",
       "type": "object",
       "properties": {
-        "Heading": {
-          "type": "string"
+        "FromPort": {
+          "$ref": "#/definitions/Port"
         },
-        "Body": {
-          "type": "string"
+        "ToPort": {
+          "$ref": "#/definitions/Port"
         }
-      },
-      "additionalProperties": false
-    }
-  },
-  "properties": {
-    "TPSCode": {
-      "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
-      "type": "string",
-      "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
-    },
-    "Title": {
-      "description": "The title of the TPS report is a mandatory element.",
-      "type": "string",
-      "minLength": 20,
-      "maxLength": 250
-    },
-    "CoverSheetIncluded": {
-      "description": "Required for all TPS Reports submitted after 2/19/1999",
-      "type": "boolean"
-    },
-    "DueDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "ApprovalDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "Memo": {
-      "$ref": "#/definitions/Memo"
-    },
-    "SecondCopyOfMemo": {
-      "description": "In case you didn't get the first one.",
-      "$ref": "#/definitions/Memo"
-    },
-    "TestCode": {
-      "type": "string",
-      "enum": [
-        "NOT_STARTED",
-        "CANCELLED"
-      ]
-    },
-    "Authors": {
-      "type": "array",
-      "items": {
-        "type": "string"
       }
     }
   },
-  "additionalProperties": false,
+  "properties": {
+    "ListenerArn": {
+      "description": "The Amazon Resource Name (ARN) of the listener",
+      "type": "string"
+    },
+    "AcceleratorArn": {
+      "description": "The Amazon Resource Name (ARN) of the accelerator",
+      "type": "string"
+    },
+    "PortRanges": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PortRange"
+      }
+    },
+    "Protocol": {
+      "description": "The title of the TPS report is a mandatory element.",
+      "type": "string",
+      "default": "TCP",
+      "enum": [
+        "TCP",
+        "UDP"
+      ]
+    },
+    "ClientAffinity": {
+      "description": "Client affinity lets you direct all requests from a user to the same endpoint",
+      "type": "string",
+      "default": "NONE",
+      "enum": [
+        "NONE",
+        "SOURCE_IP"
+      ]
+    }
+  },
   "required": [
-    "TestCode",
-    "Title"
+    "AcceleratorArn",
+    "PortRanges",
+    "Protocol"
   ],
   "readOnlyProperties": [
-    "/properties/TPSCode"
+    "/properties/ListenerArn"
   ],
   "primaryIdentifier": [
-    "/properties/TPSCode"
+    "/properties/ListenerArn"
   ],
   "handlers": {
     "create": {
       "permissions": [
-        "initech:CreateReport"
+        "globalaccelerator:CreateListener",
+        "globalaccelerator:DescribeListener",
+        "globalaccelerator:DescribeAccelerator"
       ]
     },
     "read": {
       "permissions": [
-        "initech:DescribeReport"
+        "globalaccelerator:DescribeListener"
       ]
     },
     "update": {
       "permissions": [
-        "initech:UpdateReport"
+        "globalaccelerator:UpdateListener",
+        "globalaccelerator:DescribeListener",
+        "globalaccelerator:DescribeAccelerator"
       ]
     },
     "delete": {
       "permissions": [
-        "initech:DeleteReport"
-      ]
-    },
-    "list": {
-      "permissions": [
-        "initech:ListReports"
+        "globalaccelerator:DescribeListener",
+        "globalaccelerator:DeleteListener"
       ]
     }
-  }
+  },
+  "additionalProperties": false
 }

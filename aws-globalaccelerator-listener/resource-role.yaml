@@ -23,11 +23,11 @@ Resources:
             Statement:
               - Effect: Allow
                 Action:
-                - "initech:CreateReport"
-                - "initech:DeleteReport"
-                - "initech:DescribeReport"
-                - "initech:ListReports"
-                - "initech:UpdateReport"
+                - "globalaccelerator:CreateListener"
+                - "globalaccelerator:DeleteListener"
+                - "globalaccelerator:DescribeAccelerator"
+                - "globalaccelerator:DescribeListener"
+                - "globalaccelerator:UpdateListener"
                 Resource: "*"
 Outputs:
   ExecutionRoleArn:
