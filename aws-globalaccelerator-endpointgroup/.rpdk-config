@@ -1,0 +1,15 @@
+{
+    "typeName": "AWS::GlobalAccelerator::EndpointGroup",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "software.amazon.globalaccelerator.endpointgroup.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.globalaccelerator.endpointgroup.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "software",
+            "amazon",
+            "globalaccelerator",
+            "endpointgroup"
+        ]
+    }
+}
