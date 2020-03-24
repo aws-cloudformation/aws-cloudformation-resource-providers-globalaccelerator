@@ -14,6 +14,7 @@ import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
@@ -23,6 +24,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
     private AWSGlobalAccelerator agaClient;
     private AmazonWebServicesClientProxy clientProxy;
+    private Logger logger;
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -31,6 +33,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger
     ) {
+        this.logger = logger;
         clientProxy = proxy;
         agaClient = AcceleratorClientBuilder.getClient();
 
@@ -46,18 +49,16 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
         val model = request.getDesiredResourceState();
         if (callbackContext == null) {
-            return CreateAcceleratorStep(model, logger);
+            return CreateAcceleratorStep(model);
         } else {
-            return WaitForSynchronziedStep(currentContext, model, logger);
+            return WaitForSynchronziedStep(currentContext, model);
         }
     }
 
     /**
      * Create an accelerator and create the correct progress continuation context
      */
-    private ProgressEvent<ResourceModel, CallbackContext> CreateAcceleratorStep(
-            ResourceModel model, Logger logger
-    ) {
+    private ProgressEvent<ResourceModel, CallbackContext> CreateAcceleratorStep(final ResourceModel model) {
         logger.log("Creating new accelerator.");
         val acc = createAccelerator(model);
         model.setAcceleratorArn(acc.getAcceleratorArn());
@@ -85,7 +86,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
      * Check to see if accelerator creation is complete and create the correct progress continuation context
      */
     private ProgressEvent<ResourceModel, CallbackContext> WaitForSynchronziedStep(
-            CallbackContext context, ResourceModel model, Logger logger
+            final CallbackContext context, final ResourceModel model
     ) {
         logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", model.getAcceleratorArn()));
 
@@ -103,10 +104,13 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
     /**
      * Create the accelerator based on the provided ResourceModel
      */
-    private Accelerator createAccelerator(ResourceModel model) {
-        val convertedTags = model.getTags().stream()
-                .map(x -> new Tag().withKey(x.getKey()).withValue(x.getValue()))
-                .collect(Collectors.toList());
+    private Accelerator createAccelerator(final ResourceModel model) {
+        List<Tag> convertedTags = null;
+        if (model.getTags() != null) {
+            convertedTags = model.getTags().stream()
+                    .map(x -> new Tag().withKey(x.getKey()).withValue(x.getValue()))
+                    .collect(Collectors.toList());
+        }
 
         val request = new CreateAcceleratorRequest()
                         .withName(model.getName())
@@ -123,14 +127,14 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
      * @param arn ARN of the accelerator
      * @return NULL if the accelerator does not exist
      */
-    private Accelerator getAccelerator(String arn) {
+    private Accelerator getAccelerator(final String arn) {
         Accelerator accelerator = null;
         try {
             val request = new DescribeAcceleratorRequest().withAcceleratorArn(arn);
             accelerator =  clientProxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).getAccelerator();
         }
         catch (AcceleratorNotFoundException ex) {
-            // TODO: Log here?
+            logger.log(String.format("Did not find accelerator with arn [%s]", arn));
         }
         return accelerator;
     }

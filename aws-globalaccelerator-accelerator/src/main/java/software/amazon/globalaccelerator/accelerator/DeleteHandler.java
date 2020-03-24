@@ -7,11 +7,12 @@ import software.amazon.cloudformation.proxy.*;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
     private static final int CALLBACK_DELAY_IN_SECONDS = 1;
-    private static final int NUMBER_OF_STATE_POLL_RETRIES = 120;
+    private static final int NUMBER_OF_STATE_POLL_RETRIES = (60 / CALLBACK_DELAY_IN_SECONDS) * 60 * 4; // 4 hours
     private static final String TIMED_OUT_MESSAGE = "Timed out waiting for global accelerator to be deployed.";
 
     private AWSGlobalAccelerator agaClient;
     private AmazonWebServicesClientProxy clientProxy;
+    private Logger logger;
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
@@ -21,10 +22,18 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         final Logger logger) {
         clientProxy = proxy;
         agaClient = AcceleratorClientBuilder.getClient();
+        this.logger = logger;
 
         logger.log(String.format("DELETE REQUEST: [%s]", request));
         val acceleratorArn = request.getDesiredResourceState().getAcceleratorArn();
         val foundAccelerator = getAccelerator(acceleratorArn);
+
+        // check if we have exceeded our permitted stabilization count
+        val stabilizationAttemptsRemaining = callbackContext == null ?
+                NUMBER_OF_STATE_POLL_RETRIES : callbackContext.getStabilizationRetriesRemaining() - 1;
+        if (stabilizationAttemptsRemaining <= 0) {
+            throw new RuntimeException(TIMED_OUT_MESSAGE);
+        }
 
         // if we did not find the accelerator and this is the first call in the chain,
         // CFN states we should return NotFound
@@ -35,8 +44,6 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
                     .build();
         }
 
-        // TODO: We should pay attention to us going under our permitted stablization count
-
         if (foundAccelerator == null) {
             return ProgressEvent.defaultSuccessHandler(request.getDesiredResourceState());
         } else if (foundAccelerator.getEnabled()) {
@@ -44,9 +51,6 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         } else if (foundAccelerator.getStatus().equals(AcceleratorStatus.DEPLOYED.toString())) {
             deleteAccelerator(foundAccelerator.getAcceleratorArn());
         }
-
-        val stabilizationAttemptsRemaining = callbackContext == null ?
-                NUMBER_OF_STATE_POLL_RETRIES : callbackContext.getStabilizationRetriesRemaining() - 1;
 
         val newCallbackContext = CallbackContext.builder()
                 .stabilizationRetriesRemaining(stabilizationAttemptsRemaining)
@@ -69,13 +73,13 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             accelerator =  clientProxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).getAccelerator();
         }
         catch (AcceleratorNotFoundException ex) {
-            // TODO: Log here?
+            logger.log(String.format("Did not find accelerator with arn [%s]", arn));
         }
         return accelerator;
     }
 
     private Accelerator disableAccelerator(String arn) {
-        val request = new UpdateAcceleratorRequest().withEnabled(false);
+        val request = new UpdateAcceleratorRequest().withAcceleratorArn(arn).withEnabled(false);
         return clientProxy.injectCredentialsAndInvoke(request, agaClient::updateAccelerator).getAccelerator();
     }
 
