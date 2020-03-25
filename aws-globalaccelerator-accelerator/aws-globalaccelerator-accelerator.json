@@ -1,6 +1,6 @@
 {
   "typeName": "AWS::GlobalAccelerator::Accelerator",
-  "description": "Resource schema for AWS::GlobalAccelerator::Accelerator.",
+  "description": "Creates an accelerator",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-globalaccelerator",
   "definitions": {
     "Tag": {
@@ -8,13 +8,13 @@
       "type": "object",
       "properties": {
         "Key": {
-          "description": "Key of the Tag. You can specify a value that is 1 to 127 characters.",
+          "description": "Key of the tag. Value can be 1 to 127 characters.",
           "type": "string",
           "minLength": 1,
           "maxLength": 127
         },
         "Value": {
-          "description": "Value for the Tag. You can specify a value that is 1 to 255 characters.",
+          "description": "Value for the tag. Value can be 1 to 255 characters.",
           "type": "string",
           "minLength": 1,
           "maxLength": 255
@@ -26,6 +26,7 @@
       ]
     },
     "IpAddress": {
+      "pattern": "^(?:[0-9]{1,3}\\.){3}[0-9]{1,3}$",
       "description": "The IP addresses from BYOIP Prefix pool.",
       "type": "string"
     }
@@ -41,6 +42,7 @@
     "IpAddressType": {
       "description": "IP Address type.",
       "type": "string",
+      "default": "IPV4",
       "enum": [
         "IPV4",
         "IPV6"
@@ -55,18 +57,11 @@
     },
     "Enabled": {
       "description": "Indicates whether an accelerator is enabled. The value is true or false.",
-      "type": "string",
-      "enum": [
-        "true",
-        "false"
-      ]
-    },
-    "IdempotencyToken": {
-      "description": "A unique, case-sensitive identifier that you provide to ensure the idempotency",
-      "type": "string"
+      "default": true,
+      "type": "boolean"
     },
     "AcceleratorArn": {
-      "description": "The Amazon Resource Name (ARN) of the accelerator",
+      "description": "The Amazon Resource Name (ARN) of the accelerator.",
       "type": "string"
     },
     "Tags": {
@@ -76,6 +71,9 @@
       }
     }
   },
+  "required": [
+    "Name"
+  ],
   "handlers": {
     "create": {
       "permissions": [
@@ -98,21 +96,16 @@
         "globalaccelerator:UpdateAccelerator",
         "globalaccelerator:DeleteAccelerator"
       ]
-    },
-    "list": {
-      "permissions": [
-        "globalaccelerator:ListAccelerator"
-      ]
     }
   },
-  "writeOnlyProperties": [
-    "/properties/IdempotencyToken"
+  "readOnlyProperties": [
+    "/properties/AcceleratorArn"
   ],
   "createOnlyProperties": [
-    "/properties/Name"
+    "/properties/IpAddresses"
   ],
   "primaryIdentifier": [
-    "/properties/Name"
+    "/properties/AcceleratorArn"
   ],
   "additionalProperties": false
 }
