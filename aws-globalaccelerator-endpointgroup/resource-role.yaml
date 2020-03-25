@@ -24,9 +24,12 @@ Resources:
               - Effect: Allow
                 Action:
                 - "globalaccelerator:CreateEndpointGroup"
+                - "globalaccelerator:DeleteEndpointGroup"
                 - "globalaccelerator:DescribeAccelerator"
                 - "globalaccelerator:DescribeEndpointGroup"
                 - "globalaccelerator:DescribeListener"
+                - "globalaccelerator:ListAccelerators"
+                - "globalaccelerator:ListListeners"
                 - "globalaccelerator:UpdateEndpointGroup"
                 Resource: "*"
 Outputs:
