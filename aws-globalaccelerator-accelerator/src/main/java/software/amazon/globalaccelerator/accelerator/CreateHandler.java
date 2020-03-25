@@ -15,7 +15,9 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class CreateHandler extends BaseHandler<CallbackContext> {
     @Override
@@ -52,15 +54,13 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         val acc = createAccelerator(model, handlerRequest, proxy, agaClient);
         model.setAcceleratorArn(acc.getAcceleratorArn());
 
-        val allAddresses = new ArrayList<String>();
+
+        List<String> allAddresses = null;
         val ipSets = acc.getIpSets();
         if (ipSets != null) {
-            for (int i = 0; i != ipSets.size(); ++i) {
-                val ipSetAddresses = ipSets.get(i).getIpAddresses();
-                for (int j = 0; j != ipSetAddresses.size(); ++j) {
-                    allAddresses.add(ipSetAddresses.get(j));
-                }
-            }
+            allAddresses = ipSets.stream()
+                    .flatMap(x -> x.getIpAddresses().stream())
+                    .collect(Collectors.toList());
         }
         model.setIpAddresses(allAddresses);
 
