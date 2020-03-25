@@ -38,7 +38,7 @@
       }
     },
     "Protocol": {
-      "description": "The title of the TPS report is a mandatory element.",
+      "description": "The protocol for the listener.",
       "type": "string",
       "default": "TCP",
       "enum": [
