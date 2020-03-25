@@ -3,103 +3,125 @@
   "description": "An example resource schema demonstrating some basic constructs and validation rules.",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
   "definitions": {
-    "InitechDateFormat": {
-      "$comment": "Use the `definitions` block to provide shared resource property schemas",
-      "type": "string",
-      "format": "date-time"
+    "Port": {
+      "description": "A network port number",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
     },
-    "Memo": {
+    "EndpointConfiguration": {
+      "description": "The configuration for a given endpoint",
       "type": "object",
       "properties": {
-        "Heading": {
+        "EndpointId": {
+          "description": "Id of the endpoint.  For Network/Application Load Balancer this value is the ARN.  For EIP, this value is the allocation ID.  For EC2 instances, this is the EC2 instance ID",
           "type": "string"
         },
-        "Body": {
-          "type": "string"
+        "Weight": {
+          "description": "The weight for the endpoint.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 255,
+          "default": 100
+        },
+        "ClientIPPreservationEnabled": {
+          "description": "true if client ip should be preserved",
+          "type": "boolean",
+          "default": true
         }
       },
-      "additionalProperties": false
+      "required": [
+        "EndpointId"
+      ]
     }
   },
   "properties": {
-    "TPSCode": {
-      "description": "A TPS Code is automatically generated on creation and assigned as the unique identifier.",
-      "type": "string",
-      "pattern": "^[A-Z]{3,5}[0-9]{8}-[0-9]{4}$"
+    "ListenerArn": {
+      "description": "The Amazon Resource Name (ARN) of the listener",
+      "type": "string"
     },
-    "Title": {
-      "description": "The title of the TPS report is a mandatory element.",
-      "type": "string",
-      "minLength": 20,
-      "maxLength": 250
+    "EndpointGroupRegion": {
+      "description": "The name of the AWS Region where the endpoint group is located",
+      "type": "string"
     },
-    "CoverSheetIncluded": {
-      "description": "Required for all TPS Reports submitted after 2/19/1999",
-      "type": "boolean"
-    },
-    "DueDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "ApprovalDate": {
-      "$ref": "#/definitions/InitechDateFormat"
-    },
-    "Memo": {
-      "$ref": "#/definitions/Memo"
-    },
-    "SecondCopyOfMemo": {
-      "description": "In case you didn't get the first one.",
-      "$ref": "#/definitions/Memo"
-    },
-    "TestCode": {
-      "type": "string",
-      "enum": [
-        "NOT_STARTED",
-        "CANCELLED"
-      ]
-    },
-    "Authors": {
+    "EndpointConfigurations": {
+      "description": "The list of endpoint objects.",
       "type": "array",
       "items": {
-        "type": "string"
+        "$ref": "#/definitions/EndpointConfiguration"
       }
+    },
+    "TrafficDialPercentage": {
+      "description": "The percentage of traffic to sent to an AWS Region",
+      "type": "integer",
+      "minimum": 0,
+      "default": 100
+    },
+    "HealthCheckPort": {
+      "description": "The port that AWS Global Accelerator uses to check the health of endpoints in this endpoint group.",
+      "$ref": "#/definitions/Port"
+    },
+    "HealthCheckProtocol": {
+      "description": "The protocol that AWS Global Accelerator uses to check the health of endpoints in this endpoint group.",
+      "type": "string",
+      "default": "TCP",
+      "enum": [
+        "TCP",
+        "HTTP",
+        "HTTPS"
+      ]
+    },
+    "HealthCheckIntervalSeconds": {
+      "description": "The time in seconds between each health check for an endpoint.  Must be a value of 10 or 30",
+      "type": "integer",
+      "default": 30
+    },
+    "ThresholdCount": {
+      "description": "The number of consecutive health checks required to set the state of the endpoint to unhealthy.",
+      "type": "integer",
+      "default": 3
+    },
+    "EndpointGroupArn": {
+      "description": "",
+      "type": "string"
     }
   },
-  "additionalProperties": false,
   "required": [
-    "TestCode",
-    "Title"
+    "ListenerArn",
+    "EndpointGroupRegion"
   ],
   "readOnlyProperties": [
-    "/properties/TPSCode"
+    "/properties/EndpointGroupArn"
   ],
   "primaryIdentifier": [
-    "/properties/TPSCode"
+    "/properties/EndpointGroupArn"
   ],
   "handlers": {
     "create": {
       "permissions": [
-        "initech:CreateReport"
+        "globalaccelerator:CreateEndpointGroup",
+        "globalaccelerator:DescribeEndpointGroup",
+        "globalaccelerator:DescribeListener"
       ]
     },
     "read": {
       "permissions": [
-        "initech:DescribeReport"
+        "globalaccelerator:DescribeEndpointGroup"
       ]
     },
     "update": {
       "permissions": [
-        "initech:UpdateReport"
+        "globalaccelerator:UpdateEndpointGroup",
+        "globalaccelerator:DescribeEndpointGroup",
+        "globalaccelerator:DescribeListener"
       ]
     },
     "delete": {
       "permissions": [
-        "initech:DeleteReport"
-      ]
-    },
-    "list": {
-      "permissions": [
-        "initech:ListReports"
+        "globalaccelerator:DescribeEndpointGroup",
+        "globalaccelerator:DescribeAccelerator"
       ]
     }
-  }
+  },
+  "additionalProperties": false
 }
