@@ -3,12 +3,6 @@
   "description": "An example resource schema demonstrating some basic constructs and validation rules.",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
   "definitions": {
-    "Port": {
-      "description": "A network port number",
-      "type": "integer",
-      "minimum": 0,
-      "maximum": 65535
-    },
     "EndpointConfiguration": {
       "description": "The configuration for a given endpoint",
       "type": "object",
@@ -59,7 +53,10 @@
     },
     "HealthCheckPort": {
       "description": "The port that AWS Global Accelerator uses to check the health of endpoints in this endpoint group.",
-      "$ref": "#/definitions/Port"
+      "type": "integer",
+      "minimum": -1,
+      "maximum": 65535,
+      "default": -1
     },
     "HealthCheckProtocol": {
       "description": "The protocol that AWS Global Accelerator uses to check the health of endpoints in this endpoint group.",
@@ -70,6 +67,11 @@
         "HTTP",
         "HTTPS"
       ]
+    },
+    "HealthCheckPath": {
+      "description": "",
+      "type": "string",
+      "default": "/"
     },
     "HealthCheckIntervalSeconds": {
       "description": "The time in seconds between each health check for an endpoint.  Must be a value of 10 or 30",
@@ -82,7 +84,11 @@
       "default": 3
     },
     "EndpointGroupArn": {
-      "description": "",
+      "description": "The Amazon Resource Name (ARN) of the endpoint group",
+      "type": "string"
+    },
+    "AcceleratorArn": {
+      "description": "The Amazon Resource Name (ARN) of the associated accelerator",
       "type": "string"
     }
   },
@@ -91,7 +97,8 @@
     "EndpointGroupRegion"
   ],
   "readOnlyProperties": [
-    "/properties/EndpointGroupArn"
+    "/properties/EndpointGroupArn",
+    "/properties/AcceleratorArn"
   ],
   "primaryIdentifier": [
     "/properties/EndpointGroupArn"
@@ -101,7 +108,9 @@
       "permissions": [
         "globalaccelerator:CreateEndpointGroup",
         "globalaccelerator:DescribeEndpointGroup",
-        "globalaccelerator:DescribeListener"
+        "globalaccelerator:DescribeListener",
+        "globalaccelerator:ListAccelerators",
+        "globalaccelerator:ListListeners"
       ]
     },
     "read": {
@@ -118,6 +127,7 @@
     },
     "delete": {
       "permissions": [
+        "globalaccelerator:DeleteEndpointGroup",
         "globalaccelerator:DescribeEndpointGroup",
         "globalaccelerator:DescribeAccelerator"
       ]
