@@ -6,85 +6,75 @@ import lombok.val;
 import software.amazon.cloudformation.proxy.*;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
-    private static final int CALLBACK_DELAY_IN_SECONDS = 1;
-    private static final int NUMBER_OF_STATE_POLL_RETRIES = (60 / CALLBACK_DELAY_IN_SECONDS) * 60 * 4; // 4 hours
-    private static final String TIMED_OUT_MESSAGE = "Timed out waiting for global accelerator to be deployed.";
-
-    private AWSGlobalAccelerator agaClient;
-    private AmazonWebServicesClientProxy clientProxy;
-    private Logger logger;
-
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
         final AmazonWebServicesClientProxy proxy,
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final Logger logger) {
-        clientProxy = proxy;
-        agaClient = AcceleratorClientBuilder.getClient();
-        this.logger = logger;
-
         logger.log(String.format("DELETE REQUEST: [%s]", request));
-        val acceleratorArn = request.getDesiredResourceState().getAcceleratorArn();
-        val foundAccelerator = getAccelerator(acceleratorArn);
 
-        // check if we have exceeded our permitted stabilization count
-        val stabilizationAttemptsRemaining = callbackContext == null ?
-                NUMBER_OF_STATE_POLL_RETRIES : callbackContext.getStabilizationRetriesRemaining() - 1;
-        if (stabilizationAttemptsRemaining <= 0) {
-            throw new RuntimeException(TIMED_OUT_MESSAGE);
-        }
+        val agaClient = AcceleratorClientBuilder.getClient();
+        val inferredCallbackContext = callbackContext != null ?
+                callbackContext :
+                CallbackContext.builder()
+                        .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
+                        .build();
 
-        // if we did not find the accelerator and this is the first call in the chain,
-        // CFN states we should return NotFound
-        if (foundAccelerator == null && callbackContext == null) {
-            return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                    .status(OperationStatus.FAILED)
-                    .errorCode(HandlerErrorCode.NotFound)
-                    .build();
-        }
+        val model = request.getDesiredResourceState();
+        val foundAccelerator = HandlerCommons.getAccelerator(model.getAcceleratorArn(), proxy, agaClient, logger);
 
         if (foundAccelerator == null) {
-            return ProgressEvent.defaultSuccessHandler(request.getDesiredResourceState());
+            return ProgressEvent.defaultSuccessHandler(model);
         } else if (foundAccelerator.getEnabled()) {
-            disableAccelerator(foundAccelerator.getAcceleratorArn());
+            disableAccelerator(foundAccelerator.getAcceleratorArn(), proxy, agaClient, logger);
         } else if (foundAccelerator.getStatus().equals(AcceleratorStatus.DEPLOYED.toString())) {
-            deleteAccelerator(foundAccelerator.getAcceleratorArn());
+            deleteAccelerator(foundAccelerator.getAcceleratorArn(), proxy, agaClient, logger);
         }
 
+        return waitForDeletedStep(inferredCallbackContext, model, proxy, agaClient, logger);
+    }
+
+    /**
+     * Check to see if accelerator creation is complete and create the correct progress continuation context
+     */
+    private static ProgressEvent<ResourceModel, CallbackContext> waitForDeletedStep(final CallbackContext context,
+                                                                                   final ResourceModel model,
+                                                                                   final AmazonWebServicesClientProxy proxy,
+                                                                                   final AWSGlobalAccelerator agaClient,
+                                                                                   final Logger logger) {
+        logger.log(String.format("Waiting for accelerator with arn [%s] to be deleted", model.getAcceleratorArn()));
+
+        // check to see if we have exceeded what we are allowed to do
         val newCallbackContext = CallbackContext.builder()
-                .stabilizationRetriesRemaining(stabilizationAttemptsRemaining)
+                .stabilizationRetriesRemaining(context.getStabilizationRetriesRemaining()-1)
                 .build();
 
-        // must still be working on things
-        return ProgressEvent.<ResourceModel, CallbackContext>builder()
-                .callbackContext(newCallbackContext)
-                .resourceModel(request.getDesiredResourceState())
-                .callbackDelaySeconds(CALLBACK_DELAY_IN_SECONDS)
-                .status(OperationStatus.IN_PROGRESS)
-                .errorCode(HandlerErrorCode.NotStabilized)
-                .build();
+        if (newCallbackContext.getStabilizationRetriesRemaining() < 0) {
+            throw new RuntimeException(HandlerCommons.TIMED_OUT_MESSAGE);
+        }
+
+        val accelerator = HandlerCommons.getAccelerator(model.getAcceleratorArn(), proxy, agaClient, logger);
+        if (accelerator == null) {
+            return ProgressEvent.defaultSuccessHandler(model);
+        } else {
+            return ProgressEvent.defaultInProgressHandler(newCallbackContext, HandlerCommons.CALLBACK_DELAY_IN_SECONDS, model);
+        }
     }
 
-    private Accelerator getAccelerator(String arn) {
-        Accelerator accelerator = null;
-        try {
-            val request = new DescribeAcceleratorRequest().withAcceleratorArn(arn);
-            accelerator =  clientProxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).getAccelerator();
-        }
-        catch (AcceleratorNotFoundException ex) {
-            logger.log(String.format("Did not find accelerator with arn [%s]", arn));
-        }
-        return accelerator;
-    }
-
-    private Accelerator disableAccelerator(String arn) {
+    private static Accelerator disableAccelerator(final String arn,
+                                           final AmazonWebServicesClientProxy proxy,
+                                           final AWSGlobalAccelerator agaClient,
+                                           final Logger logger) {
         val request = new UpdateAcceleratorRequest().withAcceleratorArn(arn).withEnabled(false);
-        return clientProxy.injectCredentialsAndInvoke(request, agaClient::updateAccelerator).getAccelerator();
+        return proxy.injectCredentialsAndInvoke(request, agaClient::updateAccelerator).getAccelerator();
     }
 
-    private void deleteAccelerator(String arn) {
+    private static void deleteAccelerator(final String arn,
+                                   final AmazonWebServicesClientProxy proxy,
+                                   final AWSGlobalAccelerator agaClient,
+                                   final Logger logger) {
         val request = new DeleteAcceleratorRequest().withAcceleratorArn(arn);
-        clientProxy.injectCredentialsAndInvoke(request, agaClient::deleteAccelerator);
+        proxy.injectCredentialsAndInvoke(request, agaClient::deleteAccelerator);
     }
 }

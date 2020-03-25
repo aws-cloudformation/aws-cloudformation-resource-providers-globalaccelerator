@@ -1,6 +1,6 @@
 {
   "typeName": "AWS::GlobalAccelerator::Accelerator",
-  "description": "PUT A GOOD DESCRIPTION HERE",
+  "description": "Creates an accelerator",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-resource-providers-globalaccelerator",
   "definitions": {
     "Tag": {
@@ -8,13 +8,13 @@
       "type": "object",
       "properties": {
         "Key": {
-          "description": "Key of the Tag. You can specify a value that is 1 to 127 characters.",
+          "description": "Key of the tag. Value can be 1 to 127 characters.",
           "type": "string",
           "minLength": 1,
           "maxLength": 127
         },
         "Value": {
-          "description": "Value for the Tag. You can specify a value that is 1 to 255 characters.",
+          "description": "Value for the tag. Value can be 1 to 255 characters.",
           "type": "string",
           "minLength": 1,
           "maxLength": 255
@@ -61,7 +61,7 @@
       "type": "boolean"
     },
     "AcceleratorArn": {
-      "description": "The Amazon Resource Name (ARN) of the accelerator",
+      "description": "The Amazon Resource Name (ARN) of the accelerator.",
       "type": "string"
     },
     "Tags": {
