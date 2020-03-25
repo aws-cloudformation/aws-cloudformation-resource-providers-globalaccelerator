@@ -16,6 +16,8 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         final CallbackContext callbackContext,
         final Logger logger
     ) {
+        logger.log(String.format("Creating listener with request [%s]", request));
+
         val agaClient = AcceleratorClientBuilder.getClient();
         val inferredCallbackContext = callbackContext != null ?
                 callbackContext :
@@ -34,16 +36,16 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
         // if this is our first try then we will return
         if (model.getListenerArn() == null) {
-            return CreateListenerStep(model, request, proxy, agaClient, logger);
+            return createListenerStep(model, request, proxy, agaClient, logger);
         } else {
-            return HandlerCommons.WaitForSynchronziedStep(inferredCallbackContext, model, proxy, agaClient, logger);
+            return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger);
         }
     }
 
     /**
      * Create an accelerator and create the correct progress continuation context
      */
-    private ProgressEvent<ResourceModel, CallbackContext> CreateListenerStep(final ResourceModel model,
+    private ProgressEvent<ResourceModel, CallbackContext> createListenerStep(final ResourceModel model,
                                                                              final ResourceHandlerRequest<ResourceModel> handlerRequest,
                                                                              final AmazonWebServicesClientProxy proxy,
                                                                              final AWSGlobalAccelerator agaClient,

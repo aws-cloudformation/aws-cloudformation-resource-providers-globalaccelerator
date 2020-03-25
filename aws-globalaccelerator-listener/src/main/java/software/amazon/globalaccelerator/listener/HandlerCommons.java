@@ -15,7 +15,7 @@ public class HandlerCommons {
     /**
      * Check to see if accelerator creation is complete and create the correct progress continuation context
      */
-    public static ProgressEvent<ResourceModel, CallbackContext> WaitForSynchronziedStep(final CallbackContext context,
+    public static ProgressEvent<ResourceModel, CallbackContext> waitForSynchronizedStep(final CallbackContext context,
                                                                                         final ResourceModel model,
                                                                                         final AmazonWebServicesClientProxy proxy,
                                                                                         final AWSGlobalAccelerator agaClient,

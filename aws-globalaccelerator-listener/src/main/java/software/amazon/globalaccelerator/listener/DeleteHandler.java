@@ -12,6 +12,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final Logger logger) {
+        logger.log(String.format("Deleting listener with request [%s]", request));
 
         val agaClient = AcceleratorClientBuilder.getClient();
         val inferredCallbackContext = callbackContext != null ?
@@ -26,7 +27,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
             deleteListener(foundListener.getListenerArn(), proxy, agaClient, logger);
         }
 
-        return HandlerCommons.WaitForSynchronziedStep(inferredCallbackContext, model, proxy, agaClient, logger);
+        return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger);
     }
 
     private void deleteListener(final String listenerArn,
