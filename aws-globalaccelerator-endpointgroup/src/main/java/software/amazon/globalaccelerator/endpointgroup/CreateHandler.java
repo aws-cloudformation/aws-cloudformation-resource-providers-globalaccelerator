@@ -28,13 +28,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
         // confirm we can find the listener
         final ResourceModel model = request.getDesiredResourceState();
-        val foundListener = HandlerCommons.getListener(model.getListenerArn(), proxy, agaClient, logger);
-        if (foundListener == null) {
-            return ProgressEvent.defaultFailureHandler(
-                    new Exception(String.format("Failed to find listener with arn: [%s].  Can not create endpoint group.")),
-                    HandlerErrorCode.NotFound);
-        }
-
         if (model.getEndpointGroupArn() == null) {
             return CreateEndpointGroupStep(model, request, proxy, agaClient, logger);
         } else {
@@ -50,6 +43,13 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                                                                                   final AmazonWebServicesClientProxy proxy,
                                                                                   final AWSGlobalAccelerator agaClient,
                                                                                   final Logger logger) {
+        val foundListener = HandlerCommons.getListener(model.getListenerArn(), proxy, agaClient, logger);
+        if (foundListener == null) {
+            return ProgressEvent.defaultFailureHandler(
+                    new Exception(String.format("Failed to find listener with arn: [%s].  Can not create endpoint group.")),
+                    HandlerErrorCode.NotFound);
+        }
+
         // first thing get the accelerator associated to listener so we can update our model
         val listenerArn = new ListenerArn(model.getListenerArn());
         val accelerator = HandlerCommons.getAccelerator(listenerArn.getAcceleratorArn(), proxy, agaClient, logger);
@@ -67,6 +67,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         model.setHealthCheckPath(endpointGroup.getHealthCheckPath());
         model.setHealthCheckPort(endpointGroup.getHealthCheckPort());
         model.setHealthCheckProtocol(endpointGroup.getHealthCheckProtocol());
+        model.setThresholdCount(endpointGroup.getThresholdCount());
 
         val callbackContext = CallbackContext.builder()
                 .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
