@@ -11,7 +11,7 @@ import software.amazon.globalaccelerator.arns.ListenerArn;
 public class HandlerCommons {
     public static final int CALLBACK_DELAY_IN_SECONDS = 1;
     public static final int NUMBER_OF_STATE_POLL_RETRIES = (60 / CALLBACK_DELAY_IN_SECONDS) * 60 * 4; // 4 hours
-    private static final String TIMED_OUT_MESSAGE = "Timed out waiting for listener to be deployed.";
+    private static final String TIMED_OUT_MESSAGE = "Timed out waiting for endpoint group to be deployed.";
 
     /**
      * Check to see if accelerator creation is complete and create the correct progress continuation context
