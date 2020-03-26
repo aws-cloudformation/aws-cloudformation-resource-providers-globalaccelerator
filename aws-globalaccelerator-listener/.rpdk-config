@@ -1,0 +1,15 @@
+{
+    "typeName": "AWS::GlobalAccelerator::Listener",
+    "language": "java",
+    "runtime": "java8",
+    "entrypoint": "software.amazon.globalaccelerator.listener.HandlerWrapper::handleRequest",
+    "testEntrypoint": "software.amazon.globalaccelerator.listener.HandlerWrapper::testEntrypoint",
+    "settings": {
+        "namespace": [
+            "software",
+            "amazon",
+            "globalaccelerator",
+            "listener"
+        ]
+    }
+}
