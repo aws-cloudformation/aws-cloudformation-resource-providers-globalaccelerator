@@ -86,10 +86,6 @@
     "EndpointGroupArn": {
       "description": "The Amazon Resource Name (ARN) of the endpoint group",
       "type": "string"
-    },
-    "AcceleratorArn": {
-      "description": "The Amazon Resource Name (ARN) of the associated accelerator",
-      "type": "string"
     }
   },
   "required": [
@@ -97,8 +93,7 @@
     "EndpointGroupRegion"
   ],
   "readOnlyProperties": [
-    "/properties/EndpointGroupArn",
-    "/properties/AcceleratorArn"
+    "/properties/EndpointGroupArn"
   ],
   "primaryIdentifier": [
     "/properties/EndpointGroupArn"

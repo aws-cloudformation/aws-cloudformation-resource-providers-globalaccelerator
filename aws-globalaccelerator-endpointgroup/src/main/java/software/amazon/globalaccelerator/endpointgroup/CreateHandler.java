@@ -4,9 +4,9 @@ import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator;
 import com.amazonaws.services.globalaccelerator.model.CreateEndpointGroupRequest;
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration;
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup;
-import com.amazonaws.services.globalaccelerator.model.Listener;
 import lombok.val;
 import software.amazon.cloudformation.proxy.*;
+import software.amazon.globalaccelerator.arns.ListenerArn;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,7 +51,9 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                                                                                   final AWSGlobalAccelerator agaClient,
                                                                                   final Logger logger) {
         // first thing get the accelerator associated to listener so we can update our model
-        val accelerator = HandlerCommons.getAcceleratorFromListenerArn(model.getListenerArn(), proxy, agaClient, logger);
+        val listenerArn = new ListenerArn(model.getListenerArn());
+        val accelerator = HandlerCommons.getAccelerator(listenerArn.getAcceleratorArn(), proxy, agaClient, logger);
+
         if (accelerator == null) {
             return ProgressEvent.defaultFailureHandler(
                     new Exception(String.format("Could not find accelerator for listener [%s]", model.getListenerArn())),
@@ -60,7 +62,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
 
         // now we can move forward and create the endpoint group and update model with everything that is optional
         val endpointGroup = CreateEndpointGroup(model, handlerRequest, proxy, agaClient);
-        model.setAcceleratorArn(accelerator.getAcceleratorArn());
         model.setEndpointGroupArn(endpointGroup.getEndpointGroupArn());
         model.setHealthCheckIntervalSeconds(endpointGroup.getHealthCheckIntervalSeconds());
         model.setHealthCheckPath(endpointGroup.getHealthCheckPath());
