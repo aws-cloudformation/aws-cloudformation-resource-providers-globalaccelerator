@@ -1,12 +1,12 @@
 package software.amazon.globalaccelerator.endpointgroup;
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator;
-import com.amazonaws.services.globalaccelerator.AWSGlobalAcceleratorClient;
 import com.amazonaws.services.globalaccelerator.model.*;
 import lombok.val;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.globalaccelerator.arns.ListenerArn;
 
 public class HandlerCommons {
     public static final int CALLBACK_DELAY_IN_SECONDS = 1;
@@ -21,7 +21,8 @@ public class HandlerCommons {
                                                                                         final AmazonWebServicesClientProxy proxy,
                                                                                         final AWSGlobalAccelerator agaClient,
                                                                                         final Logger logger) {
-        logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", model.getAcceleratorArn()));
+        val acceleratorArn = new ListenerArn(model.getListenerArn()).getAcceleratorArn();
+        logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", acceleratorArn));
 
         // check to see if we have exceeded what we are allowed to do
         val newCallbackContext = CallbackContext.builder()
@@ -32,7 +33,8 @@ public class HandlerCommons {
             throw new RuntimeException(TIMED_OUT_MESSAGE);
         }
 
-        val accelerator = getAccelerator(model.getAcceleratorArn(), proxy, agaClient, logger);
+
+        val accelerator = getAccelerator(acceleratorArn, proxy, agaClient, logger);
         if (accelerator.getStatus().equals(AcceleratorStatus.DEPLOYED.toString())) {
             return ProgressEvent.defaultSuccessHandler(model);
         } else {
@@ -55,33 +57,6 @@ public class HandlerCommons {
         catch (AcceleratorNotFoundException ex) {
             logger.log(String.format("Did not find accelerator with arn [%s]", arn));
         }
-        return accelerator;
-    }
-
-    /**
-     * Get an accelerator provided the ARN of a listener
-     * @return NULL if the accelerator does not exist
-     */
-    public static Accelerator getAcceleratorFromListenerArn(final String listenerArn,
-                                                            final AmazonWebServicesClientProxy proxy,
-                                                            final AWSGlobalAccelerator agaClient,
-                                                            final Logger logger) {
-        Accelerator accelerator = null;
-        val request = new ListAcceleratorsRequest().withMaxResults(10);
-        String nextToken = null;
-        do {
-            val response = proxy.injectCredentialsAndInvoke(request, agaClient::listAccelerators);
-            nextToken = response.getNextToken();
-
-            // now check all listeners for each accelerator to see if we find the one we want
-            val accelerators = response.getAccelerators();
-            if (accelerators != null) {
-                accelerator = accelerators.stream()
-                        .filter((x) -> acceleratorHasListenerWithArn(x.getAcceleratorArn(), listenerArn, proxy, agaClient, logger))
-                        .findFirst().orElse(null);
-            }
-        } while(nextToken != null && accelerator == null); // keep going until we either find accel or out of ones to hunt for
-
         return accelerator;
     }
 
@@ -110,27 +85,5 @@ public class HandlerCommons {
         }
 
         return endpointGroup;
-    }
-
-    public static Boolean acceleratorHasListenerWithArn(final String acceleratorArn,
-                                                        final String listenerArn,
-                                                        final AmazonWebServicesClientProxy proxy,
-                                                        final AWSGlobalAccelerator agaClient,
-                                                        final Logger logger) {
-        Boolean foundMatchingListener = false;
-        val request = new ListListenersRequest().withAcceleratorArn(acceleratorArn);
-        String nextToken = null;
-        do {
-            val response = proxy.injectCredentialsAndInvoke(request, agaClient::listListeners);
-            nextToken = response.getNextToken();
-
-            val listeners = response.getListeners();
-            if (listeners != null) {
-                foundMatchingListener = listeners.stream().anyMatch((x) -> x.getListenerArn().equals(listenerArn));
-            }
-        } while(nextToken != null && !foundMatchingListener);
-
-
-        return foundMatchingListener;
     }
 }
