@@ -31,6 +31,7 @@ public class DeleteHandlerTest {
     public void handleRequest_AcceleratorAlreadyDisabledAndInSync() {
         doReturn(new DescribeAcceleratorResult()
                 .withAccelerator(new Accelerator()
+                        .withAcceleratorArn("TEST_ARN")
                         .withEnabled(false)
                         .withStatus(AcceleratorStatus.DEPLOYED)))
                 .when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());

@@ -86,7 +86,7 @@ public class CreateHandlerTest {
                 .acceleratorArn("ACCELERATOR_ARN").build();
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
 
-        val callbackContext = CallbackContext.builder().stabilizationRetriesRemaining(10).build();
+        val callbackContext = new CallbackContext(10);
         val response = handler.handleRequest(proxy, request, callbackContext, logger);
 
         assertThat(response).isNotNull();
@@ -121,7 +121,7 @@ public class CreateHandlerTest {
                 .acceleratorArn("ACCELERATOR_ARN").build();
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
 
-        val callbackContext = CallbackContext.builder().stabilizationRetriesRemaining(10).build();
+        val callbackContext = new CallbackContext(10);
         val response = handler.handleRequest(proxy, request, callbackContext, logger);
 
         assertThat(response).isNotNull();
@@ -142,7 +142,7 @@ public class CreateHandlerTest {
                 .acceleratorArn("ACCELERATOR_ARN").build();
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
 
-        val callbackContext = CallbackContext.builder().stabilizationRetriesRemaining(0).build();
+        val callbackContext = new CallbackContext(0);
         assertThatExceptionOfType(RuntimeException.class).isThrownBy(() -> handler.handleRequest(proxy, request, callbackContext, logger))
             .withMessageMatching("Timed out waiting for global accelerator to be deployed.");
     }
