@@ -18,6 +18,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final Logger logger) {
+        logger.log(String.format("Delete request [%s]", request));
 
         val agaClient = AcceleratorClientBuilder.getClient();
         val inferredCallbackContext = callbackContext != null ?
