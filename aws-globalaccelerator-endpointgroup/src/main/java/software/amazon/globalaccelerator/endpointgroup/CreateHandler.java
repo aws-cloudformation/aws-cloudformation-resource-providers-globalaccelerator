@@ -19,6 +19,8 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         final ResourceHandlerRequest<ResourceModel> request,
         final CallbackContext callbackContext,
         final Logger logger) {
+        logger.log(String.format("Create request [%s]", request));
+
         val agaClient = AcceleratorClientBuilder.getClient();
         val inferredCallbackContext = callbackContext != null ?
                 callbackContext :
@@ -26,7 +28,6 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                         .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
                         .build();
 
-        // confirm we can find the listener
         final ResourceModel model = request.getDesiredResourceState();
         if (model.getEndpointGroupArn() == null) {
             return CreateEndpointGroupStep(model, request, proxy, agaClient, logger);
@@ -94,7 +95,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         val createEndpointGroupRequest = new CreateEndpointGroupRequest()
                 .withListenerArn(model.getListenerArn())
                 .withEndpointGroupRegion(model.getEndpointGroupRegion())
-                .withHealthCheckPort(null)
+                .withHealthCheckPort(healthCheckPort)
                 .withHealthCheckIntervalSeconds(model.getHealthCheckIntervalSeconds())
                 .withHealthCheckProtocol(model.getHealthCheckProtocol())
                 .withHealthCheckPath(model.getHealthCheckPath())

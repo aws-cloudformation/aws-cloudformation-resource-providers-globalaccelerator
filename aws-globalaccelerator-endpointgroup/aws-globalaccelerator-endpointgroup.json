@@ -1,6 +1,6 @@
 {
   "typeName": "AWS::GlobalAccelerator::EndpointGroup",
-  "description": "An example resource schema demonstrating some basic constructs and validation rules.",
+  "description": "An endpoint group is a collection of endpoints in one AWS Region.",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
   "definitions": {
     "EndpointConfiguration": {
@@ -8,7 +8,7 @@
       "type": "object",
       "properties": {
         "EndpointId": {
-          "description": "Id of the endpoint.  For Network/Application Load Balancer this value is the ARN.  For EIP, this value is the allocation ID.  For EC2 instances, this is the EC2 instance ID",
+          "description": "Id of the endpoint. For Network/Application Load Balancer this value is the ARN.  For EIP, this value is the allocation ID.  For EC2 instances, this is the EC2 instance ID",
           "type": "string"
         },
         "Weight": {
@@ -49,6 +49,7 @@
       "description": "The percentage of traffic to sent to an AWS Region",
       "type": "integer",
       "minimum": 0,
+      "maximum": 100,
       "default": 100
     },
     "HealthCheckPort": {
@@ -74,7 +75,7 @@
       "default": "/"
     },
     "HealthCheckIntervalSeconds": {
-      "description": "The time in seconds between each health check for an endpoint.  Must be a value of 10 or 30",
+      "description": "The time in seconds between each health check for an endpoint. Must be a value of 10 or 30",
       "type": "integer",
       "default": 30
     },

@@ -154,6 +154,10 @@ public class DeleteHandlerTest {
 
     @Test
     public void handleRequest_ResourceDoesNotExist_ThresholdTimeExceeded() {
+        // the endpoint group describe request will return not found
+        doThrow(new EndpointGroupNotFoundException("NOT FOUND"))
+                .when(proxy).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest.class), any());
+
         // Create the model we will provide to our handler
         val endpointConfigurations = new ArrayList<EndpointConfiguration>();
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").build());

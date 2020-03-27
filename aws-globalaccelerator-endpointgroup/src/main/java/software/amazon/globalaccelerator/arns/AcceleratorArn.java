@@ -59,7 +59,7 @@ public class AcceleratorArn {
     }
 
     /**
-     * Gets accelerator arn arn.
+     * Gets accelerator arn.
      * @return
      */
     public String getAcceleratorArn() {
