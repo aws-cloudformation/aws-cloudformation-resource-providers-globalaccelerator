@@ -34,12 +34,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     HandlerErrorCode.NotFound);
         }
 
-        // if this is our first try then we will return
-        if (model.getListenerArn() == null) {
-            return createListenerStep(model, request, proxy, agaClient, logger);
-        } else {
-            return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger);
-        }
+        return createListenerStep(model, request, proxy, agaClient, logger);
     }
 
     /**
@@ -60,7 +55,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
                 .build();
 
-        return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model);
+        return ProgressEvent.defaultSuccessHandler(model);
     }
 
     private Listener createListener(final ResourceModel model,

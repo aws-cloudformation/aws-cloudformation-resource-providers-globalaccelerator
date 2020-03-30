@@ -22,12 +22,8 @@ public class HandlerCommons {
                                                                                         final Logger logger) {
         logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", model.getAcceleratorArn()));
 
-        // check to see if we have exceeded what we are allowed to do
-        val newCallbackContext = CallbackContext.builder()
-                .stabilizationRetriesRemaining(context.getStabilizationRetriesRemaining()-1)
-                .build();
-
-        if (newCallbackContext.getStabilizationRetriesRemaining() < 0) {
+        context.setStabilizationRetriesRemaining(context.getStabilizationRetriesRemaining()-1);
+        if (context.getStabilizationRetriesRemaining() < 0) {
             throw new RuntimeException(TIMED_OUT_MESSAGE);
         }
 
@@ -35,7 +31,7 @@ public class HandlerCommons {
         if (accelerator.getStatus().equals(AcceleratorStatus.DEPLOYED.toString())) {
             return ProgressEvent.defaultSuccessHandler(model);
         } else {
-            return ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model);
+            return ProgressEvent.defaultInProgressHandler(context, CALLBACK_DELAY_IN_SECONDS, model);
         }
     }
 

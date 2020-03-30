@@ -57,7 +57,7 @@ public class CreateHandlerTest {
     }
 
     @Test
-    public void handleRequest_ListenerDoesNotExist() {
+    public void handleRequest_ListenerCreation_DoesNotWaitForAcceleratorDeployed() {
         val createListenerResult = new CreateListenerResult()
                 .withListener(new Listener()
                         .withListenerArn("LISTENER_ARN")
@@ -68,7 +68,8 @@ public class CreateHandlerTest {
 
         val describeAcceleratorResult = new DescribeAcceleratorResult()
                 .withAccelerator(new Accelerator()
-                    .withAcceleratorArn("ACCELERATOR_ARN"));
+                    .withAcceleratorArn("ACCELERATOR_ARN")
+                    .withStatus(AcceleratorStatus.IN_PROGRESS.toString()));
         doReturn(describeAcceleratorResult).when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
 
         // create the input
@@ -86,13 +87,11 @@ public class CreateHandlerTest {
         val response = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getCallbackContext()).isNotNull();
+        assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getResourceModel()).isNotNull();
-        assertThat(response.getResourceModel()).isEqualTo(model);
-        assertThat(response.getResourceModel().getClientAffinity()).isEqualTo(ClientAffinity.SOURCE_IP.toString());
-        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getResourceModel()).isEqualTo(model);assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
     }
 }
