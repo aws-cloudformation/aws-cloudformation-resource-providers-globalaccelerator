@@ -18,8 +18,6 @@ public class AcceleratorArn {
 
     private static final String SERVICE_NAME = "globalaccelerator";
     private static final String RESOURCE_NAME = "accelerator";
-    private static final String OLD_SERVICE_NAME = "ubiquity";
-    private static final String OLD_RESOURCE_NAME = "ubiq";
     private static final String EXPECTED_ARN_REGEX = "^arn:aws:(\\w+)::(\\d{12}):(\\w+)/([0-9a-f-]+)$";
 
     /**
@@ -40,7 +38,7 @@ public class AcceleratorArn {
         final String serviceName = matcher.group(1);
         final String resourceName = matcher.group(3);
 
-        if (matchesOldName(serviceName, resourceName) || matchesNewName(serviceName, resourceName)) {
+        if (matchesName(serviceName, resourceName)) {
             this.acceleratorArn = arn;
             this.awsAccountId = matcher.group(2);
             this.uuid = matcher.group(4);
@@ -82,11 +80,7 @@ public class AcceleratorArn {
         return this.uuid;
     }
 
-    private boolean matchesOldName(final String serviceName, final String resourceName) {
-        return (OLD_SERVICE_NAME.equals(serviceName)) && OLD_RESOURCE_NAME.equals(resourceName);
-    }
-
-    private boolean matchesNewName(final String serviceName, final String resourceName) {
+    private boolean matchesName(final String serviceName, final String resourceName) {
         return SERVICE_NAME.equals(serviceName) && RESOURCE_NAME.equals(resourceName);
     }
 }

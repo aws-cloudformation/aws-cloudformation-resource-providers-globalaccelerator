@@ -32,7 +32,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         if (model.getEndpointGroupArn() == null) {
             return CreateEndpointGroupStep(model, request, proxy, agaClient, logger);
         } else {
-            return HandlerCommons.waitForSynchronziedStep(inferredCallbackContext, model, proxy, agaClient, logger);
+            return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger);
         }
     }
 
