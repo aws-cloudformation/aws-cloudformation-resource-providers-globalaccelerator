@@ -1,9 +1,11 @@
 package software.amazon.globalaccelerator.accelerator
 
-import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.junit.jupiter.MockitoExtension
@@ -34,13 +36,13 @@ class UpdateHandlerTest {
                 .desiredResourceState(model)
                 .build()
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
-        Assertions.assertThat(response).isNotNull
-        Assertions.assertThat(response.status).isEqualTo(OperationStatus.SUCCESS)
-        Assertions.assertThat(response.callbackContext).isNull()
-        Assertions.assertThat(response.callbackDelaySeconds).isEqualTo(0)
-        Assertions.assertThat(response.resourceModel).isEqualTo(request.desiredResourceState)
-        Assertions.assertThat(response.resourceModels).isNull()
-        Assertions.assertThat(response.message).isNull()
-        Assertions.assertThat(response.errorCode).isNull()
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertNull(response.callbackContext)
+        assertEquals(0, response.callbackDelaySeconds)
+        assertEquals(request.desiredResourceState, response.resourceModel)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
+        assertNull(response.errorCode)
     }
 }

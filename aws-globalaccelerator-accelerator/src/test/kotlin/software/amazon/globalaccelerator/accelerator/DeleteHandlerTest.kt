@@ -6,10 +6,12 @@ import com.amazonaws.services.globalaccelerator.model.Accelerator
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
-import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -51,13 +53,13 @@ class DeleteHandlerTest {
                 .previousResourceState(model)
                 .build()
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
-        Assertions.assertThat(response).isNotNull
-        Assertions.assertThat(response.status).isEqualTo(OperationStatus.IN_PROGRESS)
-        Assertions.assertThat(response.callbackContext).isNotNull
-        Assertions.assertThat(response.callbackDelaySeconds).isEqualTo(1)
-        Assertions.assertThat(response.resourceModel).isNotNull
-        Assertions.assertThat(response.resourceModels).isNull()
-        Assertions.assertThat(response.message).isNull()
-        Assertions.assertThat(response.errorCode).isNull()
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertNotNull(response.callbackContext)
+        assertEquals(1, response.callbackDelaySeconds)
+        assertNotNull(response.resourceModel)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
+        assertNull(response.errorCode)
     }
 }
