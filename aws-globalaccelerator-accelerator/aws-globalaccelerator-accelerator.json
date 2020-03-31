@@ -78,7 +78,8 @@
     "create": {
       "permissions": [
         "globalaccelerator:CreateAccelerator",
-        "globalaccelerator:DescribeAccelerator"
+        "globalaccelerator:DescribeAccelerator",
+        "globalaccelerator:TagResource"
       ]
     },
     "read": {
