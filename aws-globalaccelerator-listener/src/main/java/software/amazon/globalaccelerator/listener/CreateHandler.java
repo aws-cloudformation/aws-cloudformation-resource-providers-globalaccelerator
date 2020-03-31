@@ -1,10 +1,15 @@
 package software.amazon.globalaccelerator.listener;
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator;
-import com.amazonaws.services.globalaccelerator.model.*;
+import com.amazonaws.services.globalaccelerator.model.CreateListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.Listener;
 import com.amazonaws.services.globalaccelerator.model.PortRange;
 import lombok.val;
-import software.amazon.cloudformation.proxy.*;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.HandlerErrorCode;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.stream.Collectors;
 
@@ -34,12 +39,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                     HandlerErrorCode.NotFound);
         }
 
-        // if this is our first try then we will return
-        if (model.getListenerArn() == null) {
-            return createListenerStep(model, request, proxy, agaClient, logger);
-        } else {
-            return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger);
-        }
+        return createListenerStep(model, request, proxy, agaClient, logger);
     }
 
     /**
@@ -60,7 +60,7 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
                 .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
                 .build();
 
-        return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model);
+        return ProgressEvent.defaultSuccessHandler(model);
     }
 
     private Listener createListener(final ResourceModel model,

@@ -1,14 +1,27 @@
 package software.amazon.globalaccelerator.listener;
 
-import com.amazonaws.services.globalaccelerator.model.*;
+import com.amazonaws.services.globalaccelerator.model.Accelerator;
+import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException;
+import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus;
+import com.amazonaws.services.globalaccelerator.model.ClientAffinity;
+import com.amazonaws.services.globalaccelerator.model.CreateListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.CreateListenerResult;
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest;
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult;
+import com.amazonaws.services.globalaccelerator.model.Listener;
 import com.amazonaws.services.globalaccelerator.model.PortRange;
+import com.amazonaws.services.globalaccelerator.model.Protocol;
 import lombok.val;
-import software.amazon.cloudformation.proxy.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.HandlerErrorCode;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.ArrayList;
 
@@ -57,7 +70,7 @@ public class CreateHandlerTest {
     }
 
     @Test
-    public void handleRequest_ListenerDoesNotExist() {
+    public void handleRequest_ListenerCreation_DoesNotWaitForAcceleratorDeployed() {
         val createListenerResult = new CreateListenerResult()
                 .withListener(new Listener()
                         .withListenerArn("LISTENER_ARN")
@@ -68,7 +81,8 @@ public class CreateHandlerTest {
 
         val describeAcceleratorResult = new DescribeAcceleratorResult()
                 .withAccelerator(new Accelerator()
-                    .withAcceleratorArn("ACCELERATOR_ARN"));
+                    .withAcceleratorArn("ACCELERATOR_ARN")
+                    .withStatus(AcceleratorStatus.IN_PROGRESS.toString()));
         doReturn(describeAcceleratorResult).when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
 
         // create the input
@@ -86,13 +100,11 @@ public class CreateHandlerTest {
         val response = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
         assertThat(response.getCallbackDelaySeconds()).isEqualTo(0);
-        assertThat(response.getCallbackContext()).isNotNull();
+        assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getResourceModel()).isNotNull();
-        assertThat(response.getResourceModel()).isEqualTo(model);
-        assertThat(response.getResourceModel().getClientAffinity()).isEqualTo(ClientAffinity.SOURCE_IP.toString());
-        assertThat(response.getResourceModels()).isNull();
+        assertThat(response.getResourceModel()).isEqualTo(model);assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();
     }
 }
