@@ -13,16 +13,17 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final Logger logger) {
 
         val agaClient = AcceleratorClientBuilder.getClient();
         val inferredCallbackContext = callbackContext != null ?
                 callbackContext :
                 CallbackContext.builder()
                         .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
+                        .pendingStabilization(false)
                         .build();
 
         final ResourceModel model = request.getDesiredResourceState();

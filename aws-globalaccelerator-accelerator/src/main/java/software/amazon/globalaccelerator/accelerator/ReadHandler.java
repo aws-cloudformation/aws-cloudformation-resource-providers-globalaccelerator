@@ -14,10 +14,10 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
 
     @Override
     public ProgressEvent<ResourceModel, CallbackContext> handleRequest(
-        final AmazonWebServicesClientProxy proxy,
-        final ResourceHandlerRequest<ResourceModel> request,
-        final CallbackContext callbackContext,
-        final Logger logger) {
+            final AmazonWebServicesClientProxy proxy,
+            final ResourceHandlerRequest<ResourceModel> request,
+            final CallbackContext callbackContext,
+            final Logger logger) {
 
         val agaClient = AcceleratorClientBuilder.getClient();
         final ResourceModel model = request.getDesiredResourceState();
@@ -28,7 +28,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
 
         if (acceleratorResourceModel == null){
             logger.log(String.format("Accelerator with ARN [%s] not found", model.getAcceleratorArn()));
-            return ProgressEvent.defaultFailureHandler(new Exception("Listener not found."), HandlerErrorCode.NotFound);
+            return ProgressEvent.defaultFailureHandler(new Exception("Accelerator not found."), HandlerErrorCode.NotFound);
         } else {
             return ProgressEvent.defaultSuccessHandler(acceleratorResourceModel);
         }
@@ -42,7 +42,7 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
             newModel.setEnabled(accelerator.getEnabled());
             newModel.setIpAddressType(accelerator.getIpAddressType());
             newModel.setIpAddresses(accelerator.getIpSets() == null ? null :
-                            accelerator.getIpSets().stream()
+                    accelerator.getIpSets().stream()
                             .flatMap(x -> x.getIpAddresses().stream())
                             .collect(Collectors.toList()));
         }

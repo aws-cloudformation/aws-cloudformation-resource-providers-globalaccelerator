@@ -39,18 +39,13 @@ public class ReadHandlerTest {
     private String ACCELERATOR_ARN = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d";
     private List<String> ipAddresses;
     private IpSet ipSet;
-    private ResourceModel model;
 
-    @BeforeEach
-    public void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
-
+    private ResourceModel createTestResourceModel() {
         ipAddresses = new ArrayList<String>();
         ipAddresses.add("10.10.10.1");
         ipAddresses.add("10.10.10.2");
         ipSet = new IpSet().withIpAddresses(ipAddresses);
-        model = ResourceModel.builder()
+        return ResourceModel.builder()
                 .acceleratorArn(ACCELERATOR_ARN)
                 .enabled(true)
                 .name("Name")
@@ -59,20 +54,26 @@ public class ReadHandlerTest {
                 .build();
     }
 
+    @BeforeEach
+    public void setup() {
+        proxy = mock(AmazonWebServicesClientProxy.class);
+        logger = mock(Logger.class);
+    }
+
     @Test
     public void handleRequest_returnsMappedAccelerator() {
+        ResourceModel model = createTestResourceModel();
         DescribeAcceleratorResult describeAcceleratorResult = new DescribeAcceleratorResult()
                 .withAccelerator(new Accelerator()
-                .withAcceleratorArn(ACCELERATOR_ARN)
-                .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
-                .withEnabled(true)
-                .withIpAddressType("IPV4")
-                .withName("Name")
-                .withIpSets(ipSet)
+                        .withAcceleratorArn(ACCELERATOR_ARN)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
+                        .withEnabled(true)
+                        .withIpAddressType("IPV4")
+                        .withName("Name")
+                        .withIpSets(ipSet)
                 );
 
         doReturn(describeAcceleratorResult).when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
-
 
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
         val response = new ReadHandler().handleRequest(proxy, request, null, logger);
@@ -93,6 +94,7 @@ public class ReadHandlerTest {
 
     @Test
     public void handleRequest_nonExistingAccelerator() {
+        ResourceModel model = createTestResourceModel();
         doThrow(new AcceleratorNotFoundException("NOT FOUND")).when(proxy).
                 injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
@@ -102,6 +104,5 @@ public class ReadHandlerTest {
         assertThat(response.getStatus()).isEqualTo(OperationStatus.FAILED);
         assertThat(response.getErrorCode()).isEqualTo(HandlerErrorCode.NotFound);
         assertThat(response.getResourceModel()).isNull();
-
     }
 }

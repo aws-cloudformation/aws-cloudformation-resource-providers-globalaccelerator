@@ -40,15 +40,11 @@ public class UpdateHandlerTest {
     private Logger logger;
 
     private List<Tag> listOfTags;
-    private ResourceModel desiredModel;
     private List<String> ipAddresses;
     private String ACCELERATOR_ARN = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d";
 
-    @BeforeEach
-    public void setup() {
-        proxy = mock(AmazonWebServicesClientProxy.class);
-        logger = mock(Logger.class);
 
+    private ResourceModel createTestResourceModel() {
         Tag t1 = Tag.builder().key("Key1").value("Value1").build();
         listOfTags = new ArrayList<Tag>();
         listOfTags.add(t1);
@@ -57,7 +53,7 @@ public class UpdateHandlerTest {
         ipAddresses.add("10.10.10.1");
         ipAddresses.add("10.10.10.2");
 
-        desiredModel =  ResourceModel.builder()
+        return ResourceModel.builder()
                 .acceleratorArn(ACCELERATOR_ARN)
                 .enabled(true)
                 .name("ACCELERATOR_NAME_2")
@@ -67,15 +63,21 @@ public class UpdateHandlerTest {
                 .build();
     }
 
+    @BeforeEach
+    public void setup() {
+        proxy = mock(AmazonWebServicesClientProxy.class);
+        logger = mock(Logger.class);
+    }
+
     @Test
     public void handleRequest_NonExistingAccelerator() {
         final UpdateHandler handler = new UpdateHandler();
-
+        ResourceModel desiredModel = createTestResourceModel();
         doThrow(AcceleratorNotFoundException.class).when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
 
         final ResourceHandlerRequest<ResourceModel> request = ResourceHandlerRequest.<ResourceModel>builder()
-            .desiredResourceState(desiredModel)
-            .build();
+                .desiredResourceState(desiredModel)
+                .build();
 
         val response = handler.handleRequest(proxy, request, null, logger);
         assertThat(response).isNotNull();
@@ -88,6 +90,7 @@ public class UpdateHandlerTest {
     @Test
     public void handleRequest_UpdateAccelerator_PendingReturnsInProgress() {
         final UpdateHandler handler = new UpdateHandler();
+        ResourceModel desiredModel = createTestResourceModel();
 
         DescribeAcceleratorResult describeAcceleratorResult = new DescribeAcceleratorResult()
                 .withAccelerator(new Accelerator()
@@ -124,6 +127,7 @@ public class UpdateHandlerTest {
     @Test
     public void handleRequest_UpdateAccelerator_DeployedReturnsSuccess() {
         final UpdateHandler handler = new UpdateHandler();
+        ResourceModel desiredModel = createTestResourceModel();
 
         DescribeAcceleratorResult describeAcceleratorResult = new DescribeAcceleratorResult()
                 .withAccelerator(new Accelerator()
@@ -156,6 +160,7 @@ public class UpdateHandlerTest {
     @Test
     public void testStabilizationTimeout() {
         final UpdateHandler handler = new UpdateHandler();
+        ResourceModel desiredModel = createTestResourceModel();
 
         DescribeAcceleratorResult describeAcceleratorResult = new DescribeAcceleratorResult()
                 .withAccelerator(new Accelerator()
