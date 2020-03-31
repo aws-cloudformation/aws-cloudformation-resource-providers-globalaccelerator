@@ -5,10 +5,12 @@ import com.amazonaws.services.globalaccelerator.model.Listener;
 import com.amazonaws.services.globalaccelerator.model.PortRange;
 import com.amazonaws.services.globalaccelerator.model.UpdateListenerRequest;
 import lombok.val;
-import software.amazon.cloudformation.proxy.*;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.HashMap;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class UpdateHandler extends BaseHandler<CallbackContext> {

@@ -1,9 +1,12 @@
 package software.amazon.globalaccelerator.listener;
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator;
-import com.amazonaws.services.globalaccelerator.model.*;
+import com.amazonaws.services.globalaccelerator.model.DeleteListenerRequest;
 import lombok.val;
-import software.amazon.cloudformation.proxy.*;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 public class DeleteHandler extends BaseHandler<CallbackContext> {
     @Override

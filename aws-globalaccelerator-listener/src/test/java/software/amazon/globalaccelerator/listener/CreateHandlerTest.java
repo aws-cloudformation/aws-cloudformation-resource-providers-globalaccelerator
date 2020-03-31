@@ -1,14 +1,27 @@
 package software.amazon.globalaccelerator.listener;
 
-import com.amazonaws.services.globalaccelerator.model.*;
+import com.amazonaws.services.globalaccelerator.model.Accelerator;
+import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException;
+import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus;
+import com.amazonaws.services.globalaccelerator.model.ClientAffinity;
+import com.amazonaws.services.globalaccelerator.model.CreateListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.CreateListenerResult;
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest;
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult;
+import com.amazonaws.services.globalaccelerator.model.Listener;
 import com.amazonaws.services.globalaccelerator.model.PortRange;
+import com.amazonaws.services.globalaccelerator.model.Protocol;
 import lombok.val;
-import software.amazon.cloudformation.proxy.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.HandlerErrorCode;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.ArrayList;
 

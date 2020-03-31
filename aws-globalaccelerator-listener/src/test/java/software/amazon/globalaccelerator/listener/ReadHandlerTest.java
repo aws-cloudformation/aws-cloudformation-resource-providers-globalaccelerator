@@ -1,19 +1,26 @@
 package software.amazon.globalaccelerator.listener;
 
-import com.amazonaws.services.globalaccelerator.model.*;
-import com.amazonaws.services.lambda.runtime.Client;
+import com.amazonaws.services.globalaccelerator.model.ClientAffinity;
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult;
+import com.amazonaws.services.globalaccelerator.model.Listener;
+import com.amazonaws.services.globalaccelerator.model.ListenerNotFoundException;
+import com.amazonaws.services.globalaccelerator.model.Protocol;
 import lombok.val;
-import software.amazon.cloudformation.proxy.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.HandlerErrorCode;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.ArrayList;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 

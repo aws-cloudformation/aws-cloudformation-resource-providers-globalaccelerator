@@ -1,7 +1,13 @@
 package software.amazon.globalaccelerator.listener;
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator;
-import com.amazonaws.services.globalaccelerator.model.*;
+import com.amazonaws.services.globalaccelerator.model.Accelerator;
+import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException;
+import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus;
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest;
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.Listener;
+import com.amazonaws.services.globalaccelerator.model.ListenerNotFoundException;
 import lombok.val;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.Logger;

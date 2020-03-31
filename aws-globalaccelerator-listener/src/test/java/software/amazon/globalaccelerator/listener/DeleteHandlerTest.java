@@ -1,20 +1,23 @@
 package software.amazon.globalaccelerator.listener;
 
-import com.amazonaws.services.globalaccelerator.model.*;
-import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
-import software.amazon.cloudformation.proxy.Logger;
-import software.amazon.cloudformation.proxy.OperationStatus;
-import software.amazon.cloudformation.proxy.ProgressEvent;
-import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import com.amazonaws.services.globalaccelerator.model.DeleteListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.DeleteListenerResult;
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult;
+import com.amazonaws.services.globalaccelerator.model.Listener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.mockito.ArgumentMatchers.any;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 

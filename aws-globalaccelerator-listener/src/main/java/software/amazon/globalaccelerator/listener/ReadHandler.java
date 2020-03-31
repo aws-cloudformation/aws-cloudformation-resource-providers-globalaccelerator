@@ -2,7 +2,11 @@ package software.amazon.globalaccelerator.listener;
 
 import com.amazonaws.services.globalaccelerator.model.Listener;
 import lombok.val;
-import software.amazon.cloudformation.proxy.*;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.HandlerErrorCode;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.stream.Collectors;
 
