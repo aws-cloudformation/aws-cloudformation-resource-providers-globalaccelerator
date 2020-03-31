@@ -1,21 +1,23 @@
 package software.amazon.globalaccelerator.listener;
 
-import com.amazonaws.services.globalaccelerator.model.*;
-import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
-import software.amazon.cloudformation.proxy.Logger;
-import software.amazon.cloudformation.proxy.OperationStatus;
-import software.amazon.cloudformation.proxy.ProgressEvent;
-import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import com.amazonaws.services.globalaccelerator.model.DeleteListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.DeleteListenerResult;
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest;
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult;
+import com.amazonaws.services.globalaccelerator.model.Listener;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
-import static org.mockito.ArgumentMatchers.any;
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
+import software.amazon.cloudformation.proxy.Logger;
+import software.amazon.cloudformation.proxy.OperationStatus;
+import software.amazon.cloudformation.proxy.ProgressEvent;
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 
@@ -44,12 +46,6 @@ public class DeleteHandlerTest {
         doReturn(new DeleteListenerResult())
                 .when(proxy).injectCredentialsAndInvoke(any(DeleteListenerRequest.class), any());
 
-        doReturn(new DescribeAcceleratorResult()
-                .withAccelerator(new Accelerator()
-                    .withAcceleratorArn("ACCELERATOR_ARN")
-                    .withStatus(AcceleratorStatus.IN_PROGRESS)))
-                .when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
-
         final DeleteHandler handler = new DeleteHandler();
         final ResourceModel model = ResourceModel.builder()
                 .acceleratorArn("TEST_LISTENER_ARN")
@@ -64,10 +60,8 @@ public class DeleteHandlerTest {
                 = handler.handleRequest(proxy, request, null, logger);
 
         assertThat(response).isNotNull();
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS);
-        assertThat(response.getCallbackContext()).isNotNull();
-        assertThat(response.getCallbackContext().getStabilizationRetriesRemaining()).isGreaterThan(0);
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(1);
+        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS);
+        assertThat(response.getCallbackContext()).isNull();
         assertThat(response.getResourceModel()).isEqualTo(model);
         assertThat(response.getResourceModels()).isNull();
         assertThat(response.getMessage()).isNull();

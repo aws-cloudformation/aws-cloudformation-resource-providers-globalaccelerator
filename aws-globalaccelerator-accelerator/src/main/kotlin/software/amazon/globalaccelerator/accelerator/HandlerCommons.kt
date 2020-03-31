@@ -13,6 +13,7 @@ object HandlerCommons {
     const val CALLBACK_DELAY_IN_SECONDS = 1
     const val NUMBER_OF_STATE_POLL_RETRIES = 60 / CALLBACK_DELAY_IN_SECONDS * 60 * 4 // 4 hours
     const val TIMED_OUT_MESSAGE = "Timed out waiting for global accelerator to be deployed."
+    const val ACCELERATOR_NOT_FOUND = "Accelerator not found."
 
     /**
      * Check to see if accelerator creation is complete and create the correct progress continuation context
