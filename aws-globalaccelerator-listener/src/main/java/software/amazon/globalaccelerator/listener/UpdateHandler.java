@@ -5,12 +5,10 @@ import com.amazonaws.services.globalaccelerator.model.Listener;
 import com.amazonaws.services.globalaccelerator.model.PortRange;
 import com.amazonaws.services.globalaccelerator.model.UpdateListenerRequest;
 import lombok.val;
-import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
-import software.amazon.cloudformation.proxy.Logger;
-import software.amazon.cloudformation.proxy.ProgressEvent;
-import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+import software.amazon.cloudformation.proxy.*;
 
 import java.util.HashMap;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class UpdateHandler extends BaseHandler<CallbackContext> {
@@ -31,16 +29,14 @@ public class UpdateHandler extends BaseHandler<CallbackContext> {
                 callbackContext :
                 CallbackContext.builder()
                         .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
+                        .pendingStabilization(false)
                         .build();
 
         // confirm we can find the accelerator
         final ResourceModel model = request.getDesiredResourceState();
-        if (inferredCallbackContext.getCallbackMap() == null ||
-            !inferredCallbackContext.getCallbackMap().containsKey(UPDATE_COMPLETED_KEY)) {
+        if (!inferredCallbackContext.isPendingStabilization()) {
             updateListenerStep(model, request, proxy, agaClient, logger);
-            val callbackMap = new HashMap<String, String>();
-            callbackMap.put(UPDATE_COMPLETED_KEY, Boolean.toString(true));
-            inferredCallbackContext.setCallbackMap(callbackMap);
+            inferredCallbackContext.setPendingStabilization(true);
         }
 
         return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger);

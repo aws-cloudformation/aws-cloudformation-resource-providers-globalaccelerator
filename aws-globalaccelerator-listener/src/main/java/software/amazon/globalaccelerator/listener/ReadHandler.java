@@ -22,9 +22,8 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
 
         val model = request.getDesiredResourceState();
         val agaClient = AcceleratorClientBuilder.getClient();
-        val desiredState = request.getDesiredResourceState();
 
-        val listener = HandlerCommons.getListener(desiredState.getListenerArn(), proxy, agaClient, logger);
+        val listener = HandlerCommons.getListener(model.getListenerArn(), proxy, agaClient, logger);
         val convertedModel = convertListenerToResourceModel(listener, model);
 
         logger.log(String.format("Current found listener is: [%s]", convertedModel == null ? "null" : convertedModel));

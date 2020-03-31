@@ -108,11 +108,9 @@ public class UpdateHandlerTest {
         expectDescribeAccelerator(AcceleratorStatus.IN_PROGRESS);
 
         val model = createTestResourceModel();
-        val callbackMap = new HashMap<String, String>();
-        callbackMap.put(UpdateHandler.UPDATE_COMPLETED_KEY, Boolean.valueOf(true).toString());
         val context = CallbackContext.builder()
                 .stabilizationRetriesRemaining(10)
-                .callbackMap(callbackMap)
+                .pendingStabilization(true)
                 .build();
 
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
@@ -140,7 +138,7 @@ public class UpdateHandlerTest {
         callbackMap.put(UpdateHandler.UPDATE_COMPLETED_KEY, Boolean.valueOf(true).toString());
         val context = CallbackContext.builder()
                 .stabilizationRetriesRemaining(10)
-                .callbackMap(callbackMap)
+                .pendingStabilization(true)
                 .build();
 
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
@@ -159,11 +157,9 @@ public class UpdateHandlerTest {
     @Test
     public void handleRequest_ThresholdTimeExceeded() {
         val model = createTestResourceModel();
-        val callbackMap = new HashMap<String, String>();
-        callbackMap.put(UpdateHandler.UPDATE_COMPLETED_KEY, Boolean.valueOf(true).toString());
         val callbackContext = CallbackContext.builder()
                 .stabilizationRetriesRemaining(0)
-                .callbackMap(callbackMap)
+                .pendingStabilization(true)
                 .build();
 
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
