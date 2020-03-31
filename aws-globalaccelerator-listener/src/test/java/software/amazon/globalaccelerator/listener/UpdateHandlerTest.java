@@ -45,14 +45,34 @@ public class UpdateHandlerTest {
         logger = mock(Logger.class);
     }
 
-    @Test
-    public void handleRequest_InitialUpdate_ReturnsInProgress() {
+    /**
+     * Sets up expectation that describe accelerator will be called on our test mock
+     * @param acceleratorStatus the status the describe call should return
+     */
+    private void expectDescribeAccelerator(AcceleratorStatus acceleratorStatus) {
         // we expect a call to get the accelerator status
         val describeAcceleratorResult = new DescribeAcceleratorResult()
                 .withAccelerator(new Accelerator()
-                    .withAcceleratorArn("ACCELERATOR_ARN")
-                    .withStatus(AcceleratorStatus.IN_PROGRESS.toString()));
+                        .withAcceleratorArn("ACCELERATOR_ARN")
+                        .withStatus(acceleratorStatus.toString()));
         doReturn(describeAcceleratorResult).when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
+    }
+
+    private static ResourceModel createTestResourceModel() {
+        val portRanges = new ArrayList<software.amazon.globalaccelerator.listener.PortRange>();
+        portRanges.add(new software.amazon.globalaccelerator.listener.PortRange(80, 81));
+        return ResourceModel.builder()
+                .listenerArn("LISTENER_ARN")
+                .acceleratorArn("ACCELERATOR_ARN")
+                .clientAffinity("SOURCE_IP")
+                .protocol("TCP")
+                .portRanges(portRanges)
+                .build();
+    }
+
+    @Test
+    public void handleRequest_InitialUpdate_ReturnsInProgress() {
+        expectDescribeAccelerator(AcceleratorStatus.IN_PROGRESS);
 
         // we expect a call to update
         val updateListenerResult = new UpdateListenerResult()
@@ -63,18 +83,7 @@ public class UpdateHandlerTest {
                     .withPortRanges(new PortRange().withFromPort(80).withToPort(81)));
         doReturn(updateListenerResult).when(proxy).injectCredentialsAndInvoke(any(UpdateListenerRequest.class), any());
 
-
-        // create the that will go to our handler
-        val portRanges = new ArrayList<software.amazon.globalaccelerator.listener.PortRange>();
-        portRanges.add(new software.amazon.globalaccelerator.listener.PortRange(80, 81));
-        val model = ResourceModel.builder()
-                .listenerArn("LISTENER_ARN")
-                .acceleratorArn("ACCELERATOR_ARN")
-                .clientAffinity("SOURCE_IP")
-                .protocol("TCP")
-                .portRanges(portRanges)
-                .build();
-
+        val model = createTestResourceModel();
         val request = ResourceHandlerRequest.<ResourceModel>builder().desiredResourceState(model).build();
         val response = new UpdateHandler().handleRequest(proxy, request, null, logger);
 
@@ -96,24 +105,9 @@ public class UpdateHandlerTest {
         // strict mocking will cause us to throw if the handler calls update.
 
         // we expect a call to get the accelerator status
-        val describeAcceleratorResult = new DescribeAcceleratorResult()
-                .withAccelerator(new Accelerator()
-                        .withAcceleratorArn("ACCELERATOR_ARN")
-                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString()));
-        doReturn(describeAcceleratorResult).when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
+        expectDescribeAccelerator(AcceleratorStatus.IN_PROGRESS);
 
-        // create the that will go to our handler
-        val portRanges = new ArrayList<software.amazon.globalaccelerator.listener.PortRange>();
-        portRanges.add(new software.amazon.globalaccelerator.listener.PortRange(80, 81));
-        val model = ResourceModel.builder()
-                .listenerArn("LISTENER_ARN")
-                .acceleratorArn("ACCELERATOR_ARN")
-                .clientAffinity("SOURCE_IP")
-                .protocol("TCP")
-                .portRanges(portRanges)
-                .build();
-
-
+        val model = createTestResourceModel();
         val callbackMap = new HashMap<String, String>();
         callbackMap.put(UpdateHandler.UPDATE_COMPLETED_KEY, Boolean.valueOf(true).toString());
         val context = CallbackContext.builder()
@@ -138,24 +132,10 @@ public class UpdateHandlerTest {
 
     @Test
     public void handleRequest_AcceleratorDoneDeploying_ReturnsSuccess() {
-        // we expect a call to get the accelerator status
-        val describeAcceleratorResult = new DescribeAcceleratorResult()
-                .withAccelerator(new Accelerator()
-                        .withAcceleratorArn("ACCELERATOR_ARN")
-                        .withStatus(AcceleratorStatus.DEPLOYED.toString()));
-        doReturn(describeAcceleratorResult).when(proxy).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest.class), any());
+        expectDescribeAccelerator(AcceleratorStatus.DEPLOYED);
 
         // create the that will go to our handler
-        val portRanges = new ArrayList<software.amazon.globalaccelerator.listener.PortRange>();
-        portRanges.add(new software.amazon.globalaccelerator.listener.PortRange(80, 81));
-        val model = ResourceModel.builder()
-                .listenerArn("LISTENER_ARN")
-                .acceleratorArn("ACCELERATOR_ARN")
-                .clientAffinity("SOURCE_IP")
-                .protocol("TCP")
-                .portRanges(portRanges)
-                .build();
-
+        val model = createTestResourceModel();
         val callbackMap = new HashMap<String, String>();
         callbackMap.put(UpdateHandler.UPDATE_COMPLETED_KEY, Boolean.valueOf(true).toString());
         val context = CallbackContext.builder()
@@ -178,17 +158,7 @@ public class UpdateHandlerTest {
 
     @Test
     public void handleRequest_ThresholdTimeExceeded() {
-        // create the that will go to our handler
-        val portRanges = new ArrayList<software.amazon.globalaccelerator.listener.PortRange>();
-        portRanges.add(new software.amazon.globalaccelerator.listener.PortRange(80, 81));
-        val model = ResourceModel.builder()
-                .listenerArn("LISTENER_ARN")
-                .acceleratorArn("ACCELERATOR_ARN")
-                .clientAffinity("SOURCE_IP")
-                .protocol("TCP")
-                .portRanges(portRanges)
-                .build();
-
+        val model = createTestResourceModel();
         val callbackMap = new HashMap<String, String>();
         callbackMap.put(UpdateHandler.UPDATE_COMPLETED_KEY, Boolean.valueOf(true).toString());
         val callbackContext = CallbackContext.builder()
