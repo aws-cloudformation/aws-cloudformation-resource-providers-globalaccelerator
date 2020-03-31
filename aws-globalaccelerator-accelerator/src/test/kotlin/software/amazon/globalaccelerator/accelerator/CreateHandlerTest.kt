@@ -8,10 +8,14 @@ import com.amazonaws.services.globalaccelerator.model.CreateAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.CreateAcceleratorResult
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
-import org.assertj.core.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertThrows
+import org.junit.jupiter.api.assertThrows
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.Mockito
@@ -53,14 +57,14 @@ class CreateHandlerTest {
         val model = ResourceModel.builder().enabled(true).name("AcceleratorTest").tags(tags).build()
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
-        Assertions.assertThat(response).isNotNull
-        Assertions.assertThat(response.status).isEqualTo(OperationStatus.IN_PROGRESS)
-        Assertions.assertThat(response.callbackDelaySeconds).isEqualTo(0)
-        Assertions.assertThat(response.callbackContext).isNotNull
-        Assertions.assertThat(response.resourceModel).isNotNull
-        Assertions.assertThat(response.resourceModel.acceleratorArn).isEqualTo("ACCELERATOR_ARN")
-        Assertions.assertThat(response.resourceModels).isNull()
-        Assertions.assertThat(response.message).isNull()
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(0, response.callbackDelaySeconds)
+        assertNotNull(response.callbackContext)
+        assertNotNull(response.resourceModel)
+        assertEquals("ACCELERATOR_ARN", response.resourceModel.acceleratorArn)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
     }
 
     @Test
@@ -84,15 +88,15 @@ class CreateHandlerTest {
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val callbackContext = CallbackContext(10)
         val response = handler.handleRequest(proxy!!, request, callbackContext, logger!!)
-        Assertions.assertThat(response).isNotNull
-        Assertions.assertThat(response.status).isEqualTo(OperationStatus.IN_PROGRESS)
-        Assertions.assertThat(response.callbackDelaySeconds).isEqualTo(1)
-        Assertions.assertThat(response.callbackContext).isNotNull
-        Assertions.assertThat(response.callbackContext!!.stabilizationRetriesRemaining).isEqualTo(callbackContext.stabilizationRetriesRemaining - 1)
-        Assertions.assertThat(response.resourceModel).isNotNull
-        Assertions.assertThat(response.resourceModel.acceleratorArn).isEqualTo("ACCELERATOR_ARN")
-        Assertions.assertThat(response.resourceModels).isNull()
-        Assertions.assertThat(response.message).isNull()
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(1, response.callbackDelaySeconds)
+        assertNotNull(response.callbackContext)
+        assertEquals(response.callbackContext!!.stabilizationRetriesRemaining, callbackContext.stabilizationRetriesRemaining - 1)
+        assertNotNull(response.resourceModel)
+        assertEquals("ACCELERATOR_ARN", response.resourceModel.acceleratorArn)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
     }
 
     @Test
@@ -116,14 +120,13 @@ class CreateHandlerTest {
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val callbackContext = CallbackContext(10)
         val response = handler.handleRequest(proxy!!, request, callbackContext, logger!!)
-        Assertions.assertThat(response).isNotNull
-        Assertions.assertThat(response.status).isEqualTo(OperationStatus.SUCCESS)
-        Assertions.assertThat(response.callbackDelaySeconds).isEqualTo(0)
-        Assertions.assertThat(response.callbackContext).isNull()
-        Assertions.assertThat(response.resourceModel).isNotNull
-        Assertions.assertThat(response.resourceModel.acceleratorArn).isEqualTo("ACCELERATOR_ARN")
-        Assertions.assertThat(response.resourceModels).isNull()
-        Assertions.assertThat(response.message).isNull()
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertEquals(0, response.callbackDelaySeconds)
+        assertNotNull(response.resourceModel)
+        assertEquals("ACCELERATOR_ARN", response.resourceModel.acceleratorArn)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
     }
 
     @Test
@@ -134,7 +137,9 @@ class CreateHandlerTest {
                 .acceleratorArn("ACCELERATOR_ARN").build()
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val callbackContext = CallbackContext(0)
-        Assertions.assertThatExceptionOfType(RuntimeException::class.java).isThrownBy { handler.handleRequest(proxy!!, request, callbackContext, logger!!) }
-                .withMessageMatching("Timed out waiting for global accelerator to be deployed.")
+        val exception = assertThrows(RuntimeException::class.java) {
+            handler.handleRequest(proxy!!, request, callbackContext, logger!!)
+        }
+        assertEquals("Timed out waiting for global accelerator to be deployed.", exception.message)
     }
 }
