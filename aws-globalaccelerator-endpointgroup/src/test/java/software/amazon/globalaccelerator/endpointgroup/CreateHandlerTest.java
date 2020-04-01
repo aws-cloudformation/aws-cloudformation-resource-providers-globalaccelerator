@@ -13,6 +13,7 @@ import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
@@ -33,6 +34,24 @@ public class CreateHandlerTest {
     public void setup() {
         proxy = mock(AmazonWebServicesClientProxy.class);
         logger = mock(Logger.class);
+    }
+
+
+    private List<EndpointDescription> createEndpointDescription() {
+        ArrayList<EndpointDescription> array = new ArrayList<EndpointDescription>();
+        array.add(new EndpointDescription()
+                .withClientIPPreservationEnabled(true)
+                .withHealthState("HS1")
+                .withEndpointId("ID1")
+                .withWeight(100)
+                .withHealthReason("Reason1"));
+        array.add(new EndpointDescription()
+                .withClientIPPreservationEnabled(false)
+                .withHealthState("HS2")
+                .withEndpointId("ID2")
+                .withWeight(100)
+                .withHealthReason("Reason2"));
+        return array;
     }
 
     @Test
@@ -58,7 +77,8 @@ public class CreateHandlerTest {
                     .withEndpointGroupRegion("us-west-2")
                     .withHealthCheckProtocol("HTTP")
                     .withHealthCheckIntervalSeconds(10)
-                    .withThresholdCount(4));
+                    .withThresholdCount(4)
+                    .withEndpointDescriptions(createEndpointDescription()));
         doReturn(createEndpointGroupResult).when(proxy).injectCredentialsAndInvoke(any(CreateEndpointGroupRequest.class), any());
 
         // create the that will go to our handler

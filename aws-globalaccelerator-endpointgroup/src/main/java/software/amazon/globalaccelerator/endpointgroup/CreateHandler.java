@@ -3,6 +3,7 @@ package software.amazon.globalaccelerator.endpointgroup;
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator;
 import com.amazonaws.services.globalaccelerator.model.CreateEndpointGroupRequest;
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration;
+import com.amazonaws.services.globalaccelerator.model.EndpointDescription;
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup;
 import lombok.val;
 import software.amazon.cloudformation.proxy.*;
@@ -69,12 +70,21 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         model.setHealthCheckPort(endpointGroup.getHealthCheckPort());
         model.setHealthCheckProtocol(endpointGroup.getHealthCheckProtocol());
         model.setThresholdCount(endpointGroup.getThresholdCount());
+        model.setEndpointConfigurations(getEndpointConfigurations(endpointGroup.getEndpointDescriptions()));
 
         val callbackContext = CallbackContext.builder()
                 .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
                 .build();
 
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model);
+    }
+
+    private List<software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration> getEndpointConfigurations (List<EndpointDescription> endpointDescriptions) {
+        return endpointDescriptions.stream().map((x) -> software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration.builder()
+                .clientIPPreservationEnabled(x.getClientIPPreservationEnabled())
+                .endpointId(x.getEndpointId())
+                .weight(x.getWeight())
+                .build()).collect(Collectors.toList());
     }
 
     private EndpointGroup CreateEndpointGroup(final ResourceModel model,
@@ -88,7 +98,8 @@ public class CreateHandler extends BaseHandler<CallbackContext> {
         List<EndpointConfiguration> convertedEndpointConfigurations = null;
         if (model.getEndpointConfigurations() != null) {
             convertedEndpointConfigurations = model.getEndpointConfigurations().stream()
-                    .map((x) -> new EndpointConfiguration().withEndpointId(x.getEndpointId()).withWeight(x.getWeight()))
+                    .map((x) -> new EndpointConfiguration().withEndpointId(x.getEndpointId()).withWeight(x.getWeight())
+                            .withClientIPPreservationEnabled(x.getClientIPPreservationEnabled()))
                     .collect(Collectors.toList());
         }
 

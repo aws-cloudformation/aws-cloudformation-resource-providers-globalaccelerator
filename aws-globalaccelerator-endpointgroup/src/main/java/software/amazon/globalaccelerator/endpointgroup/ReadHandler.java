@@ -1,6 +1,8 @@
 package software.amazon.globalaccelerator.endpointgroup;
 
+import com.amazonaws.services.globalaccelerator.model.EndpointDescription;
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup;
+import software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration;
 import lombok.val;
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy;
 import software.amazon.cloudformation.proxy.HandlerErrorCode;
@@ -8,6 +10,10 @@ import software.amazon.cloudformation.proxy.Logger;
 import software.amazon.cloudformation.proxy.ProgressEvent;
 import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class ReadHandler extends BaseHandler<CallbackContext> {
 
@@ -46,7 +52,16 @@ public class ReadHandler extends BaseHandler<CallbackContext> {
             newModel.setThresholdCount(endpointGroup.getThresholdCount());
             newModel.setTrafficDialPercentage(endpointGroup.getTrafficDialPercentage().intValue());
             newModel.setEndpointGroupRegion(endpointGroup.getEndpointGroupRegion());
+            newModel.setEndpointConfigurations(getEndpointConfigurations(endpointGroup.getEndpointDescriptions()));
         }
         return newModel;
+    }
+
+    private List<EndpointConfiguration> getEndpointConfigurations (List<EndpointDescription> endpointDescriptions) {
+        return endpointDescriptions.stream().map((x) -> EndpointConfiguration.builder()
+                .clientIPPreservationEnabled(x.getClientIPPreservationEnabled())
+                .endpointId(x.getEndpointId())
+                .weight(x.getWeight())
+                .build()).collect(Collectors.toList());
     }
 }

@@ -2,6 +2,7 @@ package software.amazon.globalaccelerator.endpointgroup;
 
 import com.amazonaws.services.globalaccelerator.model.DescribeEndpointGroupRequest;
 import com.amazonaws.services.globalaccelerator.model.DescribeEndpointGroupResult;
+import com.amazonaws.services.globalaccelerator.model.EndpointDescription;
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup;
 import com.amazonaws.services.globalaccelerator.model.EndpointGroupNotFoundException;
 import lombok.val;
@@ -18,6 +19,7 @@ import software.amazon.cloudformation.proxy.OperationStatus;
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
@@ -60,6 +62,23 @@ public class ReadHandlerTest {
                 .build();
     }
 
+    private List<EndpointDescription> createEndpointDescription() {
+        ArrayList<EndpointDescription> array = new ArrayList<EndpointDescription>();
+        array.add(new EndpointDescription()
+                .withClientIPPreservationEnabled(true)
+                .withHealthState("HS1")
+                .withEndpointId("ID1")
+                .withWeight(100)
+                .withHealthReason("Reason1"));
+        array.add(new EndpointDescription()
+                .withClientIPPreservationEnabled(false)
+                .withHealthState("HS2")
+                .withEndpointId("ID2")
+                .withWeight(100)
+                .withHealthReason("Reason2"));
+        return array;
+    }
+
     @Test
     public void handleRequest_returnsMappedEndpointGroup() {
         ResourceModel model = createTestResourceModel();
@@ -67,7 +86,8 @@ public class ReadHandlerTest {
                 .withEndpointGroup(new EndpointGroup()
                         .withEndpointGroupArn("ENDPOINTGROUP_ARN")
                         .withEndpointGroupRegion("us-west-2")
-                        .withTrafficDialPercentage(50.0f));
+                        .withTrafficDialPercentage(50.0f)
+                        .withEndpointDescriptions(createEndpointDescription()));
 
         doReturn(describeEndpointGroupResult).when(proxy).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest.class), any());
 
