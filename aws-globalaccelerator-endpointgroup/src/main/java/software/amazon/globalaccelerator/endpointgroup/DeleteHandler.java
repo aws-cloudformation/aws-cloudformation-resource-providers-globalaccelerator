@@ -21,7 +21,7 @@ public class DeleteHandler extends BaseHandler<CallbackContext> {
         val agaClient = AcceleratorClientBuilder.getClient();
         val inferredCallbackContext = callbackContext != null ?
                 callbackContext :
-                CallbackContext.builder().build().builder()
+                CallbackContext.builder()
                         .stabilizationRetriesRemaining(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
                         .build();
 
