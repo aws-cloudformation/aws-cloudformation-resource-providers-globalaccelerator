@@ -32,7 +32,7 @@ object HandlerCommons {
         }
 
         val accelerator = getAccelerator(acceleratorArn, proxy, agaClient, logger)
-        return if (accelerator!!.getStatus().equals(AcceleratorStatus.DEPLOYED.toString())) {
+        return if (accelerator!!.getStatus() == AcceleratorStatus.DEPLOYED.toString()) {
             ProgressEvent.defaultSuccessHandler(model)
         } else {
             ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model)
@@ -60,12 +60,12 @@ object HandlerCommons {
     /** Gets the listener with the specified ARN  */
     fun getListener(listenerArn: String, proxy: AmazonWebServicesClientProxy,
                     agaClient: AWSGlobalAccelerator, logger: Logger): Listener? {
-        var listener: Listener? = null
-        try {
+        val listener = try {
             val request = DescribeListenerRequest().withListenerArn(listenerArn)
-            listener = proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
+            proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
         } catch (ex: ListenerNotFoundException) {
             logger.log(String.format("Did not find listener with arn [%s]", listenerArn))
+            null
         }
 
         return listener
@@ -73,12 +73,12 @@ object HandlerCommons {
 
     fun getEndpointGroup(endpointGroupArn: String, proxy: AmazonWebServicesClientProxy,
                          agaClient: AWSGlobalAccelerator, logger: Logger): EndpointGroup? {
-        var endpointGroup: EndpointGroup? = null
-        try {
+        var endpointGroup = try {
             val request = DescribeEndpointGroupRequest().withEndpointGroupArn(endpointGroupArn)
-            endpointGroup = proxy.injectCredentialsAndInvoke(request, agaClient::describeEndpointGroup).endpointGroup
+            proxy.injectCredentialsAndInvoke(request, agaClient::describeEndpointGroup).endpointGroup
         } catch (eex: EndpointGroupNotFoundException) {
             logger.log(String.format("Did not find endpoint group with arn [%s]", endpointGroupArn))
+            null
         }
 
         return endpointGroup

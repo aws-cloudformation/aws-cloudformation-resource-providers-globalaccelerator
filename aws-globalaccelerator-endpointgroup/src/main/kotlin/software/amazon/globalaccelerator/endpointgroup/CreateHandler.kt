@@ -5,10 +5,8 @@ import com.amazonaws.services.globalaccelerator.model.CreateEndpointGroupRequest
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration
 import com.amazonaws.services.globalaccelerator.model.EndpointDescription
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup
-import lombok.`val`
 import software.amazon.cloudformation.proxy.*
 import software.amazon.globalaccelerator.arns.ListenerArn
-import java.util.stream.Collectors
 
 class CreateHandler : BaseHandler<CallbackContext?>() {
 
@@ -75,13 +73,11 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
     }
 
     private fun getEndpointConfigurations(endpointDescriptions: List<EndpointDescription>): List<software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration> {
-        return endpointDescriptions.stream().map({ x ->
-            software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration.builder()
-                    .clientIPPreservationEnabled(x.getClientIPPreservationEnabled())
-                    .endpointId(x.getEndpointId())
-                    .weight(x.getWeight())
-                    .build()
-        }).collect(Collectors.toList())
+        return endpointDescriptions.map {software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration.builder()
+                    .clientIPPreservationEnabled(it.getClientIPPreservationEnabled())
+                    .endpointId(it.getEndpointId())
+                    .weight(it.getWeight())
+                    .build()}
     }
 
     private fun CreateEndpointGroup(model: ResourceModel,
@@ -92,15 +88,9 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         val healthCheckPort = if (model.getHealthCheckPort() < 0) null else model.getHealthCheckPort()
 
         // we need to map all of our endpoint configurations
-        var convertedEndpointConfigurations: List<EndpointConfiguration>? = null
-        if (model.getEndpointConfigurations() != null) {
-            convertedEndpointConfigurations = model.getEndpointConfigurations().stream()
-                    .map({ x ->
-                        EndpointConfiguration().withEndpointId(x.getEndpointId()).withWeight(x.getWeight())
-                                .withClientIPPreservationEnabled(x.getClientIPPreservationEnabled())
-                    })
-                    .collect(Collectors.toList())
-        }
+        var convertedEndpointConfigurations = model.getEndpointConfigurations()?.map {EndpointConfiguration()
+                    .withEndpointId(it.getEndpointId()).withWeight(it.getWeight())
+                    .withClientIPPreservationEnabled(it.getClientIPPreservationEnabled())}
 
         val createEndpointGroupRequest = CreateEndpointGroupRequest()
                 .withListenerArn(model.getListenerArn())

@@ -2,17 +2,11 @@ package software.amazon.globalaccelerator.endpointgroup
 
 import com.amazonaws.services.globalaccelerator.model.EndpointDescription
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup
-import software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration
-import lombok.`val`
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
-import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
-
-import java.util.ArrayList
-import java.util.stream.Collectors
 
 class ReadHandler : BaseHandler<CallbackContext>() {
 
@@ -57,12 +51,10 @@ class ReadHandler : BaseHandler<CallbackContext>() {
     }
 
     private fun getEndpointConfigurations(endpointDescriptions: List<EndpointDescription>): List<EndpointConfiguration> {
-        return endpointDescriptions.stream().map({ x ->
-            EndpointConfiguration.builder()
-                    .clientIPPreservationEnabled(x.getClientIPPreservationEnabled())
-                    .endpointId(x.getEndpointId())
-                    .weight(x.getWeight())
-                    .build()
-        }).collect(Collectors.toList())
+        return endpointDescriptions.map{ EndpointConfiguration.builder()
+                    .clientIPPreservationEnabled(it.getClientIPPreservationEnabled())
+                    .endpointId(it.getEndpointId())
+                    .weight(it.getWeight())
+                    .build()}
     }
 }

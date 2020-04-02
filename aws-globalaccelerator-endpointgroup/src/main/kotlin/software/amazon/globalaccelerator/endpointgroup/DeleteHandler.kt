@@ -2,7 +2,6 @@ package software.amazon.globalaccelerator.endpointgroup
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
 import com.amazonaws.services.globalaccelerator.model.DeleteEndpointGroupRequest
-import lombok.`val`
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent

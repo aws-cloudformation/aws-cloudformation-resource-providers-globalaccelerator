@@ -77,7 +77,7 @@ class CreateHandlerTest {
         // the endpoint group create result
         val createEndpointGroupResult = CreateEndpointGroupResult()
                 .withEndpointGroup(EndpointGroup()
-                        .withEndpointGroupArn("ENDPOINT_GROUP_ARN")
+                        .withEndpointGroupArn("ENDPOINTGROUP_ARN")
                         .withHealthCheckPath("/MYPATH")
                         .withHealthCheckPort(200)
                         .withEndpointGroupRegion("us-west-2")
@@ -99,22 +99,22 @@ class CreateHandlerTest {
         val handler = CreateHandler()
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
 
-        assertThat(response).isNotNull()
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS)
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0)
-        assertThat(response.getCallbackContext()).isNotNull()
-        assertThat(response.getResourceModels()).isNull()
-        assertThat(response.getMessage()).isNull()
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.getCallbackDelaySeconds(), 0)
+        Assertions.assertNotNull(response.getCallbackContext())
+        Assertions.assertNotNull(response.getResourceModel())
+        Assertions.assertNull(response.getMessage())
+        Assertions.assertNull(response.getResourceModels())
+        Assertions.assertEquals(response.getResourceModel().getEndpointGroupArn(), "ENDPOINTGROUP_ARN")
+        Assertions.assertFalse(response.callbackContext!!.pendingStabilization)
 
-        // want to confirm data was updated correctly
-        assertThat(response.getResourceModel()).isNotNull()
-        assertThat(response.getResourceModel().getEndpointGroupArn()).isEqualTo("ENDPOINT_GROUP_ARN")
-        assertThat(response.getResourceModel().getHealthCheckPath()).isEqualTo("/MYPATH")
-        assertThat(response.getResourceModel().getHealthCheckPort()).isEqualTo(200)
-        assertThat(response.getResourceModel().getEndpointGroupRegion()).isEqualTo("us-west-2")
-        assertThat(response.getResourceModel().getHealthCheckProtocol()).isEqualTo("HTTP")
-        assertThat(response.getResourceModel().getHealthCheckIntervalSeconds()).isEqualTo(10)
-        assertThat(response.getResourceModel().getThresholdCount()).isEqualTo(4)
+        Assertions.assertEquals(response.getResourceModel().getHealthCheckPath(), "/MYPATH")
+        Assertions.assertEquals(response.getResourceModel().getHealthCheckPort(), 200)
+        Assertions.assertEquals(response.getResourceModel().getEndpointGroupRegion(), "us-west-2")
+        Assertions.assertEquals(response.getResourceModel().getHealthCheckProtocol(), "HTTP")
+        Assertions.assertEquals(response.getResourceModel().getHealthCheckIntervalSeconds(), 10)
+        Assertions.assertEquals(response.getResourceModel().getThresholdCount(), 4)
     }
 
     @Test
@@ -146,17 +146,14 @@ class CreateHandlerTest {
         val handler = CreateHandler()
         val response = handler.handleRequest(proxy!!, request, callbackContext, logger!!)
 
-        // validate expectations
-        assertThat(response).isNotNull()
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS)
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(1)
-        assertThat(response.getCallbackContext()).isNotNull()
-        assertThat(response.callbackContext!!.stabilizationRetriesRemaining).isEqualTo(4)
-        assertThat(response.getResourceModels()).isNull()
-        assertThat(response.getMessage()).isNull()
-
-        // confirm the model did not mutate
-        assertThat(response.getResourceModel()).isEqualTo(model)
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.getCallbackDelaySeconds(), 1)
+        Assertions.assertEquals(response.callbackContext!!.stabilizationRetriesRemaining, 4)
+        Assertions.assertNotNull(response.getCallbackContext())
+        Assertions.assertNull(response.getMessage())
+        Assertions.assertNull(response.getResourceModels())
+        Assertions.assertEquals(response.getResourceModel(), model)
     }
 
     @Test
@@ -188,16 +185,14 @@ class CreateHandlerTest {
         val handler = CreateHandler()
         val response = handler.handleRequest(proxy!!, request, callbackContext, logger!!)
 
-        // validate expectations
-        assertThat(response).isNotNull()
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS)
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0)
-        assertThat(response.getCallbackContext()).isNull()
-        assertThat(response.getResourceModels()).isNull()
-        assertThat(response.getMessage()).isNull()
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
+        Assertions.assertEquals(response.getCallbackDelaySeconds(), 0)
+        Assertions.assertNull(response.getCallbackContext())
+        Assertions.assertNull(response.getMessage())
+        Assertions.assertNull(response.getResourceModels())
+        Assertions.assertEquals(response.getResourceModel(), model)
 
-        // confirm the model did not mutate
-        assertThat(response.getResourceModel()).isEqualTo(model)
     }
 
     @Test

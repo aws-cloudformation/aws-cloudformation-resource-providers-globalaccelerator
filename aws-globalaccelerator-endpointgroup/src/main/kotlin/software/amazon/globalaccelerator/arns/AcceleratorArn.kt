@@ -1,36 +1,17 @@
 package software.amazon.globalaccelerator.arns
 
 import com.google.common.base.Strings
-import lombok.EqualsAndHashCode
-
-import java.util.regex.Matcher
 import java.util.regex.Pattern
 
 /**
  * Class for accelerator arn
  */
-@EqualsAndHashCode
 open class AcceleratorArn
-/**
- * Constructs a accelerator arn.
- * @param arn
- */
+
 (arn: String) {
 
-    /**
-     * Gets accelerator arn.
-     * @return
-     */
     val acceleratorArn: String
-    /**
-     * Gets the accelerator aws account id.
-     * @return
-     */
     val awsAccountId: String
-    /**
-     * Gets the uuid.
-     * @return
-     */
     val uuid: String
 
     init {
@@ -56,10 +37,6 @@ open class AcceleratorArn
         }
     }
 
-    /**
-     * Converts to a string.
-     * @return
-     */
     @Override
     override fun toString(): String {
         return acceleratorArn

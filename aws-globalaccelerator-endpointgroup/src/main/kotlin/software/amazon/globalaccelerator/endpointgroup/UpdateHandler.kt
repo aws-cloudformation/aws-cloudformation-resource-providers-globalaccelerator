@@ -3,14 +3,11 @@ package software.amazon.globalaccelerator.endpointgroup
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration
 import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupRequest
-import lombok.`val`
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
-import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
-import java.util.stream.Collectors
 
 class UpdateHandler : BaseHandler<CallbackContext>() {
 
@@ -28,7 +25,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
 
         val model = request.getDesiredResourceState()
 
-        val foundEndpointGroup = HandlerCommons.getEndpointGroup(model.getEndpointGroupArn(), proxy, agaClient, logger)
+        HandlerCommons.getEndpointGroup(model.getEndpointGroupArn(), proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
                         Exception(String.format("Failed to find endpoint group with arn:[%s]", model.getEndpointGroupArn())),
                         HandlerErrorCode.NotFound
@@ -52,13 +49,8 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                     logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
 
         logger.log(String.format("Updating endpoint group with arn: [%s]", model.getEndpointGroupArn()))
-        var convertedEndpointConfigurations: List<com.amazonaws.services.globalaccelerator.model.EndpointConfiguration>? = null
-
-        if (model.getEndpointConfigurations() != null) {
-            convertedEndpointConfigurations = model.getEndpointConfigurations().stream()
-                    .map({ x -> EndpointConfiguration().withEndpointId(x.getEndpointId()).withWeight(x.getWeight()) })
-                    .collect(Collectors.toList())
-        }
+        var convertedEndpointConfigurations = model.getEndpointConfigurations()?.map {EndpointConfiguration()
+                    .withEndpointId(it.getEndpointId()).withWeight(it.getWeight())}
 
         val request = UpdateEndpointGroupRequest()
                 .withEndpointGroupArn(model.getEndpointGroupArn())

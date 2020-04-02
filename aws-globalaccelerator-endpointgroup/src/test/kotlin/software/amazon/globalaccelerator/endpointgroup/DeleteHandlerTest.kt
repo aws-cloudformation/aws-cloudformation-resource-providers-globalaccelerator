@@ -70,15 +70,13 @@ class DeleteHandlerTest {
         val handler = DeleteHandler()
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
 
-        assertThat(response).isNotNull()
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS)
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(1)
-        assertThat(response.getCallbackContext()).isNotNull()
-        assertThat(response.getResourceModels()).isNull()
-        assertThat(response.getMessage()).isNull()
-
-        // want to confirm model remains the same
-        assertThat(response.getResourceModel()).isEqualTo(model)
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.getCallbackDelaySeconds(), 1)
+        Assertions.assertNotNull(response.getCallbackContext())
+        Assertions.assertNull(response.getMessage())
+        Assertions.assertNull(response.getResourceModels())
+        Assertions.assertEquals(response.getResourceModel(), model)
     }
 
     @Test
@@ -107,15 +105,13 @@ class DeleteHandlerTest {
         val context = CallbackContext(2)
         val response = handler.handleRequest(proxy!!, request, context, logger!!)
 
-        assertThat(response).isNotNull()
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.IN_PROGRESS)
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(1)
-        assertThat(response.getCallbackContext()).isNotNull()
-        assertThat(response.getResourceModels()).isNull()
-        assertThat(response.getMessage()).isNull()
-
-        // want to confirm model remains the same
-        assertThat(response.getResourceModel()).isEqualTo(model)
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.getCallbackDelaySeconds(), 1)
+        Assertions.assertNotNull(response.getCallbackContext())
+        Assertions.assertNull(response.getMessage())
+        Assertions.assertNull(response.getResourceModels())
+        Assertions.assertEquals(response.getResourceModel(), model)
     }
 
     @Test
@@ -144,15 +140,13 @@ class DeleteHandlerTest {
         val context = CallbackContext(2)
         val response = handler.handleRequest(proxy!!, request, context, logger!!)
 
-        assertThat(response).isNotNull()
-        assertThat(response.getStatus()).isEqualTo(OperationStatus.SUCCESS)
-        assertThat(response.getCallbackDelaySeconds()).isEqualTo(0)
-        assertThat(response.getCallbackContext()).isNull()
-        assertThat(response.getResourceModels()).isNull()
-        assertThat(response.getMessage()).isNull()
-
-        // want to confirm model remains the same
-        assertThat(response.getResourceModel()).isEqualTo(model)
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
+        Assertions.assertEquals(response.getCallbackDelaySeconds(), 0)
+        Assertions.assertNull(response.getCallbackContext())
+        Assertions.assertNull(response.getMessage())
+        Assertions.assertNull(response.getResourceModels())
+        Assertions.assertEquals(response.getResourceModel(), model)
     }
 
     @Test
