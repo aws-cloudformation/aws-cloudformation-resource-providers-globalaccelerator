@@ -330,7 +330,7 @@
             <resource>
                 <directory>${project.basedir}</directory>
                 <includes>
-                    <include>aws-globalaccelerator-accelerator.json</include>
+                    <include>aws-globalaccelerator-endpointgroup.json</include>
                 </includes>
             </resource>
         </resources>
