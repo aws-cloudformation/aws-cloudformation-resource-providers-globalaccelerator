@@ -3,7 +3,6 @@ package software.amazon.globalaccelerator.endpointgroup
 import com.amazonaws.AmazonWebServiceResult
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.services.globalaccelerator.model.*
-import junit.framework.Assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -177,6 +176,6 @@ class DeleteHandlerTest {
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
             handler.handleRequest(proxy!!, request, callbackContext, logger!!)
         }
-        Assert.assertEquals("Timed out waiting for endpoint group to be deployed.", exception.message)
+        Assertions.assertEquals("Timed out waiting for endpoint group to be deployed.", exception.message)
     }
 }

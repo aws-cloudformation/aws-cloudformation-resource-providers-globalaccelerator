@@ -12,7 +12,6 @@ import com.amazonaws.services.globalaccelerator.model.EndpointGroup
 import com.amazonaws.services.globalaccelerator.model.EndpointGroupNotFoundException
 import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupRequest
 import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupResult
-import junit.framework.Assert
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -167,7 +166,6 @@ class UpdateHandlerTest {
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
             handler.handleRequest(proxy!!, request, context, logger!!)
         }
-        Assert.assertEquals("Timed out waiting for endpoint group to be deployed.", exception.message)
+        Assertions.assertEquals("Timed out waiting for endpoint group to be deployed.", exception.message)
     }
-
 }

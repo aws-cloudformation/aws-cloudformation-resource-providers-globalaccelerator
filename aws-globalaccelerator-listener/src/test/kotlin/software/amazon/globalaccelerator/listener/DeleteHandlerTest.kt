@@ -15,7 +15,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
 import org.junit.jupiter.api.Assertions
 import org.mockito.ArgumentMatchers
-import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import java.util.function.Function

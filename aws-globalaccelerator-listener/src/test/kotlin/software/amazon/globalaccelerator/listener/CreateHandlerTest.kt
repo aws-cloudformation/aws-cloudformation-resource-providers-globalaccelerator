@@ -101,6 +101,5 @@ class CreateHandlerTest {
         Assertions.assertEquals(response.getResourceModel(), model)
         Assertions.assertNull(response.getMessage())
         Assertions.assertNull(response.getResourceModels())
-
     }
 }
