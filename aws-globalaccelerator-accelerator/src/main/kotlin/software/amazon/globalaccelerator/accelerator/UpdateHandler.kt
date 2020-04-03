@@ -10,7 +10,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import software.amazon.globalaccelerator.accelerator.AcceleratorClientBuilder.client
 import software.amazon.globalaccelerator.accelerator.HandlerCommons.getAccelerator
 import software.amazon.globalaccelerator.accelerator.HandlerCommons.waitForSynchronizedStep
-import java.lang.String
 
 class UpdateHandler : BaseHandler<CallbackContext?>() {
     override fun handleRequest(

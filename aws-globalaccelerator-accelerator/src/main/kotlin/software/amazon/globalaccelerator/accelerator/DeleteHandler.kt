@@ -42,7 +42,7 @@ class DeleteHandler : BaseHandler<CallbackContext?>() {
                                        proxy: AmazonWebServicesClientProxy,
                                        agaClient: AWSGlobalAccelerator,
                                        logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-            logger.log(java.lang.String.format("Waiting for accelerator with arn [%s] to be deleted", model.acceleratorArn))
+            logger.log("Waiting for accelerator with arn [${model.acceleratorArn}] to be deleted")
 
             // check to see if we have exceeded what we are allowed to do
             val newCallbackContext = CallbackContext(context.stabilizationRetriesRemaining - 1)
@@ -61,16 +61,18 @@ class DeleteHandler : BaseHandler<CallbackContext?>() {
                                        proxy: AmazonWebServicesClientProxy,
                                        agaClient: AWSGlobalAccelerator,
                                        logger: Logger): Accelerator {
+            logger.log("Disabling accelerator with arn [$arn]")
             val request = UpdateAcceleratorRequest().withAcceleratorArn(arn).withEnabled(false)
-            return proxy.injectCredentialsAndInvoke(request, { updateAcceleratorRequest: UpdateAcceleratorRequest? -> agaClient.updateAccelerator(updateAcceleratorRequest) }).accelerator
+            return proxy.injectCredentialsAndInvoke(request, agaClient::updateAccelerator).accelerator
         }
 
         private fun deleteAccelerator(arn: String,
                                       proxy: AmazonWebServicesClientProxy,
                                       agaClient: AWSGlobalAccelerator,
                                       logger: Logger) {
+            logger.log("Deleting accelerator with arn [$arn]")
             val request = DeleteAcceleratorRequest().withAcceleratorArn(arn)
-            proxy.injectCredentialsAndInvoke(request, { deleteAcceleratorRequest: DeleteAcceleratorRequest? -> agaClient.deleteAccelerator(deleteAcceleratorRequest) })
+            proxy.injectCredentialsAndInvoke(request, agaClient::deleteAccelerator)
         }
     }
 }
