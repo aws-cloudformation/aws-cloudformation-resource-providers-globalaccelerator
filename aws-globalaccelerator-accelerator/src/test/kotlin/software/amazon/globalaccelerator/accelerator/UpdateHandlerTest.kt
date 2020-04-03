@@ -29,8 +29,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import java.util.function.Function
 
-typealias ProxyDescribeAccelerator = Function<DescribeAcceleratorRequest, DescribeAcceleratorResult>
-typealias ProxyUpdateAccelerator = Function<UpdateAcceleratorRequest, UpdateAcceleratorResult>
+
 
 
 @ExtendWith(MockKExtension::class)

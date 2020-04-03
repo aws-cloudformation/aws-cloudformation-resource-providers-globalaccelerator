@@ -4,8 +4,13 @@ import com.amazonaws.AmazonWebServiceResult
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.services.globalaccelerator.model.Accelerator
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
+import com.amazonaws.services.globalaccelerator.model.DeleteAcceleratorResult
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,28 +27,28 @@ import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import java.util.function.Function
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class DeleteHandlerTest {
-    @Mock
-    private var proxy: AmazonWebServicesClientProxy? = null
+    @MockK
+    lateinit var proxy: AmazonWebServicesClientProxy
 
-    @Mock
-    private var logger: Logger? = null
+    @MockK(relaxed = true)
+    lateinit var logger: Logger
 
     @BeforeEach
-    fun setup() {
-        proxy = Mockito.mock(AmazonWebServicesClientProxy::class.java)
-        logger = Mockito.mock(Logger::class.java)
-    }
+    fun setup() = MockKAnnotations.init(this)
 
     @Test
     fun handleRequest_AcceleratorAlreadyDisabledAndInSync() {
-        Mockito.doReturn(DescribeAcceleratorResult()
-                        .withAccelerator(Accelerator()
-                                .withAcceleratorArn("TEST_ARN")
-                                .withEnabled(false)
-                                .withStatus(AcceleratorStatus.DEPLOYED)))
-                .`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeAcceleratorRequest::class.java), ArgumentMatchers.any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        val result = DescribeAcceleratorResult()
+                .withAccelerator(Accelerator()
+                .withAcceleratorArn("TEST_ARN")
+                .withEnabled(false)
+                .withStatus(AcceleratorStatus.DEPLOYED))
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns result
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDeleteAccelerator>()) } returns DeleteAcceleratorResult()
+
+
         val handler = DeleteHandler()
         val model = ResourceModel.builder()
                 .acceleratorArn("TEST_ARN")
@@ -52,7 +57,7 @@ class DeleteHandlerTest {
                 .desiredResourceState(model)
                 .previousResourceState(model)
                 .build()
-        val response = handler.handleRequest(proxy!!, request, null, logger!!)
+        val response = handler.handleRequest(proxy, request, null, logger)
         assertNotNull(response)
         assertEquals(OperationStatus.IN_PROGRESS, response.status)
         assertNotNull(response.callbackContext)
