@@ -3,7 +3,6 @@ package software.amazon.globalaccelerator.endpointgroup
 import com.amazonaws.AmazonWebServiceResult
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.services.globalaccelerator.model.*
-import lombok.`val`
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -18,7 +17,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
 import java.util.ArrayList
 
-import org.assertj.core.api.Assertions.assertThat
 import org.mockito.ArgumentMatchers
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.doReturn

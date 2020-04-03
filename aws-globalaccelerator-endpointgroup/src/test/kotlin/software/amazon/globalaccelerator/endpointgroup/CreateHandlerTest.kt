@@ -4,7 +4,6 @@ import com.amazonaws.AmazonWebServiceResult
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.services.globalaccelerator.model.*
 import junit.framework.Assert.assertEquals
-import lombok.`val`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith

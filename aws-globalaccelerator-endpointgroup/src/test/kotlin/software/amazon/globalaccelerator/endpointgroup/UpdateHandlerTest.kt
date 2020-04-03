@@ -13,12 +13,10 @@ import com.amazonaws.services.globalaccelerator.model.EndpointGroupNotFoundExcep
 import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupRequest
 import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupResult
 import junit.framework.Assert
-import lombok.`val`
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.function.Executable
 import org.mockito.ArgumentMatchers
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
@@ -26,7 +24,6 @@ import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.OperationStatus
-import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import java.util.ArrayList
 import org.mockito.Mockito.mock

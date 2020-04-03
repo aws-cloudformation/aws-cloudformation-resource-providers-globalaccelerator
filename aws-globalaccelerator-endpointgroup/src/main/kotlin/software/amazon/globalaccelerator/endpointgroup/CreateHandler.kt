@@ -28,12 +28,6 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
-
-        return if (model.getEndpointGroupArn() == null) {
-            CreateEndpointGroupStep(model, request, proxy, agaClient, logger)
-        } else {
-            HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
-        };
     }
 
     /**
