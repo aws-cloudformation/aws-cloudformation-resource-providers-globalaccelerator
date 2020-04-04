@@ -1,6 +1,8 @@
 package software.amazon.globalaccelerator.accelerator
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
+import com.amazonaws.services.globalaccelerator.model.Tag
+import com.amazonaws.services.globalaccelerator.model.TagResourceRequest
 import com.amazonaws.services.globalaccelerator.model.UpdateAcceleratorRequest
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
@@ -33,7 +35,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         // c. else, trigger an update operation
         val isUpdateStarted: Boolean = inferredCallbackContext.pendingStabilization
         return if (!isUpdateStarted) {
-            updateAccelerator(model, proxy, agaClient, logger)
+            validateTagsAndUpdateAccelerator(model, proxy, agaClient, logger)
         } else {
             waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
@@ -44,14 +46,42 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                                   agaClient: AWSGlobalAccelerator,
                                   logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         logger.log(String.format("Updating accelerator with arn: [%s]", model.acceleratorArn))
+
         val request = UpdateAcceleratorRequest()
                 .withAcceleratorArn(model.acceleratorArn)
                 .withEnabled(model.enabled)
                 .withIpAddressType(model.ipAddressType)
                 .withName(model.name)
-        proxy.injectCredentialsAndInvoke(request, { updateAcceleratorRequest: UpdateAcceleratorRequest? -> agaClient.updateAccelerator(updateAcceleratorRequest) }).accelerator
+
+        val acc = proxy.injectCredentialsAndInvoke(request, { updateAcceleratorRequest: UpdateAcceleratorRequest? -> agaClient.updateAccelerator(updateAcceleratorRequest) }).accelerator
+
+        if (model.tags != null) {
+            logger.log(String.format("Updating tags for accelerator with arn: [%s]", model.acceleratorArn))
+            val tags = model.tags.map{ Tag().withKey(it.key).withValue(it.value)}
+            val tagRequest = TagResourceRequest()
+                    .withResourceArn(acc.acceleratorArn)
+                    .withTags(tags)
+            proxy.injectCredentialsAndInvoke(tagRequest, { tagRequest: TagResourceRequest? -> agaClient.tagResource(tagRequest) })
+        }
+
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES,
                 pendingStabilization = true)
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
+    }
+
+    private fun validateTagsAndUpdateAccelerator(model: ResourceModel,
+                                                 proxy: AmazonWebServicesClientProxy,
+                                                 agaClient: AWSGlobalAccelerator,
+                                                 logger: Logger): ProgressEvent<ResourceModel, CallbackContext?>{
+        val regex = "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$".toRegex()
+        model.tags?.forEach {
+            if ((!regex.matches(it.key)) or (!regex.matches(it.value))) {
+                return ProgressEvent.defaultFailureHandler(
+                        Exception("Invalid tag format"),
+                        HandlerErrorCode.InvalidRequest
+                )
+            }
+        }
+        return updateAccelerator(model, proxy, agaClient, logger)
     }
 }

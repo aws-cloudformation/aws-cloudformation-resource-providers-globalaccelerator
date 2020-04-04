@@ -5,6 +5,8 @@ import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundExcepti
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
+import com.amazonaws.services.globalaccelerator.model.TagResourceRequest
+import com.amazonaws.services.globalaccelerator.model.TagResourceResult
 import com.amazonaws.services.globalaccelerator.model.UpdateAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.UpdateAcceleratorResult
 import io.mockk.MockKAnnotations
@@ -29,7 +31,9 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import java.util.function.Function
 
-
+typealias ProxyDescribeAccelerator = Function<DescribeAcceleratorRequest, DescribeAcceleratorResult>
+typealias ProxyUpdateAccelerator = Function<UpdateAcceleratorRequest, UpdateAcceleratorResult>
+typealias ProxyTagResourceRequest = Function<TagResourceRequest, TagResourceResult>
 
 
 @ExtendWith(MockKExtension::class)
@@ -90,6 +94,7 @@ class UpdateHandlerTest {
 
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateAccelerator>()) } returns updateAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyTagResourceRequest>()) } returns null
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
@@ -151,5 +156,69 @@ class UpdateHandlerTest {
             handler.handleRequest(proxy, request, context, logger)
         }
         assertEquals(HandlerCommons.TIMED_OUT_MESSAGE, exception.message)
+    }
+
+    @Test
+    fun handleRequest_UpdateAccelerator_InvalidTag() {
+        val handler = UpdateHandler()
+        val desiredModel = createTestResourceModel()
+        desiredModel.tags = listOf(Tag.builder().key("Key1").value("Value1?2").build())
+        val describeAcceleratorResult = DescribeAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString()))
+        val updateAcceleratorResult = UpdateAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN))
+
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateAccelerator>()) } returns updateAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyTagResourceRequest>()) } returns null
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(desiredModel)
+                .build()
+        val response = handler.handleRequest(proxy, request, null, logger)
+        assertNotNull(response)
+        assertEquals(OperationStatus.FAILED, response.status)
+        assertEquals(HandlerErrorCode.InvalidRequest, response.errorCode)
+    }
+
+    @Test
+    fun handleRequest_UpdateAccelerator_MissingTags() {
+        val handler = UpdateHandler()
+        val desiredModel = ResourceModel.builder()
+                .acceleratorArn(ACCELERATOR_ARN)
+                .enabled(true)
+                .name("ACCELERATOR_NAME_2")
+                .ipAddressType("IPV4")
+                .ipAddresses(listOf("10.10.10.1", "10.10.10.2"))
+                .build()
+
+        val describeAcceleratorResult = DescribeAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString()))
+        val updateAcceleratorResult = UpdateAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN))
+
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateAccelerator>()) } returns updateAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyTagResourceRequest>()) } returns null
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(desiredModel)
+                .build()
+        val response = handler.handleRequest(proxy, request, null, logger)
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(0, response.callbackDelaySeconds)
+        assertNotNull(response.resourceModel)
+        assertEquals(ACCELERATOR_ARN, response.resourceModel.acceleratorArn)
+        assertEquals(desiredModel.enabled, response.resourceModel.enabled)
+        assertEquals(desiredModel.name, response.resourceModel.name)
+        assertEquals(desiredModel.ipAddressType, response.resourceModel.ipAddressType)
+        assertTrue(response.callbackContext?.pendingStabilization!!)
     }
 }
