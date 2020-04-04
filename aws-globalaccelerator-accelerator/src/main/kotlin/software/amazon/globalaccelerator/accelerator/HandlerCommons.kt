@@ -23,15 +23,19 @@ object HandlerCommons {
                                 proxy: AmazonWebServicesClientProxy,
                                 agaClient: AWSGlobalAccelerator,
                                 logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log(java.lang.String.format("Waiting for accelerator with arn [%s] to synchronize", model.acceleratorArn))
+        logger.log(String.format("[DEBUG] Waiting for accelerator with arn [%s] to synchronize", model.acceleratorArn))
+        logger.log(String.format("[DEBUG] Stabilization retries remaining [%s]", context.stabilizationRetriesRemaining))
 
         // check to see if we have exceeded what we are allowed to do
-        val newCallbackContext = CallbackContext(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1)
+        val newCallbackContext = CallbackContext(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1,
+                pendingStabilization = true)
+
         if (newCallbackContext.stabilizationRetriesRemaining < 0) {
             throw RuntimeException(TIMED_OUT_MESSAGE)
         }
         val accelerator = getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
         return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
+            logger.log(String.format("[DEBUG] Accelerator with arn [%s] is DEPLOYED", model.acceleratorArn))
             ProgressEvent.defaultSuccessHandler(model)
         } else {
             ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model)
@@ -50,7 +54,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             accelerator = proxy.injectCredentialsAndInvoke(request, { describeAcceleratorRequest: DescribeAcceleratorRequest? -> agaClient.describeAccelerator(describeAcceleratorRequest) }).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.log(java.lang.String.format("Did not find accelerator with arn [%s]", arn))
+            logger.log(String.format("[ERROR] Did not find accelerator with arn [%s]", arn))
         }
         return accelerator
     }
