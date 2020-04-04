@@ -3,11 +3,7 @@ package software.amazon.globalaccelerator.accelerator
 import com.amazonaws.services.globalaccelerator.model.Accelerator
 import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
-import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
-import com.amazonaws.services.globalaccelerator.model.TagResourceRequest
-import com.amazonaws.services.globalaccelerator.model.TagResourceResult
-import com.amazonaws.services.globalaccelerator.model.UpdateAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.UpdateAcceleratorResult
 import io.mockk.MockKAnnotations
 import io.mockk.every
@@ -15,8 +11,9 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
-
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
@@ -24,17 +21,7 @@ import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.OperationStatus
-
-import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertTrue
-
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
-import java.util.function.Function
-
-typealias ProxyDescribeAccelerator = Function<DescribeAcceleratorRequest, DescribeAcceleratorResult>
-typealias ProxyUpdateAccelerator = Function<UpdateAcceleratorRequest, UpdateAcceleratorResult>
-typealias ProxyTagResourceRequest = Function<TagResourceRequest, TagResourceResult>
-
 
 @ExtendWith(MockKExtension::class)
 class UpdateHandlerTest {

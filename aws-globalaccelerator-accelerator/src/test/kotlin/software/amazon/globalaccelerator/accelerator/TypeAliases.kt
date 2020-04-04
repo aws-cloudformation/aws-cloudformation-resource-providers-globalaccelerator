@@ -6,6 +6,8 @@ import com.amazonaws.services.globalaccelerator.model.DeleteAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DeleteAcceleratorResult
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
+import com.amazonaws.services.globalaccelerator.model.TagResourceRequest
+import com.amazonaws.services.globalaccelerator.model.TagResourceResult
 import com.amazonaws.services.globalaccelerator.model.UpdateAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.UpdateAcceleratorResult
 import java.util.function.Function
@@ -14,3 +16,4 @@ typealias ProxyDescribeAccelerator = Function<DescribeAcceleratorRequest, Descri
 typealias ProxyUpdateAccelerator = Function<UpdateAcceleratorRequest, UpdateAcceleratorResult>
 typealias ProxyCreateAccelerator = Function<CreateAcceleratorRequest, CreateAcceleratorResult>
 typealias ProxyDeleteAccelerator = Function<DeleteAcceleratorRequest, DeleteAcceleratorResult>
+typealias ProxyTagResourceRequest = Function<TagResourceRequest, TagResourceResult>
