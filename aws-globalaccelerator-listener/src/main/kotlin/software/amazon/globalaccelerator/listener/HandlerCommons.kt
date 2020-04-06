@@ -27,7 +27,8 @@ object HandlerCommons {
                                 logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
         logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", model.getAcceleratorArn()))
 
-        val newCallbackContext = CallbackContext(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1)
+        val newCallbackContext = CallbackContext(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1,
+                pendingStabilization = true)
 
         if (newCallbackContext.stabilizationRetriesRemaining < 0) {
             throw RuntimeException(TIMED_OUT_MESSAGE)
@@ -37,7 +38,7 @@ object HandlerCommons {
         return if (accelerator!!.getStatus() == AcceleratorStatus.DEPLOYED.toString()) {
             ProgressEvent.defaultSuccessHandler(model)
         } else {
-            ProgressEvent.defaultInProgressHandler(context, CALLBACK_DELAY_IN_SECONDS, model)
+            ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model)
         }
     }
 
