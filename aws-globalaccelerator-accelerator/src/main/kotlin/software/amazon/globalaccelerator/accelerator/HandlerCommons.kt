@@ -5,6 +5,8 @@ import com.amazonaws.services.globalaccelerator.model.Accelerator
 import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
+import com.amazonaws.services.globalaccelerator.model.ListTagsForResourceRequest
+import com.amazonaws.services.globalaccelerator.model.Tag
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
@@ -57,5 +59,17 @@ object HandlerCommons {
             logger.log(String.format("[ERROR] Did not find accelerator with arn [%s]", arn))
         }
         return accelerator
+    }
+
+    fun getTags(arn: String?, proxy: AmazonWebServicesClientProxy,
+                       agaClient: AWSGlobalAccelerator, logger: Logger): List<Tag>? {
+        var tags: List<Tag>? = null
+        try {
+            val request = ListTagsForResourceRequest()
+            tags = proxy.injectCredentialsAndInvoke(request, { listTagsForResourceRequest : ListTagsForResourceRequest? -> agaClient.listTagsForResource(listTagsForResourceRequest) }).tags
+        } catch (ex: Exception) {
+            logger.log(String.format("[ERROR] Exception while getting tags for accelerator with arn [%s]", arn))
+        }
+        return tags
     }
 }
