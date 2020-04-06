@@ -82,9 +82,11 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateAccelerator>()) } returns updateAcceleratorResult
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyTagResourceRequest>()) } returns null
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUntagResourceRequest>()) } returns null
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
+                .previousResourceState(desiredModel)
                 .build()
         val response = handler.handleRequest(proxy, request, null, logger)
         assertNotNull(response)
@@ -164,6 +166,7 @@ class UpdateHandlerTest {
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
+                .previousResourceState(desiredModel)
                 .build()
         val response = handler.handleRequest(proxy, request, null, logger)
         assertNotNull(response)
@@ -196,6 +199,7 @@ class UpdateHandlerTest {
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
+                .previousResourceState(desiredModel)
                 .build()
         val response = handler.handleRequest(proxy, request, null, logger)
         assertNotNull(response)
@@ -208,4 +212,54 @@ class UpdateHandlerTest {
         assertEquals(desiredModel.ipAddressType, response.resourceModel.ipAddressType)
         assertTrue(response.callbackContext?.pendingStabilization!!)
     }
+
+    @Test
+    fun handleRequest_UpdateAccelerator_TagsDrift() {
+        val handler = UpdateHandler()
+        val desiredModel = ResourceModel.builder()
+                .acceleratorArn(ACCELERATOR_ARN)
+                .enabled(true)
+                .name("ACCELERATOR_NAME_2")
+                .ipAddressType("IPV4")
+                .ipAddresses(listOf("10.10.10.1", "10.10.10.2"))
+                .build()
+        var previousModel = ResourceModel.builder()
+                .acceleratorArn(ACCELERATOR_ARN)
+                .enabled(true)
+                .name("ACCELERATOR_NAME_2")
+                .ipAddressType("IPV4")
+                .ipAddresses(listOf("10.10.10.1", "10.10.10.2"))
+                .tags(listOf(Tag.builder().key("Key1").value("Value2").build()))
+                .build()
+
+        val describeAcceleratorResult = DescribeAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString()))
+        val updateAcceleratorResult = UpdateAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN))
+
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateAccelerator>()) } returns updateAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyTagResourceRequest>()) } returns null
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUntagResourceRequest>()) } returns null
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
+                .build()
+        val response = handler.handleRequest(proxy, request, null, logger)
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(0, response.callbackDelaySeconds)
+        assertNotNull(response.resourceModel)
+        assertEquals(ACCELERATOR_ARN, response.resourceModel.acceleratorArn)
+        assertEquals(desiredModel.enabled, response.resourceModel.enabled)
+        assertEquals(desiredModel.name, response.resourceModel.name)
+        assertEquals(desiredModel.ipAddressType, response.resourceModel.ipAddressType)
+        assertTrue(response.callbackContext?.pendingStabilization!!)
+    }
+
+
 }
