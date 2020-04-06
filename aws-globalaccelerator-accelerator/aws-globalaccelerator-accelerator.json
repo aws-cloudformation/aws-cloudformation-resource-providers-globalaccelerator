@@ -89,7 +89,9 @@
     },
     "update": {
       "permissions": [
-        "globalaccelerator:UpdateAccelerator"
+        "globalaccelerator:UpdateAccelerator",
+        "globalaccelerator:TagResource",
+        "globalaccelerator:UntagResource"
       ]
     },
     "delete": {
