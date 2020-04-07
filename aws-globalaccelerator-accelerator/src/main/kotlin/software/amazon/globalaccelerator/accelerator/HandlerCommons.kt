@@ -29,8 +29,7 @@ object HandlerCommons {
         logger.log(String.format("[DEBUG] Stabilization retries remaining [%s]", context.stabilizationRetriesRemaining))
 
         // check to see if we have exceeded what we are allowed to do
-        val newCallbackContext = CallbackContext(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1,
-                pendingStabilization = true)
+        val newCallbackContext = context.copy(context.stabilizationRetriesRemaining - 1)
 
         if (newCallbackContext.stabilizationRetriesRemaining < 0) {
             throw RuntimeException(TIMED_OUT_MESSAGE)
@@ -62,8 +61,8 @@ object HandlerCommons {
     }
 
     fun getTags(arn: String?, proxy: AmazonWebServicesClientProxy,
-                       agaClient: AWSGlobalAccelerator, logger: Logger): List<Tag>? {
-        var tags: List<Tag>? = null
+                       agaClient: AWSGlobalAccelerator, logger: Logger): List<Tag> {
+        var tags: List<Tag> = emptyList()
         try {
             val request = ListTagsForResourceRequest()
             tags = proxy.injectCredentialsAndInvoke(request, { listTagsForResourceRequest : ListTagsForResourceRequest? -> agaClient.listTagsForResource(listTagsForResourceRequest) }).tags

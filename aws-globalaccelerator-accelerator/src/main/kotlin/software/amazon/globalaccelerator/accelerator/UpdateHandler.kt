@@ -78,7 +78,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
     private fun validateTags(model: ResourceModel) : Boolean {
         val regex = "^([\\p{L}\\p{Z}\\p{N}_.:/=+\\-@]*)$".toRegex()
         model.tags?.forEach {
-            if ((!regex.matches(it.key)) or (!regex.matches(it.value))) {
+            if ((!regex.matches(it.key)) or (!regex.matches(it.value)) or (it.key.startsWith("aws:"))) {
                 return false
             }
         }
@@ -128,21 +128,17 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
 
         logger.log("[DEBUG] Looking for tags to be deleted")
 
-        var newTagsMap = mapOf<String , String>()
-        if (newTags != null) {
-            newTagsMap = newTags?.map { it.key to it.value }?.toMap()
-        }
+        var newTagsMap = if(newTags == null) mapOf<String , String>()  else  newTags?.map { it.key to it.value }?.toMap()
+        val keysToDelete = previousTags?.map { x -> x.key  }?.minus(newTagsMap.keys)
 
-        previousTags?.forEach{
-            if (! newTagsMap?.containsKey(it.key)) {
-                logger.log(String.format("[DEBUG] Untagging tag: [%s] for accelerator [%s]", it.key, accelerator.acceleratorArn))
-                val untagRequest = UntagResourceRequest()
-                        .withResourceArn(accelerator.acceleratorArn)
-                        .withTagKeys(it.key)
+        if (!keysToDelete.isNullOrEmpty()) {
+            logger.log(String.format("[DEBUG] Untagging tags: [%s] for accelerator [%s]", keysToDelete.toString(), accelerator.acceleratorArn))
+            val untagRequest = UntagResourceRequest()
+                    .withResourceArn(accelerator.acceleratorArn)
+                    .withTagKeys(keysToDelete)
 
-                proxy.injectCredentialsAndInvoke(untagRequest, { untagResourceRequest: UntagResourceRequest? ->
-                    agaClient.untagResource(untagResourceRequest) })
-            }
+            proxy.injectCredentialsAndInvoke(untagRequest, { untagResourceRequest: UntagResourceRequest? ->
+                agaClient.untagResource(untagResourceRequest) })
         }
     }
 
