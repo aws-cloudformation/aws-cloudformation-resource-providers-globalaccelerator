@@ -27,6 +27,7 @@ Resources:
                 - "globalaccelerator:DeleteAccelerator"
                 - "globalaccelerator:DescribeAccelerator"
                 - "globalaccelerator:TagResource"
+                - "globalaccelerator:UntagResource"
                 - "globalaccelerator:UpdateAccelerator"
                 Resource: "*"
 Outputs:
