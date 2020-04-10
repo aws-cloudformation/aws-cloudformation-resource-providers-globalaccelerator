@@ -68,6 +68,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         }
 
         val accelerator = updateAccelerator(model, proxy, agaClient, logger)
+        model.dnsName = accelerator.dnsName
         updateTags(accelerator, model, previousModel, proxy, agaClient, logger)
 
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES,

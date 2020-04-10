@@ -38,6 +38,7 @@ class ReadHandler : BaseHandler<CallbackContext?>() {
             newModel.name = accelerator.name
             newModel.enabled = accelerator.enabled
             newModel.ipAddressType = accelerator.ipAddressType
+            newModel.dnsName = accelerator.dnsName
             newModel.ipAddresses = accelerator.ipSets?.flatMap { it.ipAddresses }
             newModel.tags = tags.map{software.amazon.globalaccelerator.accelerator.Tag(it.key, it.value)}
             newModel

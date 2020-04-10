@@ -94,6 +94,7 @@ class CreateHandlerTest {
                 .withAccelerator(Accelerator()
                         .withStatus(AcceleratorStatus.DEPLOYED)
                         .withEnabled(true)
+                        .withDnsName("DNS_NAME_HERE")
                         .withAcceleratorArn("ACCELERATOR_ARN"))
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns result
 
@@ -113,6 +114,7 @@ class CreateHandlerTest {
         assertEquals(0, response.callbackDelaySeconds)
         assertNotNull(response.resourceModel)
         assertEquals("ACCELERATOR_ARN", response.resourceModel.acceleratorArn)
+        assertEquals("DNS_NAME_HERE", response.resourceModel.dnsName)
         assertNull(response.resourceModels)
         assertNull(response.message)
     }
