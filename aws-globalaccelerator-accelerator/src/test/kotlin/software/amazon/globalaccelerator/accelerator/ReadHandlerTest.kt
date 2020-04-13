@@ -57,6 +57,7 @@ class ReadHandlerTest {
                         .withEnabled(true)
                         .withIpAddressType("IPV4")
                         .withName("Name")
+                        .withDnsName("DNS_NAME_HERE")
                         .withIpSets(ipSet)
                 )
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
@@ -72,6 +73,7 @@ class ReadHandlerTest {
         assertEquals(ACCELERATOR_ARN, response.resourceModel.acceleratorArn)
         assertEquals("IPV4", response.resourceModel.ipAddressType)
         assertEquals("Name", response.resourceModel.name)
+        assertEquals("DNS_NAME_HERE", response.resourceModel.dnsName)
         assertTrue(response.resourceModel.enabled)
         assertEquals(model.ipAddresses, response.resourceModel.ipAddresses)
     }

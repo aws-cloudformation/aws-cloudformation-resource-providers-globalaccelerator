@@ -74,6 +74,7 @@ class UpdateHandlerTest {
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
                         .withAcceleratorArn(ACCELERATOR_ARN)
+                        .withDnsName("DNS_NAME_HERE")
                         .withStatus(AcceleratorStatus.IN_PROGRESS.toString()))
         val updateAcceleratorResult = UpdateAcceleratorResult()
                 .withAccelerator(Accelerator()

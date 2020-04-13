@@ -39,6 +39,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         logger.log(String.format("Creating new accelerator with model: [%s]",model.toString()))
         val acc = createAccelerator(model, handlerRequest, proxy, agaClient)
         model.acceleratorArn = acc.acceleratorArn
+        model.dnsName = acc.dnsName
         model.ipAddresses = acc.ipSets?.flatMap { it.ipAddresses }
         val callbackContext: CallbackContext? = CallbackContext(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
