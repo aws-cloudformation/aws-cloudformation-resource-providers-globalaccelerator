@@ -38,6 +38,19 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                         HandlerErrorCode.NotFound
                 )
 
+        if (byoipIPsUpdated(model, previousModel)) {
+            logger.log("[ERROR] - Failed attempt to update BYOIP IPs.")
+            return ProgressEvent.defaultFailureHandler(
+                    // Why BYOIP updates is not supported today:-
+                    // Fact 1. IP address cannot be shared between 2 accelerators.
+                    // Fact 2. At present, global accelerator APIs don't support BYOIP IP updates.
+                    // So, one way to support BYOIP IPs is to add IpAddresses as CreateOnly property, that will create
+                    // new accelerator and then delete old. Corner case is, if customer updates one of the IP address
+                    // out of the 2 BYOIPs then it will lead to 2 accelerators with same IPs that's not permitted.
+                    Exception("Updates for BYOIP IP addresses is not a supported operation. Delete existing accelerator and create new accelerator with updated IPs."),
+                    HandlerErrorCode.InvalidRequest)
+        }
+
         val isUpdateStarted: Boolean = inferredCallbackContext.pendingStabilization
         return if (!isUpdateStarted) {
             validateAndUpdateAccelerator(model, previousModel, proxy, agaClient, logger)
@@ -161,4 +174,9 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
             List<Tag>? {
         return previousModel.tags?.map{ Tag().withKey(it.key).withValue(it.value)}
     }
+
+    private fun byoipIPsUpdated(currentModel: ResourceModel, previousModel: ResourceModel) : Boolean {
+        return currentModel.ipAddresses != previousModel.ipAddresses
+    }
+
 }
