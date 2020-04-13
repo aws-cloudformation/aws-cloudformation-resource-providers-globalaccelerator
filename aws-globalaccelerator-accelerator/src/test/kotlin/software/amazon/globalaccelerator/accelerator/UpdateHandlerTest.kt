@@ -104,6 +104,7 @@ class UpdateHandlerTest {
     fun handleRequest_UpdateAccelerator_DeployedReturnsSuccess() {
         val handler = UpdateHandler()
         val desiredModel = createTestResourceModel()
+        var previousModel = createTestResourceModel()
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
                         .withAcceleratorArn(ACCELERATOR_ARN)
@@ -113,6 +114,7 @@ class UpdateHandlerTest {
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
                 .build()
         val context = CallbackContext(100, true)
         val response = handler.handleRequest(proxy, request, context, logger)
@@ -131,6 +133,7 @@ class UpdateHandlerTest {
     fun testStabilizationTimeout() {
         val handler = UpdateHandler()
         val desiredModel = createTestResourceModel()
+        val previousModel = createTestResourceModel()
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
                         .withAcceleratorArn(ACCELERATOR_ARN)
@@ -139,6 +142,7 @@ class UpdateHandlerTest {
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
                 .build()
         val context = CallbackContext(0, true)
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
@@ -261,5 +265,35 @@ class UpdateHandlerTest {
         assertTrue(response.callbackContext?.pendingStabilization!!)
     }
 
+    @Test
+    fun handleRequest_UpdateAccelerator_UpdatedIPs() {
+        val handler = UpdateHandler()
+        val previousModel = createTestResourceModel()
+        previousModel.ipAddresses = listOf("10.10.10.1", "10.10.10.2")
+        val desiredModel = createTestResourceModel()
+        desiredModel.ipAddresses = listOf("10.10.10.1", "10.10.10.3") // updated IP
+
+        desiredModel.tags = listOf(Tag.builder().key("Key1").value("Value1").build())
+        val describeAcceleratorResult = DescribeAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString()))
+        val updateAcceleratorResult = UpdateAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN))
+
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateAccelerator>()) } returns updateAcceleratorResult
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyTagResourceRequest>()) } returns null
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
+                .build()
+        val response = handler.handleRequest(proxy, request, null, logger)
+        assertNotNull(response)
+        assertEquals(OperationStatus.FAILED, response.status)
+        assertEquals(HandlerErrorCode.InvalidRequest, response.errorCode)
+    }
 
 }

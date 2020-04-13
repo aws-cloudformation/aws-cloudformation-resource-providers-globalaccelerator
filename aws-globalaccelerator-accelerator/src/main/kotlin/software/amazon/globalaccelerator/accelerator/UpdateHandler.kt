@@ -38,6 +38,13 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                         HandlerErrorCode.NotFound
                 )
 
+        if (byoipIPsUpdated(model, previousModel)) {
+            logger.log("[ERROR] - Failed attempt to update BYOIP IPs.")
+            return ProgressEvent.defaultFailureHandler(
+                    Exception("Updates for BYOIP IP addresses is not a supported operation. Delete existing accelerator and create new accelerator with updated IPs"),
+                    HandlerErrorCode.InvalidRequest)
+        }
+
         val isUpdateStarted: Boolean = inferredCallbackContext.pendingStabilization
         return if (!isUpdateStarted) {
             validateAndUpdateAccelerator(model, previousModel, proxy, agaClient, logger)
@@ -161,4 +168,9 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
             List<Tag>? {
         return previousModel.tags?.map{ Tag().withKey(it.key).withValue(it.value)}
     }
+
+    private fun byoipIPsUpdated(currentModel: ResourceModel, previousModel: ResourceModel) : Boolean {
+        return currentModel.ipAddresses != previousModel.ipAddresses
+    }
+
 }

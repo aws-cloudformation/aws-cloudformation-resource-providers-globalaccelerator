@@ -104,9 +104,6 @@
   "readOnlyProperties": [
     "/properties/AcceleratorArn"
   ],
-  "createOnlyProperties": [
-    "/properties/IpAddresses"
-  ],
   "primaryIdentifier": [
     "/properties/AcceleratorArn"
   ],
