@@ -39,7 +39,8 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                 )
 
         if (byoipIPsUpdated(model, previousModel)) {
-            logger.log("[ERROR] - Failed attempt to update BYOIP IPs.")
+            logger.logError("Failed attempt to update BYOIP IPs.")
+
             return ProgressEvent.defaultFailureHandler(
                     // Why BYOIP updates is not supported today:-
                     // Fact 1. IP address cannot be shared between 2 accelerators.
@@ -71,7 +72,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                                              agaClient: AWSGlobalAccelerator,
                                              logger: Logger): ProgressEvent<ResourceModel, CallbackContext?>{
 
-        logger.log("[DEBUG] Desired updated state model $model")
+        logger.logDebug("Desired updated state model $model")
 
         if (!validateTags(model)) {
             return ProgressEvent.defaultFailureHandler(
@@ -103,7 +104,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                                   agaClient: AWSGlobalAccelerator,
                                   logger: Logger) : Accelerator {
 
-        logger.log(String.format("[DEBUG] Updating accelerator with arn: [%s]", model.acceleratorArn))
+        logger.logDebug("Updating accelerator with arn" + model.acceleratorArn)
 
         val request = UpdateAcceleratorRequest()
                 .withAcceleratorArn(model.acceleratorArn)
@@ -121,7 +122,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                             agaClient: AWSGlobalAccelerator,
                             logger: Logger) {
 
-        logger.log(String.format("[DEBUG] Updating tags for accelerator with arn: [%s]", model.acceleratorArn))
+        logger.logDebug("Updating tags for accelerator with arn: "+ model.acceleratorArn)
 
         val previousStateTags = getPreviousStateTags(previousModel)
         val newTags = model.tags?.map{ Tag().withKey(it.key).withValue(it.value)}
@@ -139,13 +140,13 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                                      agaClient: AWSGlobalAccelerator,
                                      logger: Logger) {
 
-        logger.log("[DEBUG] Looking for tags to be deleted")
+        logger.logDebug("Looking for tags to be deleted")
 
         var newTagsMap = if(newTags == null) mapOf<String , String>()  else  newTags?.map { it.key to it.value }?.toMap()
         val keysToDelete = previousTags?.map { x -> x.key  }?.minus(newTagsMap.keys)
 
         if (!keysToDelete.isNullOrEmpty()) {
-            logger.log(String.format("[DEBUG] Untagging tags: [%s] for accelerator [%s]", keysToDelete.toString(), accelerator.acceleratorArn))
+            logger.logDebug("Untagging tags: [$keysToDelete.toString()] for accelerator [${accelerator.acceleratorArn}]")
             val untagRequest = UntagResourceRequest()
                     .withResourceArn(accelerator.acceleratorArn)
                     .withTagKeys(keysToDelete)
@@ -161,7 +162,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                                 agaClient: AWSGlobalAccelerator,
                                 logger: Logger) {
         if (newTags.isNullOrEmpty()) {
-            logger.log("[DEBUG] No updates or new addition of tags.")
+            logger.logDebug("No updates or new addition of tags.")
         } else {
             val tagRequest = TagResourceRequest()
                     .withResourceArn(accelerator.acceleratorArn)

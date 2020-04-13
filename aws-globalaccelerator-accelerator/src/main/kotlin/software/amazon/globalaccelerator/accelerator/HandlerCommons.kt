@@ -25,8 +25,8 @@ object HandlerCommons {
                                 proxy: AmazonWebServicesClientProxy,
                                 agaClient: AWSGlobalAccelerator,
                                 logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log(String.format("[DEBUG] Waiting for accelerator with arn [%s] to synchronize", model.acceleratorArn))
-        logger.log(String.format("[DEBUG] Stabilization retries remaining [%s]", context.stabilizationRetriesRemaining))
+        logger.logDebug("Waiting for accelerator with arn [${model.acceleratorArn}] to synchronize")
+        logger.logDebug("Stabilization retries remaining " + context.stabilizationRetriesRemaining.toString())
 
         // check to see if we have exceeded what we are allowed to do
         val newCallbackContext = context.copy(context.stabilizationRetriesRemaining - 1)
@@ -36,7 +36,7 @@ object HandlerCommons {
         }
         val accelerator = getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
         return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
-            logger.log(String.format("[DEBUG] Accelerator with arn [%s] is DEPLOYED", model.acceleratorArn))
+            logger.logDebug("Accelerator with arn [${accelerator.acceleratorArn}] is DEPLOYED")
             ProgressEvent.defaultSuccessHandler(model)
         } else {
             ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model)
@@ -55,7 +55,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             accelerator = proxy.injectCredentialsAndInvoke(request, { describeAcceleratorRequest: DescribeAcceleratorRequest? -> agaClient.describeAccelerator(describeAcceleratorRequest) }).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.log(String.format("[ERROR] Did not find accelerator with arn [%s]", arn))
+            logger.logError("Did not find accelerator with arn " + arn)
         }
         return accelerator
     }
@@ -67,7 +67,7 @@ object HandlerCommons {
             val request = ListTagsForResourceRequest()
             tags = proxy.injectCredentialsAndInvoke(request, { listTagsForResourceRequest : ListTagsForResourceRequest? -> agaClient.listTagsForResource(listTagsForResourceRequest) }).tags
         } catch (ex: Exception) {
-            logger.log(String.format("[ERROR] Exception while getting tags for accelerator with arn [%s]", arn))
+            logger.logError("Exception while getting tags for accelerator with arn " + arn)
         }
         return tags
     }

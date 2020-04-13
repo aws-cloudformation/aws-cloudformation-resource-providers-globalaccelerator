@@ -36,7 +36,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                                       proxy: AmazonWebServicesClientProxy,
                                       agaClient: AWSGlobalAccelerator,
                                       logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log(String.format("Creating new accelerator with model: [%s]",model.toString()))
+        logger.logDebug("Creating new accelerator with model: " + model.toString())
         val acc = createAccelerator(model, handlerRequest, proxy, agaClient)
         model.acceleratorArn = acc.acceleratorArn
         model.ipAddresses = acc.ipSets?.flatMap { it.ipAddresses }
