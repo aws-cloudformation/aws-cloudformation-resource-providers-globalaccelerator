@@ -25,7 +25,7 @@ object HandlerCommons {
                                 proxy: AmazonWebServicesClientProxy,
                                 agaClient: AWSGlobalAccelerator,
                                 logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.debug("Waiting for accelerator with arn [${model.acceleratorArn}] to synchronize")
+        logger.debug("Waiting for accelerator with arn ${model.acceleratorArn} to synchronize")
         logger.debug("Stabilization retries remaining ${context.stabilizationRetriesRemaining}")
 
         // check to see if we have exceeded what we are allowed to do
@@ -36,7 +36,7 @@ object HandlerCommons {
         }
         val accelerator = getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
         return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
-            logger.debug("Accelerator with arn [${accelerator.acceleratorArn}] is DEPLOYED")
+            logger.debug("Accelerator with arn ${accelerator.acceleratorArn} is DEPLOYED")
             ProgressEvent.defaultSuccessHandler(model)
         } else {
             ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model)

@@ -24,7 +24,7 @@ class ReadHandler : BaseHandler<CallbackContext?>() {
         val tags = getTags(model.acceleratorArn, proxy, agaClient, logger)
         val acceleratorResourceModel = convertAcceleratorToResourceModel(accelerator, tags)
         return if (acceleratorResourceModel == null) {
-            logger.error("Accelerator with ARN [${model.acceleratorArn}] not found")
+            logger.error("Accelerator with ARN ${model.acceleratorArn} not found")
             ProgressEvent.defaultFailureHandler(Exception("Accelerator not found."), HandlerErrorCode.NotFound)
         } else {
             ProgressEvent.defaultSuccessHandler(acceleratorResourceModel)
