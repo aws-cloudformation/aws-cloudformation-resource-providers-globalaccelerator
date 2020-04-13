@@ -94,6 +94,7 @@ class CreateHandlerTest {
                 .withAccelerator(Accelerator()
                         .withStatus(AcceleratorStatus.DEPLOYED)
                         .withEnabled(true)
+                        .withDnsName("DNS_NAME_HERE")
                         .withAcceleratorArn("ACCELERATOR_ARN"))
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns result
 

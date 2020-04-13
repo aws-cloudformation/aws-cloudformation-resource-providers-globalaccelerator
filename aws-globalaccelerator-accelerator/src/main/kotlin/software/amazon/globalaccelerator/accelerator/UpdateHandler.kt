@@ -40,7 +40,6 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
 
         if (byoipIPsUpdated(model, previousModel)) {
             logger.logError("Failed attempt to update BYOIP IPs.")
-
             return ProgressEvent.defaultFailureHandler(
                     // Why BYOIP updates is not supported today:-
                     // Fact 1. IP address cannot be shared between 2 accelerators.
