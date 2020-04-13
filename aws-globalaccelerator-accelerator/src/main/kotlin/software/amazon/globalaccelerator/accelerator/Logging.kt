@@ -2,12 +2,12 @@ package software.amazon.globalaccelerator.accelerator
 
 import software.amazon.cloudformation.proxy.Logger
 
-fun Logger.logInfo(str: String) {
+fun Logger.info(str: String) {
     this.log("[INFO] - $str")
 }
-fun Logger.logError(str: String) {
+fun Logger.error(str: String) {
     this.log("[ERROR] - $str")
 }
-fun Logger.logDebug(str: String) {
+fun Logger.debug(str: String) {
     this.log("[DEBUG] - $str")
 }

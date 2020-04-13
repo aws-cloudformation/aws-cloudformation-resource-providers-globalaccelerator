@@ -19,12 +19,12 @@ class ReadHandler : BaseHandler<CallbackContext?>() {
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         val agaClient = client
         val model = request.desiredResourceState
-        logger.logDebug("Read request for accelerator: " + request.toString())
+        logger.debug("Read request for accelerator: $request")
         val accelerator = getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
         val tags = getTags(model.acceleratorArn, proxy, agaClient, logger)
         val acceleratorResourceModel = convertAcceleratorToResourceModel(accelerator, tags)
         return if (acceleratorResourceModel == null) {
-            logger.logError("Accelerator with ARN [${model.acceleratorArn}] not found")
+            logger.error("Accelerator with ARN [${model.acceleratorArn}] not found")
             ProgressEvent.defaultFailureHandler(Exception("Accelerator not found."), HandlerErrorCode.NotFound)
         } else {
             ProgressEvent.defaultSuccessHandler(acceleratorResourceModel)
