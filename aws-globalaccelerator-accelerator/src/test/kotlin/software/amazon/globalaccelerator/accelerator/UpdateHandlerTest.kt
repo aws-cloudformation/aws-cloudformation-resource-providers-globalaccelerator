@@ -98,7 +98,6 @@ class UpdateHandlerTest {
         assertEquals(desiredModel.enabled, response.resourceModel.enabled)
         assertEquals(desiredModel.name, response.resourceModel.name)
         assertEquals(desiredModel.ipAddressType, response.resourceModel.ipAddressType)
-        assertEquals(desiredModel.dnsName, "DNS_NAME_HERE")
         assertTrue(response.callbackContext?.pendingStabilization!!)
     }
 

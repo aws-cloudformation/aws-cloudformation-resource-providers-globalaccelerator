@@ -114,7 +114,6 @@ class CreateHandlerTest {
         assertEquals(0, response.callbackDelaySeconds)
         assertNotNull(response.resourceModel)
         assertEquals("ACCELERATOR_ARN", response.resourceModel.acceleratorArn)
-        assertEquals("DNS_NAME_HERE", response.resourceModel.dnsName)
         assertNull(response.resourceModels)
         assertNull(response.message)
     }
