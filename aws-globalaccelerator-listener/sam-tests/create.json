@@ -15,10 +15,12 @@
     "clientRequestToken": "63c5c814-4102-4099-9bed-dd7a7c6f2a12",
     "desiredResourceState": {
       "AcceleratorArn": "ACCELERATOR_ARN_HERE",
-      "PortRanges": [{
-        "FromPort": 80,
-        "ToPort": 81
-      }],
+      "PortRanges": [
+        {
+          "FromPort": 80,
+          "ToPort": 81
+        }
+      ],
       "Protocol": "TCP"
     },
     "logicalResourceIdentifier": "SamTestListener"
