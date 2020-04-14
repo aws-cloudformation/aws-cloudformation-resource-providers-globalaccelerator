@@ -28,6 +28,5 @@ out/
 target/
 
 # test files
-sam-tests/
 stack.json
 aws-globalaccelerator-accelerator/pom.xml.versionsBackup

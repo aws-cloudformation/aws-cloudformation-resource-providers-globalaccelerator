@@ -1,0 +1,22 @@
+{
+  "$comment": [
+    "Use this to do a quick integration test for the delete logic",
+    "You can change the desiredResourceState to facilitate different testing scenarios",
+    "Required you put credentials below: use aws sts get-session-token",
+    "Usage: sam local invoke TestEntrypoint --event sam-tests/delete.json"
+  ],
+  "credentials": {
+    "accessKeyId": "get with sts get-session-token",
+    "secretAccessKey": "get with sts get-session-token",
+    "sessionToken": "get with sts get-session-token"
+  },
+  "action": "DELETE",
+  "request": {
+    "clientRequestToken": "63c5c814-4102-4099-9bed-dd7a7c6f2a12",
+    "desiredResourceState": {
+      "EndpointGroupArn": "ENDPOINTGROUP_ARN_HERE"
+    },
+    "logicalResourceIdentifier": "SamTestEndpointGroup"
+  },
+  "callbackContext": null
+}
