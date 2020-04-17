@@ -1,6 +1,6 @@
 {
   "typeName": "AWS::GlobalAccelerator::Listener",
-  "description": "A listener to process inbound connections from clients.",
+  "description": "Resource Type definition for AWS::GlobalAccelerator::Listener",
   "sourceUrl": "https://github.com/aws-cloudformation/aws-cloudformation-rpdk.git",
   "definitions": {
     "Port": {
