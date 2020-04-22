@@ -23,10 +23,10 @@ class CreateHandler : BaseHandler<CallbackContext>() {
         val agaClient = AcceleratorClientBuilder.client
 
         // confirm we can find the accelerator
-        val model = request.getDesiredResourceState()
-        HandlerCommons.getAccelerator(model.getAcceleratorArn(), proxy, agaClient, logger)
+        val model = request.desiredResourceState
+        HandlerCommons.getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception(String.format("Failed to find accelerator with arn: [%s].  Can not create listener", model.getAcceleratorArn())),
+                        Exception(String.format("Failed to find accelerator with arn: [%s].  Can not create listener", model.acceleratorArn)),
                         HandlerErrorCode.NotFound)
 
         return createListenerStep(model, request, proxy, agaClient, logger)
@@ -42,9 +42,9 @@ class CreateHandler : BaseHandler<CallbackContext>() {
                                    logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
         logger.log("Creating new listener.")
         val listener = createListener(model, handlerRequest, proxy, agaClient)
-        model.setListenerArn(listener.getListenerArn())
-        model.setClientAffinity(listener.getClientAffinity())
-        model.setProtocol(listener.getProtocol())
+        model.listenerArn = listener.listenerArn
+        model.clientAffinity = listener.clientAffinity
+        model.protocol = listener.protocol
         return ProgressEvent.defaultSuccessHandler(model)
     }
 
@@ -52,15 +52,15 @@ class CreateHandler : BaseHandler<CallbackContext>() {
                                handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                proxy: AmazonWebServicesClientProxy,
                                agaClient: AWSGlobalAccelerator): Listener {
-        val convertedPortRanges = model.getPortRanges().map {
-            x -> PortRange().withFromPort(x.getFromPort()).withToPort(x.getToPort())}
+        val convertedPortRanges = model.portRanges.map {
+            x -> PortRange().withFromPort(x.fromPort).withToPort(x.toPort)}
 
         val createListenerRequest = CreateListenerRequest()
-                .withAcceleratorArn(model.getAcceleratorArn())
-                .withClientAffinity(model.getClientAffinity())
-                .withProtocol(model.getProtocol())
+                .withAcceleratorArn(model.acceleratorArn)
+                .withClientAffinity(model.clientAffinity)
+                .withProtocol(model.protocol)
                 .withPortRanges(convertedPortRanges)
-                .withIdempotencyToken(handlerRequest.getLogicalResourceIdentifier())
+                .withIdempotencyToken(handlerRequest.logicalResourceIdentifier)
 
         return proxy.injectCredentialsAndInvoke(createListenerRequest, agaClient::createListener).listener;
     }

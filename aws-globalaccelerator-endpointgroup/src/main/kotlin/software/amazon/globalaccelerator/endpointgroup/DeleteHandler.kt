@@ -21,10 +21,10 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
         val inferredCallbackContext = callbackContext ?:
             CallbackContext(stabilizationRetriesRemaining =  HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
 
-        val model = request.getDesiredResourceState()
-        val foundEndpointGroup = HandlerCommons.getEndpointGroup(model.getEndpointGroupArn(), proxy, agaClient, logger)
+        val model = request.desiredResourceState
+        val foundEndpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
         if (foundEndpointGroup != null) {
-            deleteEndpointGroup(foundEndpointGroup.getEndpointGroupArn(), proxy, agaClient, logger)
+            deleteEndpointGroup(foundEndpointGroup.endpointGroupArn, proxy, agaClient, logger)
         }
 
         return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)

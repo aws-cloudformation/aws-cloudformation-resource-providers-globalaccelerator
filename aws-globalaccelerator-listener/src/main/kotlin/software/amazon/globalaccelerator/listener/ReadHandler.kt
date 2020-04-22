@@ -17,10 +17,10 @@ class ReadHandler : BaseHandler<CallbackContext>() {
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         logger.log(String.format("Reading listener with request [%s]", request))
 
-        val model = request.getDesiredResourceState()
+        val model = request.desiredResourceState
         val agaClient = AcceleratorClientBuilder.client
 
-        val listener = HandlerCommons.getListener(model.getListenerArn(), proxy, agaClient, logger)
+        val listener = HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
         val convertedModel = convertListenerToResourceModel(listener, model)
 
         logger.log(String.format("Current found listener is: [%s]", if (convertedModel == null) "null" else convertedModel))
@@ -36,17 +36,16 @@ class ReadHandler : BaseHandler<CallbackContext>() {
 
         if (listener != null) {
             converted = ResourceModel()
-            converted.setListenerArn(listener.getListenerArn())
-            converted.setProtocol(listener.getProtocol())
-            converted.setAcceleratorArn(currentModel.getAcceleratorArn())
-            converted.setClientAffinity(listener.getClientAffinity())
-            converted.setPortRanges(
-                    listener.getPortRanges().map{ x ->
-                        val portRange = PortRange()
-                        portRange.setFromPort(x.getFromPort())
-                        portRange.setToPort(x.getToPort())
-                        portRange
-                    })
+            converted.listenerArn = listener.listenerArn
+            converted.protocol = listener.protocol
+            converted.acceleratorArn = currentModel.acceleratorArn
+            converted.clientAffinity = listener.clientAffinity
+            converted.portRanges = listener.portRanges.map{ x ->
+                val portRange = PortRange()
+                portRange.fromPort = x.fromPort
+                portRange.toPort = x.toPort
+                portRange
+            }
         }
 
         return converted

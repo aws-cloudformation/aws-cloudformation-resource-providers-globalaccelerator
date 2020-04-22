@@ -17,16 +17,16 @@ class ReadHandler : BaseHandler<CallbackContext>() {
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
 
-        val model = request.getDesiredResourceState()
+        val model = request.desiredResourceState
 
         val agaClient = AcceleratorClientBuilder.client
         logger.log(String.format("Read request for endpoint group: [%s]", request))
 
-        val endpointGroup = HandlerCommons.getEndpointGroup(model.getEndpointGroupArn(), proxy, agaClient, logger)
+        val endpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
         val endpointGroupResourceModel = convertEndpointGroupToResourceModel(endpointGroup)
 
         if (endpointGroupResourceModel == null) {
-            logger.log(String.format("Endpoint group with ARN [%s] not found", model.getEndpointGroupArn()))
+            logger.log(String.format("Endpoint group with ARN [%s] not found", model.endpointGroupArn))
             return ProgressEvent.defaultFailureHandler(Exception("Endpoint group not found."), HandlerErrorCode.NotFound)
         } else {
             return ProgressEvent.defaultSuccessHandler(endpointGroupResourceModel)
@@ -37,24 +37,24 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         var newModel: ResourceModel? = null
         if (endpointGroup != null) {
             newModel = ResourceModel()
-            newModel.setEndpointGroupArn(endpointGroup.getEndpointGroupArn())
-            newModel.setHealthCheckIntervalSeconds(endpointGroup.getHealthCheckIntervalSeconds())
-            newModel.setHealthCheckPath(endpointGroup.getHealthCheckPath())
-            newModel.setHealthCheckPort(endpointGroup.getHealthCheckPort())
-            newModel.setHealthCheckProtocol(endpointGroup.getHealthCheckProtocol())
-            newModel.setThresholdCount(endpointGroup.getThresholdCount())
-            newModel.setTrafficDialPercentage(endpointGroup.getTrafficDialPercentage().toInt())
-            newModel.setEndpointGroupRegion(endpointGroup.getEndpointGroupRegion())
-            newModel.setEndpointConfigurations(getEndpointConfigurations(endpointGroup.getEndpointDescriptions()))
+            newModel.endpointGroupArn = endpointGroup.endpointGroupArn
+            newModel.healthCheckIntervalSeconds = endpointGroup.healthCheckIntervalSeconds
+            newModel.healthCheckPath = endpointGroup.healthCheckPath
+            newModel.healthCheckPort = endpointGroup.healthCheckPort
+            newModel.healthCheckProtocol = endpointGroup.healthCheckProtocol
+            newModel.thresholdCount = endpointGroup.thresholdCount
+            newModel.trafficDialPercentage = endpointGroup.trafficDialPercentage.toInt()
+            newModel.endpointGroupRegion = endpointGroup.endpointGroupRegion
+            newModel.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
         }
         return newModel
     }
 
     private fun getEndpointConfigurations(endpointDescriptions: List<EndpointDescription>): List<EndpointConfiguration> {
         return endpointDescriptions.map{ EndpointConfiguration.builder()
-                    .clientIPPreservationEnabled(it.getClientIPPreservationEnabled())
-                    .endpointId(it.getEndpointId())
-                    .weight(it.getWeight())
+                    .clientIPPreservationEnabled(it.clientIPPreservationEnabled)
+                    .endpointId(it.endpointId)
+                    .weight(it.weight)
                     .build()}
     }
 }

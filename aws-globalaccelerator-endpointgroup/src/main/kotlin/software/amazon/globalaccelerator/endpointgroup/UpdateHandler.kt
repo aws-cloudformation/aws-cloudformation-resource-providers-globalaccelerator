@@ -23,11 +23,11 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES,
                         pendingStabilization = false)
 
-        val model = request.getDesiredResourceState()
+        val model = request.desiredResourceState
 
-        HandlerCommons.getEndpointGroup(model.getEndpointGroupArn(), proxy, agaClient, logger)
+        HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception(String.format("Failed to find endpoint group with arn:[%s]", model.getEndpointGroupArn())),
+                        Exception(String.format("Failed to find endpoint group with arn:[%s]", model.endpointGroupArn)),
                         HandlerErrorCode.NotFound
                 )
 
@@ -48,17 +48,17 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                     agaClient: AWSGlobalAccelerator,
                                     logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
 
-        logger.log(String.format("Updating endpoint group with arn: [%s]", model.getEndpointGroupArn()))
-        var convertedEndpointConfigurations = model.getEndpointConfigurations()?.map {EndpointConfiguration()
-                    .withEndpointId(it.getEndpointId()).withWeight(it.getWeight())}
+        logger.log(String.format("Updating endpoint group with arn: [%s]", model.endpointGroupArn))
+        var convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
+                    .withEndpointId(it.endpointId).withWeight(it.weight)}
 
         val request = UpdateEndpointGroupRequest()
-                .withEndpointGroupArn(model.getEndpointGroupArn())
-                .withHealthCheckPort(model.getHealthCheckPort())
-                .withHealthCheckIntervalSeconds(model.getHealthCheckIntervalSeconds())
-                .withHealthCheckProtocol(model.getHealthCheckProtocol())
-                .withHealthCheckPath(model.getHealthCheckPath())
-                .withThresholdCount(model.getThresholdCount())
+                .withEndpointGroupArn(model.endpointGroupArn)
+                .withHealthCheckPort(model.healthCheckPort)
+                .withHealthCheckIntervalSeconds(model.healthCheckIntervalSeconds)
+                .withHealthCheckProtocol(model.healthCheckProtocol)
+                .withHealthCheckPath(model.healthCheckPath)
+                .withThresholdCount(model.thresholdCount)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
 
         proxy.injectCredentialsAndInvoke(request, agaClient::updateEndpointGroup).endpointGroup
