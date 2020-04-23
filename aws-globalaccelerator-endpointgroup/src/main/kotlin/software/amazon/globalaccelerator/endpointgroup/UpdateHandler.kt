@@ -27,7 +27,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
 
         HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception(String.format("Failed to find endpoint group with arn:[%s]", model.endpointGroupArn)),
+                        Exception("Failed to find endpoint group with arn:[${model.endpointGroupArn}]"),
                         HandlerErrorCode.NotFound
                 )
 
@@ -48,8 +48,8 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                     agaClient: AWSGlobalAccelerator,
                                     logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
 
-        logger.log(String.format("Updating endpoint group with arn: [%s]", model.endpointGroupArn))
-        var convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
+        logger.log("Updating endpoint group with arn: [${model.endpointGroupArn}]")
+        val convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
                     .withEndpointId(it.endpointId).withWeight(it.weight)}
 
         val request = UpdateEndpointGroupRequest()

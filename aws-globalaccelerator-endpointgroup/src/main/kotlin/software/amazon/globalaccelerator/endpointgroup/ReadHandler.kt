@@ -20,16 +20,16 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         val model = request.desiredResourceState
 
         val agaClient = AcceleratorClientBuilder.client
-        logger.log(String.format("Read request for endpoint group: [%s]", request))
+        logger.log("Read request for endpoint group: [$request]")
 
         val endpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
         val endpointGroupResourceModel = convertEndpointGroupToResourceModel(endpointGroup)
 
-        if (endpointGroupResourceModel == null) {
-            logger.log(String.format("Endpoint group with ARN [%s] not found", model.endpointGroupArn))
-            return ProgressEvent.defaultFailureHandler(Exception("Endpoint group not found."), HandlerErrorCode.NotFound)
+        return if (endpointGroupResourceModel == null) {
+            logger.log("Endpoint group with ARN [${model.endpointGroupArn}] not found")
+            ProgressEvent.defaultFailureHandler(Exception("Endpoint group not found."), HandlerErrorCode.NotFound)
         } else {
-            return ProgressEvent.defaultSuccessHandler(endpointGroupResourceModel)
+            ProgressEvent.defaultSuccessHandler(endpointGroupResourceModel)
         }
     }
 
@@ -37,15 +37,17 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         var newModel: ResourceModel? = null
         if (endpointGroup != null) {
             newModel = ResourceModel()
-            newModel.endpointGroupArn = endpointGroup.endpointGroupArn
-            newModel.healthCheckIntervalSeconds = endpointGroup.healthCheckIntervalSeconds
-            newModel.healthCheckPath = endpointGroup.healthCheckPath
-            newModel.healthCheckPort = endpointGroup.healthCheckPort
-            newModel.healthCheckProtocol = endpointGroup.healthCheckProtocol
-            newModel.thresholdCount = endpointGroup.thresholdCount
-            newModel.trafficDialPercentage = endpointGroup.trafficDialPercentage.toInt()
-            newModel.endpointGroupRegion = endpointGroup.endpointGroupRegion
-            newModel.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
+            newModel.apply {
+                this.endpointGroupArn = endpointGroup.endpointGroupArn
+                this.healthCheckIntervalSeconds = endpointGroup.healthCheckIntervalSeconds
+                this.healthCheckPath = endpointGroup.healthCheckPath
+                this.healthCheckPort = endpointGroup.healthCheckPort
+                this.healthCheckProtocol = endpointGroup.healthCheckProtocol
+                this.thresholdCount = endpointGroup.thresholdCount
+                this.trafficDialPercentage = endpointGroup.trafficDialPercentage.toInt()
+                this.endpointGroupRegion = endpointGroup.endpointGroupRegion
+                this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
+            }
         }
         return newModel
     }

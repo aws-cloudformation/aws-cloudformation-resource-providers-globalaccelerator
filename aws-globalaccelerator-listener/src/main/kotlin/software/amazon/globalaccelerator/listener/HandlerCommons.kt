@@ -25,7 +25,7 @@ object HandlerCommons {
                                 proxy: AmazonWebServicesClientProxy,
                                 agaClient: AWSGlobalAccelerator,
                                 logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
-        logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", model.acceleratorArn))
+        logger.log("Waiting for accelerator with arn [${model.acceleratorArn}] to synchronize")
 
         val newCallbackContext = CallbackContext(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1,
                 pendingStabilization = true)
@@ -54,7 +54,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.log(String.format("Did not find accelerator with arn [%s]", arn))
+            logger.log("Did not find accelerator with arn $arn")
             null
         }
     }
@@ -67,7 +67,7 @@ object HandlerCommons {
             val request = DescribeListenerRequest().withListenerArn(listenerArn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
         } catch (ex: ListenerNotFoundException) {
-            logger.log(String.format("Did not find listener with arn [%s]", listenerArn))
+            logger.log("Did not find listener with arn [$listenerArn]")
             null
         }
     }

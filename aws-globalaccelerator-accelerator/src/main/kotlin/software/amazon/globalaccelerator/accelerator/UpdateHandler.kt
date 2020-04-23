@@ -34,7 +34,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
 
         getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception(String.format("Failed to find accelerator with arn:[%s]", model.acceleratorArn)),
+                        Exception("Failed to find accelerator with arn:[${model.acceleratorArn}]"),
                         HandlerErrorCode.NotFound
                 )
 
@@ -141,7 +141,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
 
         logger.debug("Looking for tags to be deleted")
 
-        var newTagsMap = if(newTags == null) mapOf<String , String>()  else  newTags?.map { it.key to it.value }?.toMap()
+        val newTagsMap = if(newTags == null) mapOf<String , String>()  else  newTags?.map { it.key to it.value }?.toMap()
         val keysToDelete = previousTags?.map { x -> x.key  }?.minus(newTagsMap.keys)
 
         if (!keysToDelete.isNullOrEmpty()) {

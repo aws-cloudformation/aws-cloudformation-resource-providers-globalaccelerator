@@ -34,13 +34,15 @@ class ReadHandler : BaseHandler<CallbackContext?>() {
     private fun convertAcceleratorToResourceModel(accelerator: Accelerator?, tags: List<Tag>): ResourceModel? {
         return if (accelerator != null) {
             val newModel = ResourceModel()
-            newModel.acceleratorArn = accelerator.acceleratorArn
-            newModel.name = accelerator.name
-            newModel.enabled = accelerator.enabled
-            newModel.ipAddressType = accelerator.ipAddressType
-            newModel.dnsName = accelerator.dnsName
-            newModel.ipAddresses = accelerator.ipSets?.flatMap { it.ipAddresses }
-            newModel.tags = tags.map{software.amazon.globalaccelerator.accelerator.Tag(it.key, it.value)}
+            newModel.apply {
+                this.acceleratorArn = accelerator.acceleratorArn
+                this.name = accelerator.name
+                this.enabled = accelerator.enabled
+                this.ipAddressType = accelerator.ipAddressType
+                this.dnsName = accelerator.dnsName
+                this.ipAddresses = accelerator.ipSets?.flatMap { it.ipAddresses }
+                this.tags = tags.map{software.amazon.globalaccelerator.accelerator.Tag(it.key, it.value)}
+            }
             newModel
         } else {
             null

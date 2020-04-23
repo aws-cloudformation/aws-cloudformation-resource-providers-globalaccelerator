@@ -15,7 +15,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log(String.format("Reading listener with request [%s]", request))
+        logger.log("Reading listener with request [$request]")
 
         val model = request.desiredResourceState
         val agaClient = AcceleratorClientBuilder.client
@@ -23,7 +23,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         val listener = HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
         val convertedModel = convertListenerToResourceModel(listener, model)
 
-        logger.log(String.format("Current found listener is: [%s]", if (convertedModel == null) "null" else convertedModel))
+        logger.log("Current found listener is: [${convertedModel ?: "null"}]")
         return if (convertedModel != null) {
             ProgressEvent.defaultSuccessHandler(convertedModel)
         } else {
@@ -36,15 +36,17 @@ class ReadHandler : BaseHandler<CallbackContext>() {
 
         if (listener != null) {
             converted = ResourceModel()
-            converted.listenerArn = listener.listenerArn
-            converted.protocol = listener.protocol
-            converted.acceleratorArn = currentModel.acceleratorArn
-            converted.clientAffinity = listener.clientAffinity
-            converted.portRanges = listener.portRanges.map{ x ->
-                val portRange = PortRange()
-                portRange.fromPort = x.fromPort
-                portRange.toPort = x.toPort
-                portRange
+            converted.apply {
+                this.listenerArn = listener.listenerArn
+                this.protocol = listener.protocol
+                this.acceleratorArn = currentModel.acceleratorArn
+                this.clientAffinity = listener.clientAffinity
+                this.portRanges = listener.portRanges.map{ x ->
+                    val portRange = PortRange()
+                    portRange.fromPort = x.fromPort
+                    portRange.toPort = x.toPort
+                    portRange
+                }
             }
         }
 

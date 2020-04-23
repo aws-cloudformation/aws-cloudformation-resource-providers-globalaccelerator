@@ -18,7 +18,7 @@ class CreateHandler : BaseHandler<CallbackContext>() {
             callbackContext: CallbackContext?,
             logger: Logger
     ): ProgressEvent<ResourceModel, CallbackContext> {
-        logger.log(String.format("Creating listener with request [%s]", request))
+        logger.log("Creating listener with request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
 
@@ -26,7 +26,7 @@ class CreateHandler : BaseHandler<CallbackContext>() {
         val model = request.desiredResourceState
         HandlerCommons.getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception(String.format("Failed to find accelerator with arn: [%s].  Can not create listener", model.acceleratorArn)),
+                        Exception("Failed to find accelerator with arn: [${model.acceleratorArn}].  Can not create listener"),
                         HandlerErrorCode.NotFound)
 
         return createListenerStep(model, request, proxy, agaClient, logger)
@@ -42,9 +42,11 @@ class CreateHandler : BaseHandler<CallbackContext>() {
                                    logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
         logger.log("Creating new listener.")
         val listener = createListener(model, handlerRequest, proxy, agaClient)
-        model.listenerArn = listener.listenerArn
-        model.clientAffinity = listener.clientAffinity
-        model.protocol = listener.protocol
+        model.apply {
+            this.listenerArn = listener.listenerArn
+            this.clientAffinity = listener.clientAffinity
+            this.protocol = listener.protocol
+        }
         return ProgressEvent.defaultSuccessHandler(model)
     }
 

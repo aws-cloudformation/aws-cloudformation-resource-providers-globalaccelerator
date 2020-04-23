@@ -8,14 +8,13 @@ import software.amazon.cloudformation.proxy.*
 
 class UpdateHandler : BaseHandler<CallbackContext>() {
 
-
     @Override
     override fun handleRequest(
             proxy: AmazonWebServicesClientProxy,
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
-        logger.log(String.format("Updating listener with request [%s]", request))
+        logger.log("Updating listener with request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
         val inferredCallbackContext = callbackContext

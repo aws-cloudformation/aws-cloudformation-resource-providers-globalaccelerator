@@ -50,7 +50,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             accelerator = proxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.log(String.format("Did not find accelerator with arn [%s]", arn))
+            logger.log("Did not find accelerator with arn [$arn]")
         }
 
         return accelerator
@@ -64,7 +64,7 @@ object HandlerCommons {
             val request = DescribeListenerRequest().withListenerArn(listenerArn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
         } catch (ex: ListenerNotFoundException) {
-            logger.log(String.format("Did not find listener with arn [%s]", listenerArn))
+            logger.log("Did not find listener with arn [$listenerArn]")
             null
         }
     }
@@ -76,7 +76,7 @@ object HandlerCommons {
             val request = DescribeEndpointGroupRequest().withEndpointGroupArn(endpointGroupArn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeEndpointGroup).endpointGroup
         } catch (eex: EndpointGroupNotFoundException) {
-            logger.log(String.format("Did not find endpoint group with arn [%s]", endpointGroupArn))
+            logger.log("Did not find endpoint group with arn [$endpointGroupArn]")
             null
         }
     }

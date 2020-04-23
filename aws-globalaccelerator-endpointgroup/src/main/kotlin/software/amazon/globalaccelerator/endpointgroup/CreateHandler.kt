@@ -16,7 +16,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log(String.format("Create request [%s]", request))
+        logger.log("Create request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
         val inferredCallbackContext = callbackContext
@@ -41,25 +41,27 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
 
         HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception(String.format("Failed to find listener with arn: [%s].  Can not create endpoint group.")),
+                        Exception("Failed to find listener with arn: [${model.listenerArn}].  Can not create endpoint group."),
                         HandlerErrorCode.NotFound)
 
         // first thing get the accelerator associated to listener so we can update our model
         val listenerArn = ListenerArn(model.listenerArn)
         HandlerCommons.getAccelerator(listenerArn.acceleratorArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception(String.format("Could not find accelerator for listener [%s]", model.listenerArn)),
+                        Exception("Could not find accelerator for listener [${model.listenerArn}]"),
                         HandlerErrorCode.NotFound)
 
         // now we can move forward and create the endpoint group and update model with everything that is optional
         val endpointGroup = createEndpointGroup(model, handlerRequest, proxy, agaClient)
-        model.endpointGroupArn = endpointGroup.endpointGroupArn
-        model.healthCheckIntervalSeconds = endpointGroup.healthCheckIntervalSeconds
-        model.healthCheckPath = endpointGroup.healthCheckPath
-        model.healthCheckPort = endpointGroup.healthCheckPort
-        model.healthCheckProtocol = endpointGroup.healthCheckProtocol
-        model.thresholdCount = endpointGroup.thresholdCount
-        model.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
+        model.apply {
+            this.endpointGroupArn = endpointGroup.endpointGroupArn
+            this.healthCheckIntervalSeconds = endpointGroup.healthCheckIntervalSeconds
+            this.healthCheckPath = endpointGroup.healthCheckPath
+            this.healthCheckPort = endpointGroup.healthCheckPort
+            this.healthCheckProtocol = endpointGroup.healthCheckProtocol
+            this.thresholdCount = endpointGroup.thresholdCount
+            this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
+        }
 
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
 
@@ -80,7 +82,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                                     agaClient: AWSGlobalAccelerator): EndpointGroup {
 
         // we need to map all of our endpoint configurations
-        var convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
+        val convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
                     .withEndpointId(it.endpointId).withWeight(it.weight)
                     .withClientIPPreservationEnabled(it.clientIPPreservationEnabled)}
 
