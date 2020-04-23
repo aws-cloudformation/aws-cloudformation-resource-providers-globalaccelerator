@@ -8,20 +8,19 @@ import software.amazon.cloudformation.proxy.*
 
 class UpdateHandler : BaseHandler<CallbackContext>() {
 
-
     @Override
     override fun handleRequest(
             proxy: AmazonWebServicesClientProxy,
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
-        logger.log(String.format("Updating listener with request [%s]", request))
+        logger.log("Updating listener with request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
         val inferredCallbackContext = callbackContext
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization =  false);
 
-        val model = request.getDesiredResourceState()
+        val model = request.desiredResourceState
         if (!inferredCallbackContext.pendingStabilization) {
             updateListenerStep(model, request, proxy, agaClient, logger)
         }
@@ -39,8 +38,8 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                    logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
         logger.log("Updating the listener")
         val listener = updateListener(model, handlerRequest, proxy, agaClient)
-        model.clientAffinity = listener.getClientAffinity()
-        model.protocol = listener.getProtocol()
+        model.clientAffinity = listener.clientAffinity
+        model.protocol = listener.protocol
 
         val callbackContext = CallbackContext(stabilizationRetriesRemaining =  (HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES),
                 pendingStabilization = true)
@@ -52,13 +51,13 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                proxy: AmazonWebServicesClientProxy,
                                agaClient: AWSGlobalAccelerator): Listener {
-        val convertedPortRanges = model.getPortRanges().map{ x ->
-            PortRange().withFromPort(x.getFromPort()).withToPort(x.getToPort()) }
+        val convertedPortRanges = model.portRanges.map{ x ->
+            PortRange().withFromPort(x.fromPort).withToPort(x.toPort) }
 
         val updateListenerRequest = UpdateListenerRequest()
-                .withListenerArn(model.getListenerArn())
-                .withClientAffinity(model.getClientAffinity())
-                .withProtocol(model.getProtocol())
+                .withListenerArn(model.listenerArn)
+                .withClientAffinity(model.clientAffinity)
+                .withProtocol(model.protocol)
                 .withPortRanges(convertedPortRanges)
 
         return proxy.injectCredentialsAndInvoke(updateListenerRequest, agaClient::updateListener).listener;

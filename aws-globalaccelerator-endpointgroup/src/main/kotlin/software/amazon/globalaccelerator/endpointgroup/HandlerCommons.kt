@@ -8,9 +8,9 @@ import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.globalaccelerator.arns.ListenerArn
 
 object HandlerCommons {
-    val CALLBACK_DELAY_IN_SECONDS = 1
-    val NUMBER_OF_STATE_POLL_RETRIES = 60 / CALLBACK_DELAY_IN_SECONDS * 60 * 4 // 4 hours
-    private val TIMED_OUT_MESSAGE = "Timed out waiting for endpoint group to be deployed."
+    private const val CALLBACK_DELAY_IN_SECONDS = 1
+    const val NUMBER_OF_STATE_POLL_RETRIES = 60 / CALLBACK_DELAY_IN_SECONDS * 60 * 4 // 4 hours
+    private const val TIMED_OUT_MESSAGE = "Timed out waiting for endpoint group to be deployed."
 
     /**
      * Check to see if accelerator creation is complete and create the correct progress continuation context
@@ -20,18 +20,18 @@ object HandlerCommons {
                                 proxy: AmazonWebServicesClientProxy,
                                 agaClient: AWSGlobalAccelerator,
                                 logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        val acceleratorArn = ListenerArn(model.getListenerArn()).acceleratorArn
+        val acceleratorArn = ListenerArn(model.listenerArn).acceleratorArn
         logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", acceleratorArn))
 
         // check to see if we have exceeded what we are allowed to do
-        val newCallbackContext = CallbackContext(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1)
+        val newCallbackContext = context.copy(stabilizationRetriesRemaining =  context.stabilizationRetriesRemaining - 1)
 
         if (newCallbackContext.stabilizationRetriesRemaining < 0) {
             throw RuntimeException(TIMED_OUT_MESSAGE)
         }
 
         val accelerator = getAccelerator(acceleratorArn, proxy, agaClient, logger)
-        return if (accelerator!!.getStatus() == AcceleratorStatus.DEPLOYED.toString()) {
+        return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
             ProgressEvent.defaultSuccessHandler(model)
         } else {
             ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model)
@@ -50,7 +50,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             accelerator = proxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.log(String.format("Did not find accelerator with arn [%s]", arn))
+            logger.log("Did not find accelerator with arn [$arn]")
         }
 
         return accelerator
@@ -59,27 +59,25 @@ object HandlerCommons {
     /** Gets the listener with the specified ARN  */
     fun getListener(listenerArn: String, proxy: AmazonWebServicesClientProxy,
                     agaClient: AWSGlobalAccelerator, logger: Logger): Listener? {
-        val listener = try {
+
+        return try {
             val request = DescribeListenerRequest().withListenerArn(listenerArn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
         } catch (ex: ListenerNotFoundException) {
-            logger.log(String.format("Did not find listener with arn [%s]", listenerArn))
+            logger.log("Did not find listener with arn [$listenerArn]")
             null
         }
-
-        return listener
     }
 
     fun getEndpointGroup(endpointGroupArn: String, proxy: AmazonWebServicesClientProxy,
                          agaClient: AWSGlobalAccelerator, logger: Logger): EndpointGroup? {
-        var endpointGroup = try {
+
+        return try {
             val request = DescribeEndpointGroupRequest().withEndpointGroupArn(endpointGroupArn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeEndpointGroup).endpointGroup
         } catch (eex: EndpointGroupNotFoundException) {
-            logger.log(String.format("Did not find endpoint group with arn [%s]", endpointGroupArn))
+            logger.log("Did not find endpoint group with arn [$endpointGroupArn]")
             null
         }
-
-        return endpointGroup
     }
 }

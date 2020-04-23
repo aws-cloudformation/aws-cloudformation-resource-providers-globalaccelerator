@@ -15,16 +15,16 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log(String.format("Delete request [%s]", request))
+        logger.log("Delete request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
         val inferredCallbackContext = callbackContext ?:
             CallbackContext(stabilizationRetriesRemaining =  HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
 
-        val model = request.getDesiredResourceState()
-        val foundEndpointGroup = HandlerCommons.getEndpointGroup(model.getEndpointGroupArn(), proxy, agaClient, logger)
+        val model = request.desiredResourceState
+        val foundEndpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
         if (foundEndpointGroup != null) {
-            deleteEndpointGroup(foundEndpointGroup.getEndpointGroupArn(), proxy, agaClient, logger)
+            deleteEndpointGroup(foundEndpointGroup.endpointGroupArn, proxy, agaClient, logger)
         }
 
         return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)

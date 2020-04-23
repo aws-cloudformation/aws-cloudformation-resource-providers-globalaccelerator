@@ -14,14 +14,14 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log(String.format("Deleting listener with request [%s]", request))
+        logger.log("Deleting listener with request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
 
-        val model = request.getDesiredResourceState()
-        val foundListener = HandlerCommons.getListener(model.getListenerArn(), proxy, agaClient, logger)
+        val model = request.desiredResourceState
+        val foundListener = HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
         if (foundListener != null) {
-            deleteListener(model.getListenerArn(), proxy, agaClient, logger)
+            deleteListener(model.listenerArn, proxy, agaClient, logger)
         }
 
         return ProgressEvent.defaultSuccessHandler(model)
