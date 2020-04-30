@@ -52,6 +52,9 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
         val convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
                     .withEndpointId(it.endpointId).withWeight(it.weight)}
 
+        // need to fallback if null
+        val trafficDialPercentage = model?.trafficDialPercentage?.toFloat() ?: 100.0f
+
         val request = UpdateEndpointGroupRequest()
                 .withEndpointGroupArn(model.endpointGroupArn)
                 .withHealthCheckPort(model.healthCheckPort)
