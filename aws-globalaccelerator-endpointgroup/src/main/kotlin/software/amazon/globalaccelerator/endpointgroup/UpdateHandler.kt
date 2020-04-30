@@ -59,6 +59,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                 .withHealthCheckProtocol(model.healthCheckProtocol)
                 .withHealthCheckPath(model.healthCheckPath)
                 .withThresholdCount(model.thresholdCount)
+                .withTrafficDialPercentage(model.trafficDialPercentage.toFloat())
                 .withEndpointConfigurations(convertedEndpointConfigurations)
 
         proxy.injectCredentialsAndInvoke(request, agaClient::updateEndpointGroup).endpointGroup

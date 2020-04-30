@@ -163,7 +163,7 @@ class DeleteHandlerTest {
                 .endpointGroupArn("ENDPOINT_GROUP_ARN")
                 .healthCheckPort(20)
                 .thresholdCount(3)
-                .trafficDialPercentage(100)
+                .trafficDialPercentage(100.0)
                 .healthCheckPath("/HEALTH")
                 .endpointConfigurations(endpointConfigurations)
                 .build()

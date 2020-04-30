@@ -51,7 +51,7 @@ class ReadHandlerTest {
                 .thresholdCount(100)
                 .endpointConfigurations(endpointConfigurations)
                 .healthCheckPath("/Health")
-                .trafficDialPercentage(100)
+                .trafficDialPercentage(100.0)
                 .healthCheckIntervalSeconds(10)
                 .healthCheckProtocol("TCP")
                 .listenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234")
