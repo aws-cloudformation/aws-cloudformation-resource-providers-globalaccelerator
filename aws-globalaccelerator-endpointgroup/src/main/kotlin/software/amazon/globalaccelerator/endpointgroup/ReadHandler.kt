@@ -44,7 +44,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
                 this.healthCheckPort = endpointGroup.healthCheckPort
                 this.healthCheckProtocol = endpointGroup.healthCheckProtocol
                 this.thresholdCount = endpointGroup.thresholdCount
-                this.trafficDialPercentage = endpointGroup.trafficDialPercentage.toInt()
+                this.trafficDialPercentage = endpointGroup.trafficDialPercentage.toDouble()
                 this.endpointGroupRegion = endpointGroup.endpointGroupRegion
                 this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
             }

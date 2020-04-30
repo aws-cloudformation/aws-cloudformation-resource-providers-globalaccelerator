@@ -60,6 +60,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
             this.healthCheckPort = endpointGroup.healthCheckPort
             this.healthCheckProtocol = endpointGroup.healthCheckProtocol
             this.thresholdCount = endpointGroup.thresholdCount
+            this.trafficDialPercentage = endpointGroup.trafficDialPercentage.toDouble()
             this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
         }
 
@@ -86,6 +87,9 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                     .withEndpointId(it.endpointId).withWeight(it.weight)
                     .withClientIPPreservationEnabled(it.clientIPPreservationEnabled)}
 
+        // need to fallback if null
+        val trafficDialPercentage = model?.trafficDialPercentage?.toFloat() ?: 100.0f
+
         val createEndpointGroupRequest = CreateEndpointGroupRequest()
                 .withListenerArn(model.listenerArn)
                 .withEndpointGroupRegion(model.endpointGroupRegion)
@@ -94,6 +98,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                 .withHealthCheckProtocol(model.healthCheckProtocol)
                 .withHealthCheckPath(model.healthCheckPath)
                 .withThresholdCount(model.thresholdCount)
+                .withTrafficDialPercentage(trafficDialPercentage)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
                 .withIdempotencyToken(handlerRequest.logicalResourceIdentifier)
 

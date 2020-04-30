@@ -48,7 +48,7 @@
     },
     "TrafficDialPercentage": {
       "description": "The percentage of traffic to sent to an AWS Region",
-      "type": "integer",
+      "type": "number",
       "minimum": 0,
       "maximum": 100,
       "default": 100
