@@ -19,7 +19,11 @@
         "ToPort": {
           "$ref": "#/definitions/Port"
         }
-      }
+      },
+      "required": [
+        "FromPort",
+        "ToPort"
+      ]
     }
   },
   "properties": {
