@@ -48,7 +48,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                     agaClient: AWSGlobalAccelerator,
                                     logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
 
-        logger.log("Updating endpoint group with arn: [${model.endpointGroupArn}]")
+        logger.debug("Updating endpoint group with arn: [${model.endpointGroupArn}]")
         val convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
                     .withEndpointId(it.endpointId).withWeight(it.weight)}
 
@@ -62,7 +62,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                 .withHealthCheckProtocol(model.healthCheckProtocol)
                 .withHealthCheckPath(model.healthCheckPath)
                 .withThresholdCount(model.thresholdCount)
-                .withTrafficDialPercentage(model.trafficDialPercentage.toFloat())
+                .withTrafficDialPercentage(trafficDialPercentage)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
 
         proxy.injectCredentialsAndInvoke(request, agaClient::updateEndpointGroup).endpointGroup

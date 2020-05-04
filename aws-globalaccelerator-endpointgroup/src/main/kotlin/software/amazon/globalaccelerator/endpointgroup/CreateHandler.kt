@@ -16,7 +16,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log("Create request [$request]")
+        logger.debug("Create request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
         val inferredCallbackContext = callbackContext

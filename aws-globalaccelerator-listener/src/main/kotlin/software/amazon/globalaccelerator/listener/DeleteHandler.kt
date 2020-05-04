@@ -14,7 +14,7 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log("Deleting listener with request [$request]")
+        logger.debug("Deleting listener with request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
 

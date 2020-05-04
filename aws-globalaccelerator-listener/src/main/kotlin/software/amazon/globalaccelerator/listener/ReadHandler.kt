@@ -23,7 +23,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         val listener = HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
         val convertedModel = convertListenerToResourceModel(listener, model)
 
-        logger.log("Current found listener is: [${convertedModel ?: "null"}]")
+        logger.debug("Current found listener is: [${convertedModel ?: "null"}]")
         return if (convertedModel != null) {
             ProgressEvent.defaultSuccessHandler(convertedModel)
         } else {
