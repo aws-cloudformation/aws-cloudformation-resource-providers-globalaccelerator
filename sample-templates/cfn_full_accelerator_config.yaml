@@ -1,0 +1,76 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: This is a Global Accelerator template that will create a single endpoint
+  group in a specified region that points to a provided endpoint id.  Stack will output
+  a variable with the generated Accelerated DNS Name (AcceleratedDnsName)
+Parameters:
+  EndpointRegion:
+    Description: The region that owns the endpoint you will be accelerating
+    Type: String
+    AllowedValues:
+    - us-east-1
+    - us-east-2
+    - us-west-1
+    - us-west-2
+    - af-south-1
+    - ap-east-1
+    - ap-south-1
+    - ap-northeast-1
+    - ap-northeast-2
+    - ap-northeast-3
+    - ap-southeast-1
+    - ap-southeast-2
+    - ap-northeast-1
+    - ca-central-1
+    - eu-central-1
+    - eu-west-1
+    - eu-west-2
+    - eu-west-3
+    - eu-north-1
+    - eu-south-1
+    - me-south-1
+    - sa-east-1
+    ConstraintDescription: must be a valid AWS region.
+  EndpointId:
+    Description: An ID for the endpoint. If the endpoint is a Network Load Balancer
+      or Application Load Balancer, this is the Amazon Resource Name (ARN) of the
+      resource. If the endpoint is an Elastic IP address, this is the Elastic IP address
+      allocation ID. For EC2 instances, this is the EC2 instance ID.  If you do not
+      have a resource in your Amazon account, you can use one of the cloud formation
+      Application Framework Examples at https://aws.amazon.com/cloudformation/templates/aws-cloudformation-templates-us-west-1/
+    Type: String
+    MinLength: '1'
+    MaxLength: '255'
+Resources:
+  Accelerator:
+    Type: AWS::GlobalAccelerator::Accelerator
+    Properties:
+      Name: SampleAccelerator
+      Enabled: false
+  Listener:
+    Type: AWS::GlobalAccelerator::Listener
+    Properties:
+      AcceleratorArn:
+        Ref: Accelerator
+      Protocol: TCP
+      PortRanges:
+      - FromPort: 80
+        ToPort: 80
+  EndpointGroup:
+    Type: AWS::GlobalAccelerator::EndpointGroup
+    Properties:
+      ListenerArn:
+        Ref: Listener
+      EndpointGroupRegion:
+        Ref: EndpointRegion
+      TrafficDialPercentage: 100
+      EndpointConfigurations:
+      - EndpointId:
+          Ref: EndpointId
+Outputs:
+  AcceleratedDnsName:
+    Description: Accelerated DNS Name
+    Value:
+      Fn::GetAtt:
+      - Accelerator
+      - DnsName
