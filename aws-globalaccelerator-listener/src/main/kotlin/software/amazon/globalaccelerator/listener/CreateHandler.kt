@@ -18,7 +18,7 @@ class CreateHandler : BaseHandler<CallbackContext>() {
             callbackContext: CallbackContext?,
             logger: Logger
     ): ProgressEvent<ResourceModel, CallbackContext> {
-        logger.log("Creating listener with request [$request]")
+        logger.debug("Creating listener with request [$request]")
 
         val agaClient = AcceleratorClientBuilder.client
 
@@ -40,7 +40,7 @@ class CreateHandler : BaseHandler<CallbackContext>() {
                                    proxy: AmazonWebServicesClientProxy,
                                    agaClient: AWSGlobalAccelerator,
                                    logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
-        logger.log("Creating new listener.")
+        logger.debug("Creating new listener.")
         val listener = createListener(model, handlerRequest, proxy, agaClient)
         model.apply {
             this.listenerArn = listener.listenerArn

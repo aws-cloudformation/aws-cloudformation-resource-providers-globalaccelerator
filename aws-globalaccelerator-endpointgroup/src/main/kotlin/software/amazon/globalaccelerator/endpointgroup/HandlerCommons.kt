@@ -21,7 +21,7 @@ object HandlerCommons {
                                 agaClient: AWSGlobalAccelerator,
                                 logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         val acceleratorArn = ListenerArn(model.listenerArn).acceleratorArn
-        logger.log(String.format("Waiting for accelerator with arn [%s] to synchronize", acceleratorArn))
+        logger.debug(String.format("Waiting for accelerator with arn [%s] to synchronize", acceleratorArn))
 
         // check to see if we have exceeded what we are allowed to do
         val newCallbackContext = context.copy(stabilizationRetriesRemaining =  context.stabilizationRetriesRemaining - 1)
@@ -50,7 +50,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             accelerator = proxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.log("Did not find accelerator with arn [$arn]")
+            logger.error("Did not find accelerator with arn [$arn]")
         }
 
         return accelerator
@@ -64,7 +64,7 @@ object HandlerCommons {
             val request = DescribeListenerRequest().withListenerArn(listenerArn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
         } catch (ex: ListenerNotFoundException) {
-            logger.log("Did not find listener with arn [$listenerArn]")
+            logger.error("Did not find listener with arn [$listenerArn]")
             null
         }
     }
@@ -76,7 +76,7 @@ object HandlerCommons {
             val request = DescribeEndpointGroupRequest().withEndpointGroupArn(endpointGroupArn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeEndpointGroup).endpointGroup
         } catch (eex: EndpointGroupNotFoundException) {
-            logger.log("Did not find endpoint group with arn [$endpointGroupArn]")
+            logger.error("Did not find endpoint group with arn [$endpointGroupArn]")
             null
         }
     }
