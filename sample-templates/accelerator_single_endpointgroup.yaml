@@ -1,8 +1,10 @@
 ---
 AWSTemplateFormatVersion: '2010-09-09'
 Description: This is a Global Accelerator template that will create a single endpoint
-  group in a specified region that points to a provided endpoint id.  Stack will output
-  a variable with the generated Accelerated DNS Name (AcceleratedDnsName)
+  group in a specified region that points to a provided endpoint id. By default port
+  80 will be used. This stack will output a variable with the generated Accelerated
+  DNS Name (AcceleratedDnsName). You will be billed for the AWS resources used if
+  you create a stack from this template.
 Parameters:
   EndpointRegion:
     Description: The region that owns the endpoint you will be accelerating
@@ -41,12 +43,18 @@ Parameters:
     Type: String
     MinLength: '1'
     MaxLength: '255'
+  EndpointPort:
+    Description: The port the listener should use
+    Type: Number
+    MinValue: 0
+    MaxValue: 65535
+    Default: 80
 Resources:
   Accelerator:
     Type: AWS::GlobalAccelerator::Accelerator
     Properties:
       Name: SampleAccelerator
-      Enabled: false
+      Enabled: true
   Listener:
     Type: AWS::GlobalAccelerator::Listener
     Properties:
@@ -54,8 +62,10 @@ Resources:
         Ref: Accelerator
       Protocol: TCP
       PortRanges:
-      - FromPort: 80
-        ToPort: 80
+      - FromPort:
+          Ref: EndpointPort
+        ToPort:
+          Ref: EndpointPort
   EndpointGroup:
     Type: AWS::GlobalAccelerator::EndpointGroup
     Properties:
