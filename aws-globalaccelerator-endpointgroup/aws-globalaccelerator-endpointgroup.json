@@ -95,7 +95,8 @@
     "EndpointGroupRegion"
   ],
   "createOnlyProperties": [
-    "/properties/EndpointGroupRegion"
+    "/properties/EndpointGroupRegion",
+    "/properties/ListenerArn"
   ],
   "readOnlyProperties": [
     "/properties/EndpointGroupArn"
