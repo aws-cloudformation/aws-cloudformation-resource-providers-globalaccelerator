@@ -65,6 +65,9 @@
     "PortRanges",
     "Protocol"
   ],
+  "createOnlyProperties": [
+    "/properties/AcceleratorArn"
+  ],
   "readOnlyProperties": [
     "/properties/ListenerArn"
   ],
