@@ -100,7 +100,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                 .withThresholdCount(model.thresholdCount)
                 .withTrafficDialPercentage(trafficDialPercentage)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
-                .withIdempotencyToken(handlerRequest.logicalResourceIdentifier)
+                .withIdempotencyToken(handlerRequest.clientRequestToken)
 
         return proxy.injectCredentialsAndInvoke(createEndpointGroupRequest, agaClient::createEndpointGroup).endpointGroup;
     }
