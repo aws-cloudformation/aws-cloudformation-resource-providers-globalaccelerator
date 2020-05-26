@@ -1,7 +1,7 @@
 package software.amazon.globalaccelerator.accelerator
 
 /**
- * Holds date to be passed between Call Backs.
+ * Holds state to be passed between callbacks.
  * stabilizationRetriesRemaining: Number of seconds remaining before giving up on retries.
  * pendingStabilization: Waiting for termination or completion
  */
