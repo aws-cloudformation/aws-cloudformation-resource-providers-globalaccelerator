@@ -11,15 +11,17 @@ import software.amazon.globalaccelerator.accelerator.AcceleratorClientBuilder.cl
 import software.amazon.globalaccelerator.accelerator.HandlerCommons.getAccelerator
 import software.amazon.globalaccelerator.accelerator.HandlerCommons.getTags
 
+/**
+ * Read handler implementation for accelerator resource.
+ */
 class ReadHandler : BaseHandler<CallbackContext?>() {
-    override fun handleRequest(
-            proxy: AmazonWebServicesClientProxy,
-            request: ResourceHandlerRequest<ResourceModel>,
-            callbackContext: CallbackContext?,
-            logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+    override fun handleRequest(proxy: AmazonWebServicesClientProxy,
+                               request: ResourceHandlerRequest<ResourceModel>,
+                               callbackContext: CallbackContext?,
+                               logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+        logger.debug("Read Accelerator Request: $request")
         val agaClient = client
         val model = request.desiredResourceState
-        logger.debug("Read request for accelerator: $request")
         val accelerator = getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
         val tags = getTags(model.acceleratorArn, proxy, agaClient, logger)
         val acceleratorResourceModel = convertAcceleratorToResourceModel(accelerator, tags)
@@ -41,7 +43,7 @@ class ReadHandler : BaseHandler<CallbackContext?>() {
                 this.ipAddressType = accelerator.ipAddressType
                 this.dnsName = accelerator.dnsName
                 this.ipAddresses = accelerator.ipSets?.flatMap { it.ipAddresses }
-                this.tags = tags.map{software.amazon.globalaccelerator.accelerator.Tag(it.key, it.value)}
+                this.tags = tags.map { Tag(it.key, it.value) }
             }
             newModel
         } else {
