@@ -47,9 +47,6 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
     }
 
-    /**
-     * Create the accelerator based on the provided ResourceModel
-     */
     private fun createAccelerator(model: ResourceModel,
                                   handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                   proxy: AmazonWebServicesClientProxy,

@@ -49,14 +49,13 @@ object HandlerCommons {
      */
     fun getAccelerator(arn: String?, proxy: AmazonWebServicesClientProxy,
                        agaClient: AWSGlobalAccelerator, logger: Logger): Accelerator? {
-        var accelerator: Accelerator? = null
-        try {
+        return try {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
-            accelerator = proxy.injectCredentialsAndInvoke(request, { describeAcceleratorRequest: DescribeAcceleratorRequest? -> agaClient.describeAccelerator(describeAcceleratorRequest) }).accelerator
+            proxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).accelerator
         } catch (ex: AcceleratorNotFoundException) {
             logger.debug("Accelerator not found. arn: $arn")
+            null
         }
-        return accelerator
     }
 
     /**
@@ -65,13 +64,12 @@ object HandlerCommons {
      */
     fun getTags(arn: String?, proxy: AmazonWebServicesClientProxy,
                 agaClient: AWSGlobalAccelerator, logger: Logger): List<Tag> {
-        var tags: List<Tag> = emptyList()
-        try {
+        return try {
             val request = ListTagsForResourceRequest().withResourceArn(arn)
-            tags = proxy.injectCredentialsAndInvoke(request, { listTagsForResourceRequest: ListTagsForResourceRequest? -> agaClient.listTagsForResource(listTagsForResourceRequest) }).tags
+            proxy.injectCredentialsAndInvoke(request, agaClient::listTagsForResource).tags
         } catch (ex: Exception) {
             logger.error("Exception while getting tags for accelerator with arn $arn")
+            emptyList()
         }
-        return tags
     }
 }

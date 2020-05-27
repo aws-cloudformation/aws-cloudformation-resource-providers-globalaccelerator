@@ -55,12 +55,12 @@ class DeleteHandlerTest {
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
-        Assertions.assertNull(response.getCallbackContext())
-        Assertions.assertEquals(response.getResourceModel(), model)
-        Assertions.assertNotNull(response.getResourceModel())
-        Assertions.assertNull(response.getMessage())
-        Assertions.assertNull(response.getErrorCode())
-        Assertions.assertNull(response.getResourceModels())
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertEquals(response.resourceModel, model)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.errorCode)
+        Assertions.assertNull(response.resourceModels)
     }
 }

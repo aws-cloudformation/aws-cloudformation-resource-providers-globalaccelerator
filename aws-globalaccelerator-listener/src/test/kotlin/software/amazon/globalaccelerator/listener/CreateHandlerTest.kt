@@ -41,7 +41,7 @@ class CreateHandlerTest {
     @Test
     fun handleRequest_AcceleratorDoesNotExist() {
 
-        doThrow(AcceleratorNotFoundException("NOT FOUND")).`when`(proxy)!!.injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java),
+        (doThrow(AcceleratorNotFoundException("NOT FOUND")).`when`(proxy) ?: return).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java),
                 any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         // create the model
@@ -56,12 +56,12 @@ class CreateHandlerTest {
         // make the handler request
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val handler = CreateHandler()
-        val response = handler.handleRequest(proxy!!, request, null, logger!!)
+        val response = handler.handleRequest(proxy ?: return, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.FAILED)
-        Assertions.assertNull(response.getCallbackContext())
-        Assertions.assertEquals(response.getErrorCode(), HandlerErrorCode.NotFound)
+        Assertions.assertEquals(response.status, OperationStatus.FAILED)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
     }
 
     @Test
@@ -72,7 +72,7 @@ class CreateHandlerTest {
                         .withProtocol(Protocol.TCP.toString())
                         .withClientAffinity(ClientAffinity.SOURCE_IP.toString())
                         .withPortRanges(PortRange().withFromPort(80).withToPort(81)))
-        doReturn(createListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(CreateListenerRequest::class.java), ArgumentMatchers.any<Function<CreateListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(createListenerResult).`when`(proxy ?: return).injectCredentialsAndInvoke(ArgumentMatchers.any(CreateListenerRequest::class.java), ArgumentMatchers.any<Function<CreateListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
                         .withAcceleratorArn("ACCELERATOR_ARN")
@@ -91,15 +91,15 @@ class CreateHandlerTest {
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val handler = CreateHandler()
-        val response = handler.handleRequest(proxy!!, request, null, logger!!)
+        val response = handler.handleRequest(proxy ?: return, request, null, logger ?: return)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
-        Assertions.assertNotNull(response.getResourceModel())
-        Assertions.assertNull(response.getCallbackContext())
-        Assertions.assertEquals(response.getCallbackDelaySeconds(), 0)
-        Assertions.assertEquals(response.getResourceModel(), model)
-        Assertions.assertNull(response.getMessage())
-        Assertions.assertNull(response.getResourceModels())
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertEquals(response.resourceModel, model)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.resourceModels)
     }
 }
