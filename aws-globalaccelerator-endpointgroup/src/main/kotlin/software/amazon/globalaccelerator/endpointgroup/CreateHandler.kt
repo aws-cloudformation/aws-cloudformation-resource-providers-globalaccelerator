@@ -37,7 +37,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                                         logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception("Failed to create Endpoint Group. Cannot find listsner with arn: [${model.listenerArn}]."),
+                        Exception("Failed to create Endpoint Group. Cannot find listener with arn: [${model.listenerArn}]."),
                         HandlerErrorCode.NotFound)
 
         val listenerArn = ListenerArn(model.listenerArn)
