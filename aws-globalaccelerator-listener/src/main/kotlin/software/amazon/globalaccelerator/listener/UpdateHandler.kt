@@ -8,13 +8,12 @@ import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
+import software.amazon.cloudformation.proxy.HandlerErrorCode
 
 /**
  * Update handler implementation for listener resource.
  */
 class UpdateHandler : BaseHandler<CallbackContext>() {
-
-    @Override
     override fun handleRequest(
             proxy: AmazonWebServicesClientProxy,
             request: ResourceHandlerRequest<ResourceModel>,
@@ -25,10 +24,11 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
         val inferredCallbackContext = callbackContext
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false);
         val model = request.desiredResourceState
-        if (!inferredCallbackContext.pendingStabilization) {
+        return if (!inferredCallbackContext.pendingStabilization) {
             updateListenerStep(model, request, proxy, agaClient, logger)
+        } else {
+            HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
-        return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
     }
 
     private fun updateListenerStep(model: ResourceModel,

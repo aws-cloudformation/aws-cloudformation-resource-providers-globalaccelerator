@@ -65,7 +65,6 @@ class UpdateHandlerTest {
 
     @Test
     fun handleRequest_InitialUpdate_ReturnsInProgress() {
-        expectDescribeAccelerator(AcceleratorStatus.IN_PROGRESS)
 
         // we expect a call to update
         val updateListenerResult = UpdateListenerResult()
@@ -83,7 +82,7 @@ class UpdateHandlerTest {
 
         Assertions.assertNotNull(response)
         Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.callbackDelaySeconds, 1)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
         Assertions.assertNotNull(response.callbackContext)
         Assertions.assertNull(response.resourceModels)
         Assertions.assertNull(response.message)

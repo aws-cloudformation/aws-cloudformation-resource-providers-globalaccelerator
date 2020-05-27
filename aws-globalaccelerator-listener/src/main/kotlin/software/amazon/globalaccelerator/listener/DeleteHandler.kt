@@ -11,7 +11,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
  * Delete handler implementation for listener resource.
  */
 class DeleteHandler : BaseHandler<CallbackContext>() {
-    @Override
     override fun handleRequest(
             proxy: AmazonWebServicesClientProxy,
             request: ResourceHandlerRequest<ResourceModel>,

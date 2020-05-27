@@ -11,7 +11,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
  * Read handler implementation for listener resource.
  */
 class ReadHandler : BaseHandler<CallbackContext>() {
-    @Override
     override fun handleRequest(
             proxy: AmazonWebServicesClientProxy,
             request: ResourceHandlerRequest<ResourceModel>,

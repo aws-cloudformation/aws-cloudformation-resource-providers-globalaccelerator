@@ -63,7 +63,7 @@ object HandlerCommons {
     }
 
     /** Gets the listener with the specified ARN
-     *  @param arn ARN of the accelerator
+     *  @param arn ARN of the listener
      * @return NULL if listener does not exist
      */
     fun getListener(arn: String, proxy: AmazonWebServicesClientProxy,
