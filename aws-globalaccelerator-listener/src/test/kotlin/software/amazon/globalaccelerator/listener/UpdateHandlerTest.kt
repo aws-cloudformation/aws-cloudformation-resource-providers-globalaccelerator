@@ -65,7 +65,6 @@ class UpdateHandlerTest {
 
     @Test
     fun handleRequest_InitialUpdate_ReturnsInProgress() {
-        expectDescribeAccelerator(AcceleratorStatus.IN_PROGRESS)
 
         // we expect a call to update
         val updateListenerResult = UpdateListenerResult()
@@ -82,14 +81,14 @@ class UpdateHandlerTest {
         val response = UpdateHandler().handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.getCallbackDelaySeconds(), 1)
-        Assertions.assertNotNull(response.getCallbackContext())
-        Assertions.assertNull(response.getResourceModels())
-        Assertions.assertNull(response.getMessage())
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertNull(response.resourceModels)
+        Assertions.assertNull(response.message)
 
-        Assertions.assertEquals(response.getResourceModel(), model)
-        Assertions.assertNotNull(response.getResourceModel())
+        Assertions.assertEquals(response.resourceModel, model)
+        Assertions.assertNotNull(response.resourceModel)
     }
 
     @Test
@@ -108,14 +107,14 @@ class UpdateHandlerTest {
 
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.getCallbackDelaySeconds(), 1)
-        Assertions.assertNotNull(response.getCallbackContext())
-        Assertions.assertNull(response.getResourceModels())
-        Assertions.assertNull(response.getMessage())
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.callbackDelaySeconds, 1)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertNull(response.resourceModels)
+        Assertions.assertNull(response.message)
 
-        Assertions.assertEquals(response.getResourceModel(), model)
-        Assertions.assertNotNull(response.getResourceModel())
+        Assertions.assertEquals(response.resourceModel, model)
+        Assertions.assertNotNull(response.resourceModel)
     }
 
     @Test
@@ -125,7 +124,7 @@ class UpdateHandlerTest {
         // create the that will go to our handler
         val model = createTestResourceModel()
         val callbackMap = HashMap<String, String>()
-        callbackMap.put(UpdateHandler.UPDATE_COMPLETED_KEY, "true")
+        callbackMap[UpdateHandler.UPDATE_COMPLETED_KEY] = "true"
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
@@ -133,12 +132,12 @@ class UpdateHandlerTest {
 
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
-        Assertions.assertNull(response.getResourceModels())
-        Assertions.assertNull(response.getMessage())
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertNull(response.resourceModels)
+        Assertions.assertNull(response.message)
 
-        Assertions.assertEquals(response.getResourceModel(), model)
-        Assertions.assertNotNull(response.getResourceModel())
+        Assertions.assertEquals(response.resourceModel, model)
+        Assertions.assertNotNull(response.resourceModel)
     }
 
     @Test

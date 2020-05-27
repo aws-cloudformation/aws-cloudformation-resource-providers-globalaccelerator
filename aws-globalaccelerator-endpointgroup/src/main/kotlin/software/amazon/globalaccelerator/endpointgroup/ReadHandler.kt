@@ -8,23 +8,19 @@ import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
+/**
+ * Read handler implementation for Endpoint Group resource.
+ */
 class ReadHandler : BaseHandler<CallbackContext>() {
-
-    @Override
-    override fun handleRequest(
-            proxy: AmazonWebServicesClientProxy,
-            request: ResourceHandlerRequest<ResourceModel>,
-            callbackContext: CallbackContext?,
-            logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-
+    override fun handleRequest(proxy: AmazonWebServicesClientProxy,
+                               request: ResourceHandlerRequest<ResourceModel>,
+                               callbackContext: CallbackContext?,
+                               logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+        logger.debug("Read EndpointGroup request: $request")
         val model = request.desiredResourceState
-
         val agaClient = AcceleratorClientBuilder.client
-        logger.debug("Read request for endpoint group: [$request]")
-
         val endpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
         val endpointGroupResourceModel = convertEndpointGroupToResourceModel(endpointGroup)
-
         return if (endpointGroupResourceModel == null) {
             logger.debug("Endpoint group with ARN [${model.endpointGroupArn}] not found")
             ProgressEvent.defaultFailureHandler(Exception("Endpoint group not found."), HandlerErrorCode.NotFound)
@@ -34,10 +30,8 @@ class ReadHandler : BaseHandler<CallbackContext>() {
     }
 
     private fun convertEndpointGroupToResourceModel(endpointGroup: EndpointGroup?): ResourceModel? {
-        var newModel: ResourceModel? = null
-        if (endpointGroup != null) {
-            newModel = ResourceModel()
-            newModel.apply {
+        return if (endpointGroup != null) {
+            ResourceModel().apply {
                 this.endpointGroupArn = endpointGroup.endpointGroupArn
                 this.healthCheckIntervalSeconds = endpointGroup.healthCheckIntervalSeconds
                 this.healthCheckPath = endpointGroup.healthCheckPath
@@ -48,15 +42,18 @@ class ReadHandler : BaseHandler<CallbackContext>() {
                 this.endpointGroupRegion = endpointGroup.endpointGroupRegion
                 this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
             }
+        } else {
+            null
         }
-        return newModel
     }
 
     private fun getEndpointConfigurations(endpointDescriptions: List<EndpointDescription>): List<EndpointConfiguration> {
-        return endpointDescriptions.map{ EndpointConfiguration.builder()
+        return endpointDescriptions.map {
+            EndpointConfiguration.builder()
                     .clientIPPreservationEnabled(it.clientIPPreservationEnabled)
                     .endpointId(it.endpointId)
                     .weight(it.weight)
-                    .build()}
+                    .build()
+        }
     }
 }

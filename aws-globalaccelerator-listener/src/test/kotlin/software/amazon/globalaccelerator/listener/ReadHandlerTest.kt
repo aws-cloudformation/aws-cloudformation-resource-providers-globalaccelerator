@@ -66,15 +66,15 @@ class ReadHandlerTest {
         val response = ReadHandler().handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
-        Assertions.assertNull(response.getCallbackContext())
-        Assertions.assertNull(response.getResourceModels())
-        Assertions.assertNull(response.getMessage())
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertNull(response.resourceModels)
+        Assertions.assertNull(response.message)
 
-        Assertions.assertNotNull(response.getResourceModel())
-        Assertions.assertEquals(response.getResourceModel().getAcceleratorArn(), "ACCELERATOR_ARN")
-        Assertions.assertEquals(response.getResourceModel().getProtocol(), Protocol.TCP.toString())
-        Assertions.assertEquals(response.getResourceModel().getClientAffinity(), ClientAffinity.SOURCE_IP.toString())
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertEquals(response.resourceModel.acceleratorArn, "ACCELERATOR_ARN")
+        Assertions.assertEquals(response.resourceModel.protocol, Protocol.TCP.toString())
+        Assertions.assertEquals(response.resourceModel.clientAffinity, ClientAffinity.SOURCE_IP.toString())
 
     }
 
@@ -96,8 +96,8 @@ class ReadHandlerTest {
         val response = ReadHandler().handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.FAILED)
-        Assertions.assertEquals(response.getErrorCode(), HandlerErrorCode.NotFound)
-        Assertions.assertNull(response.getResourceModel())
+        Assertions.assertEquals(response.status, OperationStatus.FAILED)
+        Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
+        Assertions.assertNull(response.resourceModel)
     }
 }

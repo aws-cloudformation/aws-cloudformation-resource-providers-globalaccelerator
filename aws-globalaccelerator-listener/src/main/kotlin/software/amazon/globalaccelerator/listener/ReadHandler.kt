@@ -7,36 +7,31 @@ import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
+/**
+ * Read handler implementation for listener resource.
+ */
 class ReadHandler : BaseHandler<CallbackContext>() {
-
-    @Override
     override fun handleRequest(
             proxy: AmazonWebServicesClientProxy,
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.log("Reading listener with request [$request]")
-
+        logger.debug("Read Listener Request [$request]")
         val model = request.desiredResourceState
         val agaClient = AcceleratorClientBuilder.client
-
         val listener = HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
         val convertedModel = convertListenerToResourceModel(listener, model)
-
-        logger.debug("Current found listener is: [${convertedModel ?: "null"}]")
         return if (convertedModel != null) {
             ProgressEvent.defaultSuccessHandler(convertedModel)
         } else {
+            logger.error("Listener  not found. arn:  ${model.listenerArn}")
             ProgressEvent.defaultFailureHandler(Exception("Listener not found."), HandlerErrorCode.NotFound)
         }
     }
 
     private fun convertListenerToResourceModel(listener: Listener?, currentModel: ResourceModel): ResourceModel? {
-        var converted: ResourceModel? = null
-
-        if (listener != null) {
-            converted = ResourceModel()
-            converted.apply {
+        return if (listener != null) {
+            ResourceModel().apply {
                 this.listenerArn = listener.listenerArn
                 this.protocol = listener.protocol
                 this.acceleratorArn = currentModel.acceleratorArn
@@ -48,8 +43,8 @@ class ReadHandler : BaseHandler<CallbackContext>() {
                     portRange
                 }
             }
+        } else {
+            null
         }
-
-        return converted
     }
 }

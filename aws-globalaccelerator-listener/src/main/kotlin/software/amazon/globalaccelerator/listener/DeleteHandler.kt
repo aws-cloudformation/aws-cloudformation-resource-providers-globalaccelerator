@@ -7,23 +7,22 @@ import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
+/**
+ * Delete handler implementation for listener resource.
+ */
 class DeleteHandler : BaseHandler<CallbackContext>() {
-    @Override
     override fun handleRequest(
             proxy: AmazonWebServicesClientProxy,
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.debug("Deleting listener with request [$request]")
-
+        logger.debug("Delete Listener Request [$request]")
         val agaClient = AcceleratorClientBuilder.client
-
         val model = request.desiredResourceState
         val foundListener = HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
         if (foundListener != null) {
             deleteListener(model.listenerArn, proxy, agaClient, logger)
         }
-
         return ProgressEvent.defaultSuccessHandler(model)
     }
 

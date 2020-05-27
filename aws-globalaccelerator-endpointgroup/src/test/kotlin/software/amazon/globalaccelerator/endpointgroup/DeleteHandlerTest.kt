@@ -69,12 +69,12 @@ class DeleteHandlerTest {
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.getCallbackDelaySeconds(), 1)
-        Assertions.assertNotNull(response.getCallbackContext())
-        Assertions.assertNull(response.getMessage())
-        Assertions.assertNull(response.getResourceModels())
-        Assertions.assertEquals(response.getResourceModel(), model)
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.callbackDelaySeconds, 1)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.resourceModels)
+        Assertions.assertEquals(response.resourceModel, model)
     }
 
     @Test
@@ -104,12 +104,12 @@ class DeleteHandlerTest {
         val response = handler.handleRequest(proxy!!, request, context, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.getCallbackDelaySeconds(), 1)
-        Assertions.assertNotNull(response.getCallbackContext())
-        Assertions.assertNull(response.getMessage())
-        Assertions.assertNull(response.getResourceModels())
-        Assertions.assertEquals(response.getResourceModel(), model)
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.callbackDelaySeconds, 1)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.resourceModels)
+        Assertions.assertEquals(response.resourceModel, model)
     }
 
     @Test
@@ -139,12 +139,12 @@ class DeleteHandlerTest {
         val response = handler.handleRequest(proxy!!, request, context, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
-        Assertions.assertEquals(response.getCallbackDelaySeconds(), 0)
-        Assertions.assertNull(response.getCallbackContext())
-        Assertions.assertNull(response.getMessage())
-        Assertions.assertNull(response.getResourceModels())
-        Assertions.assertEquals(response.getResourceModel(), model)
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.resourceModels)
+        Assertions.assertEquals(response.resourceModel, model)
     }
 
     @Test

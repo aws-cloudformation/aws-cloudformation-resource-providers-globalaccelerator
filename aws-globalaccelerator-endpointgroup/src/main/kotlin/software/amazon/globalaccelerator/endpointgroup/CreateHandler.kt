@@ -5,53 +5,47 @@ import com.amazonaws.services.globalaccelerator.model.CreateEndpointGroupRequest
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration
 import com.amazonaws.services.globalaccelerator.model.EndpointDescription
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup
-import software.amazon.cloudformation.proxy.*
+import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
+import software.amazon.cloudformation.proxy.Logger
+import software.amazon.cloudformation.proxy.ProgressEvent
+import software.amazon.cloudformation.proxy.ResourceHandlerRequest
+import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.globalaccelerator.arns.ListenerArn
 
+/**
+ * Create handler implementation for Endpoint Group resource.
+ */
 class CreateHandler : BaseHandler<CallbackContext?>() {
-
-    @Override
-    override fun handleRequest(
-            proxy: AmazonWebServicesClientProxy,
-            request: ResourceHandlerRequest<ResourceModel>,
-            callbackContext: CallbackContext?,
-            logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.debug("Create request [$request]")
-
+    override fun handleRequest(proxy: AmazonWebServicesClientProxy,
+                               request: ResourceHandlerRequest<ResourceModel>,
+                               callbackContext: CallbackContext?,
+                               logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+        logger.debug("Create new EndpointGroup request: $request")
         val agaClient = AcceleratorClientBuilder.client
-        val inferredCallbackContext = callbackContext
-                ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
-
+        val inferredCallbackContext = callbackContext ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
         val model = request.desiredResourceState
-        return if (model.endpointGroupArn == null) {
-            createEndpointGroupStep(model, request, proxy, agaClient, logger)
-        } else {
-            HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
+        return when (model.endpointGroupArn) {
+            null -> createEndpointGroupStep(model, request, proxy, agaClient, logger)
+            else -> HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
     }
 
-    /**
-     * Create an accelerator and create the correct progress continuation context
-     */
     private fun createEndpointGroupStep(model: ResourceModel,
                                         handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                         proxy: AmazonWebServicesClientProxy,
                                         agaClient: AWSGlobalAccelerator,
                                         logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-
         HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception("Failed to find listener with arn: [${model.listenerArn}].  Can not create endpoint group."),
+                        Exception("Failed to create Endpoint Group. Cannot find listener with arn: [${model.listenerArn}]."),
                         HandlerErrorCode.NotFound)
 
-        // first thing get the accelerator associated to listener so we can update our model
         val listenerArn = ListenerArn(model.listenerArn)
+        // Make sure accelerator exists
         HandlerCommons.getAccelerator(listenerArn.acceleratorArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
                         Exception("Could not find accelerator for listener [${model.listenerArn}]"),
                         HandlerErrorCode.NotFound)
-
-        // now we can move forward and create the endpoint group and update model with everything that is optional
         val endpointGroup = createEndpointGroup(model, handlerRequest, proxy, agaClient)
         model.apply {
             this.endpointGroupArn = endpointGroup.endpointGroupArn
@@ -63,9 +57,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
             this.trafficDialPercentage = endpointGroup.trafficDialPercentage.toDouble()
             this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
         }
-
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
-
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
     }
 
@@ -81,15 +73,11 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                                     handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                     proxy: AmazonWebServicesClientProxy,
                                     agaClient: AWSGlobalAccelerator): EndpointGroup {
-
-        // we need to map all of our endpoint configurations
+        // Mapping all endpoint configurations
         val convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
                     .withEndpointId(it.endpointId).withWeight(it.weight)
                     .withClientIPPreservationEnabled(it.clientIPPreservationEnabled)}
-
-        // need to fallback if null
-        val trafficDialPercentage = model?.trafficDialPercentage?.toFloat() ?: 100.0f
-
+        val trafficDialPercentage = model.trafficDialPercentage?.toFloat() ?: 100.0f
         val createEndpointGroupRequest = CreateEndpointGroupRequest()
                 .withListenerArn(model.listenerArn)
                 .withEndpointGroupRegion(model.endpointGroupRegion)
@@ -101,7 +89,6 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                 .withTrafficDialPercentage(trafficDialPercentage)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
                 .withIdempotencyToken(handlerRequest.clientRequestToken)
-
         return proxy.injectCredentialsAndInvoke(createEndpointGroupRequest, agaClient::createEndpointGroup).endpointGroup;
     }
 }

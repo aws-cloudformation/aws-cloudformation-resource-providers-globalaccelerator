@@ -10,21 +10,21 @@ import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import software.amazon.globalaccelerator.accelerator.AcceleratorClientBuilder.client
 
+/**
+ * Create handler implementation for accelerator resource.
+ */
 class CreateHandler : BaseHandler<CallbackContext?>() {
-    override fun handleRequest(
-            proxy: AmazonWebServicesClientProxy,
-            request: ResourceHandlerRequest<ResourceModel>,
-            callbackContext: CallbackContext?,
-            logger: Logger
-    ): ProgressEvent<ResourceModel, CallbackContext?> {
+    override fun handleRequest(proxy: AmazonWebServicesClientProxy,
+                               request: ResourceHandlerRequest<ResourceModel>,
+                               callbackContext: CallbackContext?,
+                               logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+        logger.debug("Create Accelerator Request: $request")
         val agaClient = client
-        val inferredCallbackContext = callbackContext
-                ?: CallbackContext(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
+        val inferredCallbackContext = callbackContext ?: CallbackContext(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
         val model = request.desiredResourceState
-        return if (model.acceleratorArn == null) {
-            createAcceleratorStep(model, request, proxy, agaClient, logger)
-        } else {
-            HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
+        return when (model.acceleratorArn) {
+            null -> createAcceleratorStep(model, request, proxy, agaClient, logger)
+            else -> HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
     }
 
@@ -47,9 +47,6 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
     }
 
-    /**
-     * Create the accelerator based on the provided ResourceModel
-     */
     private fun createAccelerator(model: ResourceModel,
                                   handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                   proxy: AmazonWebServicesClientProxy,

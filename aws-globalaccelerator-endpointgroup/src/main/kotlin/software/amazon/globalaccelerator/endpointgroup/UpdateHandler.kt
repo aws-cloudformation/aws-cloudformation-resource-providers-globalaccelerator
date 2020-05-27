@@ -9,34 +9,25 @@ import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
+/**
+ * Update handler implementation for Endpoint Group resource.
+ */
 class UpdateHandler : BaseHandler<CallbackContext>() {
-
-    @Override
-    override fun handleRequest(
-            proxy: AmazonWebServicesClientProxy,
-            request: ResourceHandlerRequest<ResourceModel>,
-            callbackContext: CallbackContext?,
-            logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-
+    override fun handleRequest(proxy: AmazonWebServicesClientProxy,
+                               request: ResourceHandlerRequest<ResourceModel>,
+                               callbackContext: CallbackContext?,
+                               logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+        logger.debug("Update EndpointGroup request: $request")
         val agaClient = AcceleratorClientBuilder.client
         val inferredCallbackContext = callbackContext
-                ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES,
-                        pendingStabilization = false)
-
+                ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false)
         val model = request.desiredResourceState
-
         HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
                         Exception("Failed to find endpoint group with arn:[${model.endpointGroupArn}]"),
                         HandlerErrorCode.NotFound
                 )
-
-        // a. Check if update is started.
-        // b. If started, then poll on endpointgroup to go in sync
-        // c. else, trigger an update operation
-        val isUpdateStarted = inferredCallbackContext.pendingStabilization
-
-        return if (!isUpdateStarted) {
+        return if (!inferredCallbackContext.pendingStabilization) {
             updateEndpointGroup(model, proxy, agaClient, logger)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
@@ -47,14 +38,11 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                     proxy: AmazonWebServicesClientProxy,
                                     agaClient: AWSGlobalAccelerator,
                                     logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-
-        logger.debug("Updating endpoint group with arn: [${model.endpointGroupArn}]")
-        val convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
-                    .withEndpointId(it.endpointId).withWeight(it.weight)}
-
-        // need to fallback if null
-        val trafficDialPercentage = model?.trafficDialPercentage?.toFloat() ?: 100.0f
-
+        val convertedEndpointConfigurations = model.endpointConfigurations?.map {
+            EndpointConfiguration()
+                    .withEndpointId(it.endpointId).withWeight(it.weight)
+        }
+        val trafficDialPercentage = model.trafficDialPercentage?.toFloat() ?: 100.0f
         val request = UpdateEndpointGroupRequest()
                 .withEndpointGroupArn(model.endpointGroupArn)
                 .withHealthCheckPort(model.healthCheckPort)
@@ -64,7 +52,6 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                 .withThresholdCount(model.thresholdCount)
                 .withTrafficDialPercentage(trafficDialPercentage)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
-
         proxy.injectCredentialsAndInvoke(request, agaClient::updateEndpointGroup).endpointGroup
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES,
                 pendingStabilization = true)
