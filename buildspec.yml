@@ -15,7 +15,7 @@ phases:
       - mvn clean verify --no-transfer-progress
       - cd "$CODEBUILD_SRC_DIR/aws-globalaccelerator-endpointgroup"
       - mvn clean verify --no-transfer-progress
-     finally:
+    finally:
       - cat "$CODEBUILD_SRC_DIR/aws-globalaccelerator-accelerator/rpdk.log"
       - cat "$CODEBUILD_SRC_DIR/aws-globalaccelerator-listener/rpdk.log"
       - cat "$CODEBUILD_SRC_DIR/aws-globalaccelerator-endpointgroup/rpdk.log"
