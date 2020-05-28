@@ -14,7 +14,7 @@ class ListenerArn(arn: String?) : AcceleratorArn(arn?.split(LISTENER_SEPARATOR)?
         internal fun validateListenerArn(arn: String) {
             val splitListenerArn = arn.split(LISTENER_SEPARATOR)
             if (splitListenerArn.size != 2 || !splitListenerArn[1].matches(regex = Regex("[\\w]+"))) {
-                throw RuntimeException(String.format("Invalid listener arn %s", arn))
+                throw RuntimeException(String.format("Invalid Listener ARN %s", arn))
             }
         }
     }

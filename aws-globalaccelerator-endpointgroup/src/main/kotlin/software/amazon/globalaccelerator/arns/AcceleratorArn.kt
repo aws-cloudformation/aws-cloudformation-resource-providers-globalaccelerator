@@ -19,19 +19,19 @@ open class AcceleratorArn(arn: String?) {
 
     init {
         if (Strings.isNullOrEmpty(arn)) {
-            throw RuntimeException("Accelerator arn cannot be null or empty $arn")
+            throw RuntimeException("Accelerator ARN cannot be null or empty $arn")
         }
         val pattern = Pattern.compile(EXPECTED_ARN_REGEX)
         val matcher = pattern.matcher(arn!!)
         if (!matcher.find() || matcher.groupCount() !== 4) {
-            throw RuntimeException(String.format("Invalid global accelerator arn %s", arn))
+            throw RuntimeException(String.format("Invalid Accelerator ARN %s", arn))
         }
         if (verifyNames(matcher.group(1), matcher.group(3))) {
             this.acceleratorArn = arn
             this.awsAccountId = matcher.group(2)
             this.uuid = matcher.group(4)
         } else {
-            throw RuntimeException(String.format("Invalid global accelerator arn %s", arn))
+            throw RuntimeException(String.format("Invalid Accelerator ARN %s", arn))
         }
     }
 

@@ -18,7 +18,7 @@ class AcceleratorArnTest {
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
             AcceleratorArn(arn).acceleratorArn
         }
-        Assertions.assertEquals("Invalid global accelerator arn $arn", exception.message)
+        Assertions.assertEquals("Invalid Accelerator ARN $arn", exception.message)
     }
 
     @Test
@@ -27,7 +27,7 @@ class AcceleratorArnTest {
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
             AcceleratorArn(arn).acceleratorArn
         }
-        Assertions.assertEquals("Invalid global accelerator arn $arn", exception.message)
+        Assertions.assertEquals("Invalid Accelerator ARN $arn", exception.message)
     }
 
     @Test
@@ -36,6 +36,6 @@ class AcceleratorArnTest {
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
             AcceleratorArn(arn).acceleratorArn
         }
-        Assertions.assertEquals("Accelerator arn cannot be null or empty $arn", exception.message)
+        Assertions.assertEquals("Accelerator ARN cannot be null or empty $arn", exception.message)
     }
 }

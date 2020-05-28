@@ -18,7 +18,7 @@ class ListenerArnTest {
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
             ListenerArn(arn).listenerArn
         }
-        Assertions.assertEquals("Invalid listener arn $arn", exception.message)
+        Assertions.assertEquals("Invalid Listener ARN $arn", exception.message)
     }
 
     @Test
@@ -27,6 +27,6 @@ class ListenerArnTest {
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
             ListenerArn(arn).listenerArn
         }
-        Assertions.assertEquals("Accelerator arn cannot be null or empty $arn", exception.message)
+        Assertions.assertEquals("Accelerator ARN cannot be null or empty $arn", exception.message)
     }
 }
