@@ -9,7 +9,13 @@ phases:
   build:
     commands:
       - pre-commit run --all-files
-    #   - cd "$CODEBUILD_SRC_DIR/my_resource"
-    #   - mvn clean verify --no-transfer-progress
-    # finally:
-    #   - cat "$CODEBUILD_SRC_DIR/my_resource/rpdk.log"
+      - cd "$CODEBUILD_SRC_DIR/aws-globalaccelerator-accelerator"
+      - mvn clean verify --no-transfer-progress
+      - cd "$CODEBUILD_SRC_DIR/aws-globalaccelerator-listener"
+      - mvn clean verify --no-transfer-progress
+      - cd "$CODEBUILD_SRC_DIR/aws-globalaccelerator-endpointgroup"
+      - mvn clean verify --no-transfer-progress
+     finally:
+      - cat "$CODEBUILD_SRC_DIR/aws-globalaccelerator-accelerator/rpdk.log"
+      - cat "$CODEBUILD_SRC_DIR/aws-globalaccelerator-listener/rpdk.log"
+      - cat "$CODEBUILD_SRC_DIR/aws-globalaccelerator-endpointgroup/rpdk.log"
