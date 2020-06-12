@@ -20,17 +20,22 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
         val inferredCallbackContext = callbackContext
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
         val model = request.desiredResourceState
-        val foundEndpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
-        if (foundEndpointGroup != null) {
-            deleteEndpointGroup(foundEndpointGroup.endpointGroupArn, proxy, agaClient, logger)
+        return if (!inferredCallbackContext.pendingStabilization) {
+            HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
+                    ?: return ProgressEvent.defaultSuccessHandler(model)
+            deleteEndpointGroup(model, proxy, agaClient)
+        } else {
+            HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
-        return HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
     }
 
-    private fun deleteEndpointGroup(endpointGroupArn: String,
+    private fun deleteEndpointGroup(model: ResourceModel,
                                     proxy: AmazonWebServicesClientProxy,
-                                    agaClient: AWSGlobalAccelerator, logger: Logger) {
-        val request = DeleteEndpointGroupRequest().withEndpointGroupArn(endpointGroupArn)
+                                    agaClient: AWSGlobalAccelerator): ProgressEvent<ResourceModel, CallbackContext?> {
+        val request = DeleteEndpointGroupRequest().withEndpointGroupArn(model.endpointGroupArn)
         proxy.injectCredentialsAndInvoke(request, agaClient::deleteEndpointGroup);
+        val callbackContext = CallbackContext(stabilizationRetriesRemaining = (HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES),
+                pendingStabilization = true)
+        return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
     }
 }

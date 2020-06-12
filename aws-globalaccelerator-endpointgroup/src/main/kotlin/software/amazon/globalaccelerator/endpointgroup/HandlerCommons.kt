@@ -81,8 +81,8 @@ object HandlerCommons {
         return try {
             val request = DescribeEndpointGroupRequest().withEndpointGroupArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeEndpointGroup).endpointGroup
-        } catch (eex: EndpointGroupNotFoundException) {
-            logger.error("Did not find endpoint group with arn [$arn]")
+        } catch (ex: EndpointGroupNotFoundException) { // Should we be throwing this instead?
+            logger.debug("Did not find endpoint group with arn [$arn]")
             null
         }
     }
