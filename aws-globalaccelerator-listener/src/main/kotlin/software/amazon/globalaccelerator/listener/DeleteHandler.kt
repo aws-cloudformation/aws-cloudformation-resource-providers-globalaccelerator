@@ -22,10 +22,9 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false);
         val model = request.desiredResourceState
 
-        HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
-                ?: return ProgressEvent.defaultSuccessHandler(model)
-
         return if (!inferredCallbackContext.pendingStabilization) {
+            HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
+                    ?: return ProgressEvent.defaultSuccessHandler(model)
             deleteListener(model, proxy, agaClient)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)

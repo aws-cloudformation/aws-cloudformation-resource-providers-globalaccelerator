@@ -75,7 +75,6 @@ class DeleteHandlerTest {
 
     @Test
     fun handleRequest_AlreadyDeletedListener() {
-
         val handler = DeleteHandler()
         val model = ResourceModel.builder()
                 .listenerArn("TEST_LISTENER_ARN")
@@ -102,7 +101,6 @@ class DeleteHandlerTest {
 
     @Test
     fun handleRequest_DeleteInProgressListener() {
-
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
                         .withAcceleratorArn("ACCELERATOR_ARN")
@@ -119,8 +117,6 @@ class DeleteHandlerTest {
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
 
         doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(DescribeListenerResult().withListener(Listener().withListenerArn("TEST_LISTENER_ARN")))
-                .`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeListenerRequest::class.java), any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val response = handler.handleRequest(proxy!!, request, context, logger!!)
 
@@ -131,5 +127,55 @@ class DeleteHandlerTest {
         Assertions.assertNull(response.message)
         Assertions.assertNull(response.errorCode)
         Assertions.assertNull(response.resourceModels)
+    }
+
+    @Test
+    fun handleRequest_ListenerDoesNotExist_AcceleratorInProgress_ReturnsInProgress() {
+        val describeAcceleratorResult = DescribeAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withStatus(AcceleratorStatus.IN_PROGRESS))
+        val handler = DeleteHandler()
+        val model = ResourceModel.builder()
+                .listenerArn("TEST_LISTENER_ARN")
+                .acceleratorArn("TEST_ACCELERATOR_ARN")
+                .build()
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(model)
+                .previousResourceState(model)
+                .build()
+        val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
+
+        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<java.util.function.Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+
+        val response = handler.handleRequest(proxy!!, request, context, logger!!)
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.resourceModel, model)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.errorCode)
+        Assertions.assertNull(response.resourceModels)
+    }
+
+    @Test
+    fun handleRequest_ThresholdTimeExceeded() {
+
+        val handler = DeleteHandler()
+        val model = ResourceModel.builder()
+                .listenerArn("TEST_LISTENER_ARN")
+                .acceleratorArn("TEST_ACCELERATOR_ARN")
+                .build()
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(model)
+                .previousResourceState(model)
+                .build()
+        val context = CallbackContext(stabilizationRetriesRemaining = 0, pendingStabilization = true)
+
+        val exception = Assertions.assertThrows(RuntimeException::class.java) {
+            handler.handleRequest(proxy!!, request, context, logger!!)
+        }
+
+        Assertions.assertEquals("Timed out waiting for listener to be deployed.", exception.message)
     }
 }
