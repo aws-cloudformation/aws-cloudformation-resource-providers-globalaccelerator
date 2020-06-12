@@ -18,18 +18,27 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
             logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         logger.debug("Delete Listener Request [$request]")
         val agaClient = AcceleratorClientBuilder.client
+        val inferredCallbackContext = callbackContext
+                ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false);
         val model = request.desiredResourceState
-        val foundListener = HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
-        if (foundListener != null) {
-            deleteListener(model.listenerArn, proxy, agaClient, logger)
+
+        HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
+                ?: return ProgressEvent.defaultSuccessHandler(model)
+
+        return if (!inferredCallbackContext.pendingStabilization) {
+            deleteListener(model, proxy, agaClient)
+        } else {
+            HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
-        return ProgressEvent.defaultSuccessHandler(model)
     }
 
-    private fun deleteListener(listenerArn: String,
+    private fun deleteListener(model: ResourceModel,
                                proxy: AmazonWebServicesClientProxy,
-                               agaClient: AWSGlobalAccelerator, logger: Logger) {
-        val request = DeleteListenerRequest().withListenerArn(listenerArn)
+                               agaClient: AWSGlobalAccelerator): ProgressEvent<ResourceModel, CallbackContext?> {
+        val request = DeleteListenerRequest().withListenerArn(model.listenerArn)
         proxy.injectCredentialsAndInvoke(request, agaClient::deleteListener);
+        val callbackContext = CallbackContext(stabilizationRetriesRemaining = (HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES),
+                pendingStabilization = true)
+        return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
     }
 }

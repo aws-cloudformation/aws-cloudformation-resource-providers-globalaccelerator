@@ -18,7 +18,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
             proxy: AmazonWebServicesClientProxy,
             request: ResourceHandlerRequest<ResourceModel>,
             callbackContext: CallbackContext?,
-            logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
+            logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         logger.debug("Update Listener Request $request")
         val agaClient = AcceleratorClientBuilder.client
         val inferredCallbackContext = callbackContext
@@ -35,7 +35,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                    handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                    proxy: AmazonWebServicesClientProxy,
                                    agaClient: AWSGlobalAccelerator,
-                                   logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
+                                   logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         val listener = updateListener(model, handlerRequest, proxy, agaClient)
         model.clientAffinity = listener.clientAffinity
         model.protocol = listener.protocol

@@ -27,7 +27,7 @@ object HandlerCommons {
                                 model: ResourceModel,
                                 proxy: AmazonWebServicesClientProxy,
                                 agaClient: AWSGlobalAccelerator,
-                                logger: Logger): ProgressEvent<ResourceModel, CallbackContext> {
+                                logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
 
         logger.debug("Waiting for accelerator to be deployed. arn: ${model.acceleratorArn}. " +
                 "Stabilization retries remaining ${context.stabilizationRetriesRemaining}")
@@ -72,7 +72,7 @@ object HandlerCommons {
             val request = DescribeListenerRequest().withListenerArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
         } catch (ex: ListenerNotFoundException) {
-            logger.error("Listener not found. arn: [$arn]")
+            logger.debug("Listener not found. arn: [$arn]")
             null
         }
     }
