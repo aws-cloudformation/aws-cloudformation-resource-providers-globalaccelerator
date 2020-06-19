@@ -1,7 +1,16 @@
 package software.amazon.globalaccelerator.endpointgroup
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
-import com.amazonaws.services.globalaccelerator.model.*
+import com.amazonaws.services.globalaccelerator.model.Accelerator
+import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException
+import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
+import com.amazonaws.services.globalaccelerator.model.DescribeEndpointGroupRequest
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest
+import com.amazonaws.services.globalaccelerator.model.EndpointGroup
+import com.amazonaws.services.globalaccelerator.model.EndpointGroupNotFoundException
+import com.amazonaws.services.globalaccelerator.model.Listener
+import com.amazonaws.services.globalaccelerator.model.ListenerNotFoundException
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
@@ -22,7 +31,8 @@ object HandlerCommons {
                                 model: ResourceModel,
                                 proxy: AmazonWebServicesClientProxy,
                                 agaClient: AWSGlobalAccelerator,
-                                logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+                                logger: Logger,
+                                isDelete: Boolean = false): ProgressEvent<ResourceModel, CallbackContext?> {
 
         val acceleratorArn = ListenerArn(model.listenerArn).acceleratorArn
         logger.debug("Waiting for accelerator to be deployed. arn: $acceleratorArn. " +
@@ -34,6 +44,14 @@ object HandlerCommons {
         }
 
         val accelerator = getAccelerator(acceleratorArn, proxy, agaClient, logger)
+
+        // Addresses race condition: accelerator associated with endpointgroup is deleted out-of-band.
+        // Sequence diagram :: Delete EndpointGroup -> (accelerator deleted) -> waiting for accelerator to go-in-sync
+        // Ignore AcceleratorNotFoundException exception.
+        if (accelerator == null && isDelete) {
+            return ProgressEvent.defaultSuccessHandler(model)
+        }
+
         return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
             ProgressEvent.defaultSuccessHandler(model)
         } else {

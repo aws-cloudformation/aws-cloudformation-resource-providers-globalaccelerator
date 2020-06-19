@@ -27,7 +27,8 @@ object HandlerCommons {
                                 model: ResourceModel,
                                 proxy: AmazonWebServicesClientProxy,
                                 agaClient: AWSGlobalAccelerator,
-                                logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+                                logger: Logger,
+                                isDelete: Boolean = false): ProgressEvent<ResourceModel, CallbackContext?> {
 
         logger.debug("Waiting for accelerator to be deployed. arn: ${model.acceleratorArn}. " +
                 "Stabilization retries remaining ${context.stabilizationRetriesRemaining}")
@@ -38,6 +39,14 @@ object HandlerCommons {
         }
 
         val accelerator = getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
+
+        // Addresses race condition: accelerator associated with listener is deleted out-of-band.
+        // Sequence diagram :: Delete Listener -> (accelerator deleted) -> waiting for accelerator to go-in-sync
+        // Ignore AcceleratorNotFoundException exception.
+        if (accelerator == null && isDelete) {
+            return ProgressEvent.defaultSuccessHandler(model)
+        }
+
         return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
             logger.debug("Accelerator is deployed. arn: ${accelerator.acceleratorArn}")
             ProgressEvent.defaultSuccessHandler(model)

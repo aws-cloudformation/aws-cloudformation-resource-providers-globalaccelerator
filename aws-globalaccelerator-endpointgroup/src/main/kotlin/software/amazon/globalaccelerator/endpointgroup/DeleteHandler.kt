@@ -25,7 +25,7 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
                     ?: return ProgressEvent.defaultSuccessHandler(model)
             deleteEndpointGroup(model, proxy, agaClient)
         } else {
-            HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
+            HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger, isDelete = true)
         }
     }
 

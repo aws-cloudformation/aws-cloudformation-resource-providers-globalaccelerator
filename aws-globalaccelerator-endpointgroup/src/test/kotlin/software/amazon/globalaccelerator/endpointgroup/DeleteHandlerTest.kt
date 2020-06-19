@@ -3,6 +3,7 @@ package software.amazon.globalaccelerator.endpointgroup
 import com.amazonaws.AmazonWebServiceResult
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.services.globalaccelerator.model.Accelerator
+import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
 import com.amazonaws.services.globalaccelerator.model.DeleteEndpointGroupRequest
 import com.amazonaws.services.globalaccelerator.model.DeleteEndpointGroupResult
@@ -153,6 +154,41 @@ class DeleteHandlerTest {
         }
 
         Assertions.assertEquals("Timed out waiting for endpoint group to be deployed.", exception.message)
+    }
+
+    @Test
+    fun handleRequest_AcceleratorDoesntExist() {
+
+        val endpointConfigurations = ArrayList<EndpointConfiguration>()
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
+        val model = ResourceModel.builder()
+                .endpointGroupRegion("us-west-2")
+                .listenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234")
+                .endpointGroupArn("ENDPOINT_GROUP_ARN")
+                .healthCheckPort(20)
+                .thresholdCount(3)
+                .trafficDialPercentage(100.0)
+                .healthCheckPath("/HEALTH")
+                .endpointConfigurations(endpointConfigurations)
+                .build()
+        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
+        val callbackContext = CallbackContext(10, pendingStabilization = true)
+        val handler = DeleteHandler()
+
+        doThrow(AcceleratorNotFoundException("NOT FOUND")).`when`(proxy)!!.injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java),
+                any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+
+        val response = handler.handleRequest(proxy!!, request, callbackContext, logger!!)
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertEquals(response.resourceModel, model)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.errorCode)
+        Assertions.assertNull(response.resourceModels)
     }
 
 }

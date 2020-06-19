@@ -3,6 +3,7 @@ package software.amazon.globalaccelerator.listener
 import com.amazonaws.AmazonWebServiceResult
 import com.amazonaws.ResponseMetadata
 import com.amazonaws.services.globalaccelerator.model.Accelerator
+import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
 import com.amazonaws.services.globalaccelerator.model.DeleteListenerRequest
 import com.amazonaws.services.globalaccelerator.model.DeleteListenerResult
@@ -177,5 +178,34 @@ class DeleteHandlerTest {
         }
 
         Assertions.assertEquals("Timed out waiting for listener to be deployed.", exception.message)
+    }
+
+    @Test
+    fun handleRequest_AcceleratorDoesntExist() {
+
+        val handler = DeleteHandler()
+        val model = ResourceModel.builder()
+                .listenerArn("TEST_LISTENER_ARN")
+                .acceleratorArn("TEST_ACCELERATOR_ARN")
+                .build()
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(model)
+                .previousResourceState(model)
+                .build()
+        val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
+
+        doThrow(AcceleratorNotFoundException("NOT FOUND")).`when`(proxy)!!.injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java),
+                any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+
+        val response = handler.handleRequest(proxy!!, request, context, logger!!)
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertEquals(response.resourceModel, model)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.errorCode)
+        Assertions.assertNull(response.resourceModels)
     }
 }
