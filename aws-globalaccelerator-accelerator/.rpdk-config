@@ -10,6 +10,7 @@
             "amazon",
             "globalaccelerator",
             "accelerator"
-        ]
+        ],
+        "protocolVersion": "2.0.0"
     }
 }
