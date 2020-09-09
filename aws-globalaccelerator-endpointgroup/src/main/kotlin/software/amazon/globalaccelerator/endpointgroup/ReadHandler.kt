@@ -2,6 +2,7 @@ package software.amazon.globalaccelerator.endpointgroup
 
 import com.amazonaws.services.globalaccelerator.model.EndpointDescription
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup
+import com.amazonaws.services.globalaccelerator.model.PortOverride
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
@@ -41,6 +42,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
                 this.trafficDialPercentage = endpointGroup.trafficDialPercentage.toDouble()
                 this.endpointGroupRegion = endpointGroup.endpointGroupRegion
                 this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
+                this.portOverrides = getPortOverrides(endpointGroup.portOverrides)
             }
         } else {
             null
@@ -53,6 +55,15 @@ class ReadHandler : BaseHandler<CallbackContext>() {
                     .clientIPPreservationEnabled(it.clientIPPreservationEnabled)
                     .endpointId(it.endpointId)
                     .weight(it.weight)
+                    .build()
+        }
+    }
+
+    private fun getPortOverrides(overrides: List<PortOverride>?): List<software.amazon.globalaccelerator.endpointgroup.PortOverride>? {
+        return overrides?.map {
+            software.amazon.globalaccelerator.endpointgroup.PortOverride.builder()
+                    .listenerPort(it.listenerPort)
+                    .endpointPort(it.endpointPort)
                     .build()
         }
     }

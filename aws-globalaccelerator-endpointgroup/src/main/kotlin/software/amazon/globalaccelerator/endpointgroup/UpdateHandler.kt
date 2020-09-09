@@ -9,6 +9,7 @@ import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
+import java.util.ArrayList
 
 /**
  * Update handler implementation for Endpoint Group resource.
@@ -23,14 +24,13 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
         val inferredCallbackContext = callbackContext
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false)
         val model = request.desiredResourceState
-        val previousModel = request.previousResourceState
         HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
                         Exception("Failed to find endpoint group with arn:[${model.endpointGroupArn}]"),
                         HandlerErrorCode.NotFound
                 )
         return if (!inferredCallbackContext.pendingStabilization) {
-            updateEndpointGroup(model, previousModel, proxy, agaClient, logger)
+            updateEndpointGroup(model, request.previousResourceState, proxy, agaClient, logger)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
@@ -60,8 +60,12 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
         val previousPortOverrides = previousModel.portOverrides?.map {PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
 
         // Portoverrides are ignored if they are missing in both previous and current cfn-stack-template.
-        if (!previousPortOverrides.isNullOrEmpty() || !portOverrides.isNullOrEmpty()) {
-            request.withPortOverrides(portOverrides)
+        if (!previousPortOverrides.isNullOrEmpty() || portOverrides != null) {
+            if (portOverrides.isNullOrEmpty()) {
+                request.withPortOverrides(ArrayList<PortOverride>())
+            } else {
+                request.withPortOverrides(portOverrides)
+            }
         }
 
         proxy.injectCredentialsAndInvoke(request, agaClient::updateEndpointGroup).endpointGroup
