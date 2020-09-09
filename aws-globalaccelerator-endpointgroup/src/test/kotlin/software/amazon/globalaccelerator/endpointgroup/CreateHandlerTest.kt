@@ -33,6 +33,8 @@ class CreateHandlerTest {
     @Mock
     private var logger: Logger? = null
 
+    private val LISTENER_ARN = "arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234"
+
     @BeforeEach
     fun setup() {
         proxy = mock(AmazonWebServicesClientProxy::class.java)
@@ -69,7 +71,7 @@ class CreateHandlerTest {
         // return a listener
         val describeListenerResult = DescribeListenerResult()
                 .withListener(Listener()
-                        .withListenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234"))
+                        .withListenerArn(LISTENER_ARN))
         doReturn(describeListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeListenerRequest::class.java), any<java.util.function.Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         // the endpoint group create result
@@ -83,13 +85,13 @@ class CreateHandlerTest {
                         .withHealthCheckIntervalSeconds(10)
                         .withThresholdCount(4)
                         .withTrafficDialPercentage(100.0f)
-                        .withEndpointDescriptions(createEndpointDescription()))
+                        .withEndpointDescriptions(createEndpointDescription())
+                )
         doReturn(createEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(CreateEndpointGroupRequest::class.java), any<java.util.function.Function<CreateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
-        // create the that will go to our handler
         val model = ResourceModel.builder()
                 .endpointGroupRegion("us-west-2")
-                .listenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234")
+                .listenerArn(LISTENER_ARN)
                 .healthCheckPort(-1)
                 .thresholdCount(3)
                 .build()
@@ -131,7 +133,7 @@ class CreateHandlerTest {
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
         val model = ResourceModel.builder()
                 .endpointGroupRegion("us-west-2")
-                .listenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234")
+                .listenerArn(LISTENER_ARN)
                 .endpointGroupArn("ENDPOINT_GROUP")
                 .healthCheckPort(20)
                 .thresholdCount(3)
@@ -170,7 +172,7 @@ class CreateHandlerTest {
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
         val model = ResourceModel.builder()
                 .endpointGroupRegion("us-west-2")
-                .listenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234")
+                .listenerArn(LISTENER_ARN)
                 .endpointGroupArn("ENDPOINT_GROUP")
                 .healthCheckPort(20)
                 .thresholdCount(3)
@@ -203,7 +205,7 @@ class CreateHandlerTest {
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
         val model = ResourceModel.builder()
                 .endpointGroupRegion("us-west-2")
-                .listenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234")
+                .listenerArn(LISTENER_ARN)
                 .endpointGroupArn("ENDPOINT_GROUP_ARN")
                 .healthCheckPort(20)
                 .thresholdCount(3)
@@ -222,4 +224,64 @@ class CreateHandlerTest {
         }
         Assertions.assertEquals("Timed out waiting for endpoint group to be deployed.", exception.message)
     }
+
+    @Test
+    fun handleRequest_CreateEndpointGroupWithPortOverrides_ReturnsInProgress() {
+        val describeAcceleratorResult = DescribeAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withStatus(AcceleratorStatus.IN_PROGRESS))
+        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<java.util.function.Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        val describeListenerResult = DescribeListenerResult().withListener(Listener().withListenerArn(LISTENER_ARN))
+        doReturn(describeListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeListenerRequest::class.java), any<java.util.function.Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        val returnedPortOverrides = com.amazonaws.services.globalaccelerator.model.PortOverride().withListenerPort(80).withEndpointPort(8080)
+        val createEndpointGroupResult = CreateEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup()
+                        .withEndpointGroupArn("ENDPOINTGROUP_ARN")
+                        .withHealthCheckPath("/MYPATH")
+                        .withHealthCheckPort(200)
+                        .withEndpointGroupRegion("us-west-2")
+                        .withHealthCheckProtocol("HTTP")
+                        .withHealthCheckIntervalSeconds(10)
+                        .withThresholdCount(4)
+                        .withTrafficDialPercentage(100.0f)
+                        .withEndpointDescriptions(createEndpointDescription())
+                        .withPortOverrides(returnedPortOverrides)
+                )
+        doReturn(createEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(CreateEndpointGroupRequest::class.java), any<java.util.function.Function<CreateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+
+        val portOverrides = listOf(PortOverride(80, 8080))
+        val model = ResourceModel.builder()
+                .endpointGroupRegion("us-west-2")
+                .listenerArn(LISTENER_ARN)
+                .healthCheckPort(-1)
+                .thresholdCount(3)
+                .portOverrides(portOverrides)
+                .build()
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
+        val handler = CreateHandler()
+        val response = handler.handleRequest(proxy!!, request, null, logger!!)
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.message)
+        Assertions.assertNull(response.resourceModels)
+        Assertions.assertEquals(response.resourceModel.endpointGroupArn, "ENDPOINTGROUP_ARN")
+        Assertions.assertFalse(response.callbackContext!!.pendingStabilization)
+
+        Assertions.assertEquals(response.resourceModel.healthCheckPath, "/MYPATH")
+        Assertions.assertEquals(response.resourceModel.healthCheckPort, 200)
+        Assertions.assertEquals(response.resourceModel.endpointGroupRegion, "us-west-2")
+        Assertions.assertEquals(response.resourceModel.healthCheckProtocol, "HTTP")
+        Assertions.assertEquals(response.resourceModel.healthCheckIntervalSeconds, 10)
+        Assertions.assertEquals(response.resourceModel.thresholdCount, 4)
+        Assertions.assertEquals(response.resourceModel.trafficDialPercentage, 100.0)
+        Assertions.assertEquals(response.resourceModel.portOverrides.size, 1)
+        Assertions.assertEquals(response.resourceModel.portOverrides[0].listenerPort, returnedPortOverrides.listenerPort)
+        Assertions.assertEquals(response.resourceModel.portOverrides[0].endpointPort, returnedPortOverrides.endpointPort)
+    }
+
 }

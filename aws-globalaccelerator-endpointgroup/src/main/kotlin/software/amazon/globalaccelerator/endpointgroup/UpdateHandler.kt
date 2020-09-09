@@ -2,6 +2,7 @@ package software.amazon.globalaccelerator.endpointgroup
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration
+import com.amazonaws.services.globalaccelerator.model.PortOverride
 import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupRequest
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
@@ -22,19 +23,21 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
         val inferredCallbackContext = callbackContext
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false)
         val model = request.desiredResourceState
+        val previousModel = request.previousResourceState
         HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
                         Exception("Failed to find endpoint group with arn:[${model.endpointGroupArn}]"),
                         HandlerErrorCode.NotFound
                 )
         return if (!inferredCallbackContext.pendingStabilization) {
-            updateEndpointGroup(model, proxy, agaClient, logger)
+            updateEndpointGroup(model, previousModel, proxy, agaClient, logger)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
     }
 
     private fun updateEndpointGroup(model: ResourceModel,
+                                    previousModel: ResourceModel,
                                     proxy: AmazonWebServicesClientProxy,
                                     agaClient: AWSGlobalAccelerator,
                                     logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
@@ -52,6 +55,15 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                 .withThresholdCount(model.thresholdCount)
                 .withTrafficDialPercentage(trafficDialPercentage)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
+
+        val portOverrides = model.portOverrides?.map { PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
+        val previousPortOverrides = previousModel.portOverrides?.map {PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
+
+        // Portoverrides are ignored if they are missing in both previous and current cfn-stack-template.
+        if (!previousPortOverrides.isNullOrEmpty() || !portOverrides.isNullOrEmpty()) {
+            request.withPortOverrides(portOverrides)
+        }
+
         proxy.injectCredentialsAndInvoke(request, agaClient::updateEndpointGroup).endpointGroup
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES,
                 pendingStabilization = true)

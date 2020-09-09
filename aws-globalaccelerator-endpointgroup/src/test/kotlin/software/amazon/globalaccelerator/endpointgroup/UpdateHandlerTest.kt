@@ -87,6 +87,7 @@ class UpdateHandlerTest {
     @Test
     fun handleRequest_UpdateEndpointGroup_PendingReturnsInProgress() {
         val handler = UpdateHandler()
+        val previousModel = createTestResourceModel()
         val desiredModel = createTestResourceModel()
 
         val describeEndpointGroupResult = DescribeEndpointGroupResult()
@@ -101,16 +102,17 @@ class UpdateHandlerTest {
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
                 .build()
 
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.IN_PROGRESS)
-        Assertions.assertNotNull(response.getResourceModel())
-        Assertions.assertNotNull(response.getCallbackContext())
-        Assertions.assertEquals(response.getCallbackDelaySeconds(), 0)
-        Assertions.assertEquals(response.getResourceModel().getEndpointGroupArn(), "ENDPOINTGROUP_ARN")
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertEquals(response.resourceModel.endpointGroupArn, "ENDPOINTGROUP_ARN")
         Assertions.assertTrue(response.callbackContext!!.pendingStabilization)
     }
 
@@ -140,11 +142,11 @@ class UpdateHandlerTest {
         val response = handler.handleRequest(proxy!!, request, context, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
-        Assertions.assertNotNull(response.getResourceModel())
-        Assertions.assertNull(response.getCallbackContext())
-        Assertions.assertEquals(response.getCallbackDelaySeconds(), 0)
-        Assertions.assertEquals(response.getResourceModel().getEndpointGroupArn(), "ENDPOINTGROUP_ARN")
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertEquals(response.resourceModel.endpointGroupArn, "ENDPOINTGROUP_ARN")
     }
 
     @Test
@@ -167,5 +169,112 @@ class UpdateHandlerTest {
             handler.handleRequest(proxy!!, request, context, logger!!)
         }
         Assertions.assertEquals("Timed out waiting for endpoint group to be deployed.", exception.message)
+    }
+
+    @Test
+    fun handleRequest_UpdateEndpointGroupWithPortOverrides() {
+        val handler = UpdateHandler()
+        val previousModel = createTestResourceModel()
+        val desiredModel = createTestResourceModel()
+        val portOverrides = listOf(PortOverride(80, 8080))
+        desiredModel.portOverrides = portOverrides
+
+        val describeEndpointGroupResult = DescribeEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup()
+                        .withEndpointGroupArn("ENDPOINTGROUP_ARN"))
+
+        val updateEndpointGroupResult = UpdateEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup().withEndpointGroupArn("ENDPOINTGROUP_ARN"))
+
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
+                .build()
+
+        val response = handler.handleRequest(proxy!!, request, null, logger!!)
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertEquals(response.resourceModel.endpointGroupArn, "ENDPOINTGROUP_ARN")
+        Assertions.assertTrue(response.callbackContext!!.pendingStabilization)
+        Assertions.assertEquals(response.resourceModel.portOverrides.size, 1)
+        Assertions.assertEquals(response.resourceModel.portOverrides[0].listenerPort, portOverrides[0].listenerPort)
+        Assertions.assertEquals(response.resourceModel.portOverrides[0].endpointPort, portOverrides[0].endpointPort)
+    }
+
+    @Test
+    fun handleRequest_UpdateEndpointGroupWithNullPortOverrides() {
+        val handler = UpdateHandler()
+        val portOverrides = listOf(PortOverride(80, 8080))
+        val previousModel = createTestResourceModel()
+        previousModel.portOverrides = portOverrides
+
+        val desiredModel = createTestResourceModel()
+        val describeEndpointGroupResult = DescribeEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup()
+                        .withEndpointGroupArn("ENDPOINTGROUP_ARN"))
+
+        val updateEndpointGroupResult = UpdateEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup().withEndpointGroupArn("ENDPOINTGROUP_ARN"))
+
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
+                .build()
+
+        val response = handler.handleRequest(proxy!!, request, null, logger!!)
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertEquals(response.resourceModel.endpointGroupArn, "ENDPOINTGROUP_ARN")
+        Assertions.assertTrue(response.callbackContext!!.pendingStabilization)
+        Assertions.assertNull(response.resourceModel.portOverrides)
+    }
+
+    @Test
+    fun handleRequest_UpdateEndpointGroupWithEmptyPortOverrides() {
+        val handler = UpdateHandler()
+        val portOverrides = ArrayList<PortOverride>()
+        val previousModel = createTestResourceModel()
+        previousModel.portOverrides = portOverrides
+
+        val desiredModel = createTestResourceModel()
+        val describeEndpointGroupResult = DescribeEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup()
+                        .withEndpointGroupArn("ENDPOINTGROUP_ARN"))
+
+        val updateEndpointGroupResult = UpdateEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup().withEndpointGroupArn("ENDPOINTGROUP_ARN"))
+
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
+                .build()
+
+        val response = handler.handleRequest(proxy!!, request, null, logger!!)
+
+        Assertions.assertNotNull(response)
+        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNotNull(response.callbackContext)
+        Assertions.assertEquals(response.callbackDelaySeconds, 0)
+        Assertions.assertEquals(response.resourceModel.endpointGroupArn, "ENDPOINTGROUP_ARN")
+        Assertions.assertTrue(response.callbackContext!!.pendingStabilization)
+        Assertions.assertNull(response.resourceModel.portOverrides)
     }
 }

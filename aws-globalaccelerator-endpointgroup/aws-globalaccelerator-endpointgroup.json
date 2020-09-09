@@ -27,6 +27,28 @@
       "required": [
         "EndpointId"
       ]
+    },
+    "Port": {
+      "description": "A network port number",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 65535
+    },
+    "PortOverride": {
+      "description": "listener to endpoint port mapping.",
+      "type": "object",
+      "properties": {
+        "ListenerPort": {
+          "$ref": "#/definitions/Port"
+        },
+        "EndpointPort": {
+          "$ref": "#/definitions/Port"
+        }
+      },
+      "required": [
+        "ListenerPort",
+        "EndpointPort"
+      ]
     }
   },
   "properties": {
@@ -88,6 +110,12 @@
     "EndpointGroupArn": {
       "description": "The Amazon Resource Name (ARN) of the endpoint group",
       "type": "string"
+    },
+    "PortOverrides": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/PortOverride"
+      }
     }
   },
   "required": [

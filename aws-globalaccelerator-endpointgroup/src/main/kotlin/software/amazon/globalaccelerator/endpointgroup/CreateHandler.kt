@@ -5,6 +5,7 @@ import com.amazonaws.services.globalaccelerator.model.CreateEndpointGroupRequest
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration
 import com.amazonaws.services.globalaccelerator.model.EndpointDescription
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup
+import com.amazonaws.services.globalaccelerator.model.PortOverride
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
@@ -56,6 +57,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
             this.thresholdCount = endpointGroup.thresholdCount
             this.trafficDialPercentage = endpointGroup.trafficDialPercentage.toDouble()
             this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
+            this.portOverrides = getPortOverrides(endpointGroup.portOverrides)
         }
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
@@ -69,6 +71,15 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                     .build()}
     }
 
+    private fun getPortOverrides(overrides: List<PortOverride>?): List<software.amazon.globalaccelerator.endpointgroup.PortOverride>? {
+        return overrides?.map {
+            software.amazon.globalaccelerator.endpointgroup.PortOverride.builder()
+                    .listenerPort(it.listenerPort)
+                    .endpointPort(it.endpointPort)
+                    .build()
+        }
+    }
+
     private fun createEndpointGroup(model: ResourceModel,
                                     handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                     proxy: AmazonWebServicesClientProxy,
@@ -78,6 +89,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                     .withEndpointId(it.endpointId).withWeight(it.weight)
                     .withClientIPPreservationEnabled(it.clientIPPreservationEnabled)}
         val trafficDialPercentage = model.trafficDialPercentage?.toFloat() ?: 100.0f
+        val portOverrides = model.portOverrides?.map { PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
         val createEndpointGroupRequest = CreateEndpointGroupRequest()
                 .withListenerArn(model.listenerArn)
                 .withEndpointGroupRegion(model.endpointGroupRegion)
@@ -88,6 +100,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                 .withThresholdCount(model.thresholdCount)
                 .withTrafficDialPercentage(trafficDialPercentage)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
+                .withPortOverrides(portOverrides)
                 .withIdempotencyToken(handlerRequest.clientRequestToken)
         return proxy.injectCredentialsAndInvoke(createEndpointGroupRequest, agaClient::createEndpointGroup).endpointGroup;
     }
