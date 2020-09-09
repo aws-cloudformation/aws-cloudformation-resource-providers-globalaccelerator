@@ -59,13 +59,10 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
         val portOverrides = model.portOverrides?.map { PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
         val previousPortOverrides = previousModel.portOverrides?.map {PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
 
-        // Portoverrides are ignored if they are missing in both previous and current cfn-stack-template.
-        if (!previousPortOverrides.isNullOrEmpty() || portOverrides != null) {
-            if (portOverrides.isNullOrEmpty()) {
-                request.withPortOverrides(ArrayList<PortOverride>())
-            } else {
-                request.withPortOverrides(portOverrides)
-            }
+        if (portOverrides != null) {
+            request.withPortOverrides(portOverrides)
+        } else if (previousPortOverrides != null) {
+            request.withPortOverrides(ArrayList<PortOverride>())
         }
 
         proxy.injectCredentialsAndInvoke(request, agaClient::updateEndpointGroup).endpointGroup
