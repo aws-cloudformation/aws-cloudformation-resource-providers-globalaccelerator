@@ -59,6 +59,9 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
         val portOverrides = model.portOverrides?.map { PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
         val previousPortOverrides = previousModel.portOverrides?.map {PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
 
+        // Port-overrides are not updated if they are missing in previous and current CloudFormation stack templates.
+        // This is to preserve any changes that are done outside CloudFormation context (AWS CLI or console).
+        // We will update this behavior to be consistent as other fields after feature is publicly available.
         if (portOverrides != null) {
             request.withPortOverrides(portOverrides)
         } else if (previousPortOverrides != null) {
