@@ -42,7 +42,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-core</artifactId>
-            <version>1.11.749</version>
+            <version>1.11.885</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
@@ -82,18 +82,10 @@
             <scope>test</scope>
         </dependency>
         <!-- https://mvnrepository.com/artifact/com.amazonaws/aws-java-sdk-globalaccelerator -->
-<!--        <dependency>-->
-<!--            <groupId>com.amazonaws</groupId>-->
-<!--            <artifactId>aws-java-sdk-globalaccelerator</artifactId>-->
-<!--            <version>1.11.749</version>-->
-<!--        </dependency>-->
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-globalaccelerator</artifactId>
-            <version>1.11.1000</version>
-            <type>jar</type>
-            <scope>system</scope>
-            <systemPath>${basedir}/AWSGlobalAcceleratorJavaClient-1.11.x.jar</systemPath>
+            <version>1.11.885</version>
         </dependency>
     </dependencies>
 
