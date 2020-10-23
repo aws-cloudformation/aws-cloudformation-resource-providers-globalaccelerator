@@ -2,12 +2,14 @@ package software.amazon.globalaccelerator.endpointgroup
 
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration
+import com.amazonaws.services.globalaccelerator.model.PortOverride
 import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupRequest
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
+import java.util.ArrayList
 
 /**
  * Update handler implementation for Endpoint Group resource.
@@ -28,13 +30,14 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                         HandlerErrorCode.NotFound
                 )
         return if (!inferredCallbackContext.pendingStabilization) {
-            updateEndpointGroup(model, proxy, agaClient, logger)
+            updateEndpointGroup(model, request.previousResourceState, proxy, agaClient, logger)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
     }
 
     private fun updateEndpointGroup(model: ResourceModel,
+                                    previousModel: ResourceModel,
                                     proxy: AmazonWebServicesClientProxy,
                                     agaClient: AWSGlobalAccelerator,
                                     logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
@@ -52,6 +55,19 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                 .withThresholdCount(model.thresholdCount)
                 .withTrafficDialPercentage(trafficDialPercentage)
                 .withEndpointConfigurations(convertedEndpointConfigurations)
+
+        val portOverrides = model.portOverrides?.map { PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
+        val previousPortOverrides = previousModel.portOverrides?.map {PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }
+
+        // Port-overrides are not updated if they are missing in previous and current CloudFormation stack templates.
+        // This is to preserve any changes that are done outside CloudFormation context (AWS CLI or console).
+        // CloudFormation launch is a followup to SDK and CLI, so this approach avoids any accidental overrides.
+        if (portOverrides != null) {
+            request.withPortOverrides(portOverrides)
+        } else if (previousPortOverrides != null) {
+            request.withPortOverrides(ArrayList<PortOverride>())
+        }
+
         proxy.injectCredentialsAndInvoke(request, agaClient::updateEndpointGroup).endpointGroup
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES,
                 pendingStabilization = true)

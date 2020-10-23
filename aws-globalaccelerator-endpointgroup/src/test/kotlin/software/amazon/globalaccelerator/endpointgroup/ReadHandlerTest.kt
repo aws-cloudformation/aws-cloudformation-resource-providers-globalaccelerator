@@ -32,6 +32,8 @@ class ReadHandlerTest {
     @Mock
     private var logger: Logger? = null
 
+    private val portOverrides = listOf(PortOverride(80, 8080))
+
     @BeforeEach
     fun setup() {
         proxy = mock(AmazonWebServicesClientProxy::class.java)
@@ -42,7 +44,6 @@ class ReadHandlerTest {
         val endpointConfigurations = ArrayList<EndpointConfiguration>()
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").build())
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
-
         return ResourceModel.builder()
                 .endpointGroupArn("ENDPOINTGROUP_ARN")
                 .endpointGroupRegion("us-west-2")
@@ -55,6 +56,7 @@ class ReadHandlerTest {
                 .healthCheckIntervalSeconds(10)
                 .healthCheckProtocol("TCP")
                 .listenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234")
+                .portOverrides(portOverrides)
                 .build()
     }
 
@@ -78,23 +80,28 @@ class ReadHandlerTest {
     @Test
     fun handleRequest_returnsMappedEndpointGroup() {
         val model = createTestResourceModel()
+        val returnedPortOverrides = com.amazonaws.services.globalaccelerator.model.PortOverride().withListenerPort(80).withEndpointPort(8080)
         val describeEndpointGroupResult = DescribeEndpointGroupResult()
                 .withEndpointGroup(EndpointGroup()
                         .withEndpointGroupArn("ENDPOINTGROUP_ARN")
                         .withEndpointGroupRegion("us-west-2")
                         .withTrafficDialPercentage(50.0f)
-                        .withEndpointDescriptions(createEndpointDescription()))
+                        .withEndpointDescriptions(createEndpointDescription())
+                        .withPortOverrides(returnedPortOverrides))
 
         doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val response = ReadHandler().handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.SUCCESS)
-        Assertions.assertNotNull(response.getResourceModel())
-        Assertions.assertNull(response.getCallbackContext())
-        Assertions.assertEquals(response.getResourceModel().getEndpointGroupArn(), "ENDPOINTGROUP_ARN")
-        Assertions.assertEquals(response.getResourceModel().getEndpointGroupRegion(), "us-west-2")
+        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.callbackContext)
+        Assertions.assertEquals(response.resourceModel.endpointGroupArn, "ENDPOINTGROUP_ARN")
+        Assertions.assertEquals(response.resourceModel.endpointGroupRegion, "us-west-2")
+        Assertions.assertEquals(response.resourceModel.portOverrides.size, 1)
+        Assertions.assertEquals(response.resourceModel.portOverrides[0].listenerPort, portOverrides[0].listenerPort)
+        Assertions.assertEquals(response.resourceModel.portOverrides[0].endpointPort, portOverrides[0].endpointPort)
     }
 
     @Test
@@ -106,8 +113,8 @@ class ReadHandlerTest {
         val response = ReadHandler().handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.FAILED)
-        Assertions.assertEquals(response.getErrorCode(), HandlerErrorCode.NotFound)
-        Assertions.assertNull(response.getResourceModel())
+        Assertions.assertEquals(response.status, OperationStatus.FAILED)
+        Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
+        Assertions.assertNull(response.resourceModel)
     }
 }
