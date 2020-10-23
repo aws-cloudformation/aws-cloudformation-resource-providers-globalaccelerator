@@ -63,23 +63,6 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
     }
 
-    private fun getEndpointConfigurations(endpointDescriptions: List<EndpointDescription>): List<software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration> {
-        return endpointDescriptions.map {software.amazon.globalaccelerator.endpointgroup.EndpointConfiguration.builder()
-                    .clientIPPreservationEnabled(it.clientIPPreservationEnabled)
-                    .endpointId(it.endpointId)
-                    .weight(it.weight)
-                    .build()}
-    }
-
-    private fun getPortOverrides(overrides: List<PortOverride>?): List<software.amazon.globalaccelerator.endpointgroup.PortOverride>? {
-        return overrides?.map {
-            software.amazon.globalaccelerator.endpointgroup.PortOverride.builder()
-                    .listenerPort(it.listenerPort)
-                    .endpointPort(it.endpointPort)
-                    .build()
-        }
-    }
-
     private fun createEndpointGroup(model: ResourceModel,
                                     handlerRequest: ResourceHandlerRequest<ResourceModel>,
                                     proxy: AmazonWebServicesClientProxy,
