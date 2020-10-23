@@ -61,7 +61,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
 
         // Port-overrides are not updated if they are missing in previous and current CloudFormation stack templates.
         // This is to preserve any changes that are done outside CloudFormation context (AWS CLI or console).
-        // We will update this behavior to be consistent as other fields after feature is publicly available.
+        // CloudFormation launch is a followup to SDK and CLI, so this approach avoids any accidental overrides.
         if (portOverrides != null) {
             request.withPortOverrides(portOverrides)
         } else if (previousPortOverrides != null) {
