@@ -1,5 +1,4 @@
 {
-    "artifact_type": "RESOURCE",
     "typeName": "AWS::GlobalAccelerator::Accelerator",
     "language": "java",
     "runtime": "java8",
@@ -13,6 +12,5 @@
             "accelerator"
         ],
         "protocolVersion": "2.0.0"
-    },
-    "executableEntrypoint": "software.amazon.globalaccelerator.accelerator.HandlerWrapperExecutable"
+    }
 }
