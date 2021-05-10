@@ -58,6 +58,6 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                 .withIpAddresses(model.ipAddresses)
                 .withTags(convertedTags)
                 .withIdempotencyToken(handlerRequest.clientRequestToken)
-        return proxy.injectCredentialsAndInvoke(request, { createAcceleratorRequest: CreateAcceleratorRequest? -> agaClient.createAccelerator(createAcceleratorRequest) }).accelerator
+        return proxy.injectCredentialsAndInvoke(request, agaClient::createAccelerator).accelerator
     }
 }
