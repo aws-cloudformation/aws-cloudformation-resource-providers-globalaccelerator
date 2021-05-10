@@ -90,7 +90,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                 .withEnabled(model.enabled)
                 .withIpAddressType(model.ipAddressType)
                 .withName(model.name)
-        return proxy.injectCredentialsAndInvoke(request, { updateAcceleratorRequest: UpdateAcceleratorRequest? -> agaClient.updateAccelerator(updateAcceleratorRequest) }).accelerator
+        return proxy.injectCredentialsAndInvoke(request, agaClient::updateAccelerator).accelerator
     }
 
     private fun updateTags(accelerator: Accelerator,
@@ -121,9 +121,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         if (!keysToDelete.isNullOrEmpty()) {
             logger.debug("Untagging tags: [$keysToDelete.toString()] for accelerator [${accelerator.acceleratorArn}]")
             val untagRequest = UntagResourceRequest().withResourceArn(accelerator.acceleratorArn).withTagKeys(keysToDelete)
-            proxy.injectCredentialsAndInvoke(untagRequest, { untagResourceRequest: UntagResourceRequest? ->
-                agaClient.untagResource(untagResourceRequest)
-            })
+            proxy.injectCredentialsAndInvoke(untagRequest,agaClient::untagResource)
         }
     }
 
@@ -136,7 +134,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
             logger.debug("No updates or new addition of tags.")
         } else {
             val tagRequest = TagResourceRequest().withResourceArn(accelerator.acceleratorArn).withTags(newTags)
-            proxy.injectCredentialsAndInvoke(tagRequest, { tagRequest: TagResourceRequest? -> agaClient.tagResource(tagRequest) })
+            proxy.injectCredentialsAndInvoke(tagRequest, agaClient::tagResource)
         }
     }
 
