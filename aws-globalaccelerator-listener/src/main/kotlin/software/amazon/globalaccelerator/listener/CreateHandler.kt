@@ -58,6 +58,6 @@ class CreateHandler : BaseHandler<CallbackContext>() {
                 .withProtocol(model.protocol)
                 .withPortRanges(convertedPortRanges)
                 .withIdempotencyToken(handlerRequest.clientRequestToken)
-        return proxy.injectCredentialsAndInvoke(createListenerRequest, agaClient::createListener).listener;
+        return proxy.injectCredentialsAndInvoke(createListenerRequest, agaClient::createListener).listener
     }
 }

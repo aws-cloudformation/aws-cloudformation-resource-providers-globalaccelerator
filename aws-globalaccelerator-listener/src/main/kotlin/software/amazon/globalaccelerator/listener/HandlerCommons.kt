@@ -44,12 +44,17 @@ object HandlerCommons {
         // Sequence diagram :: Delete Listener -> (accelerator deleted) -> waiting for accelerator to go-in-sync
         // Ignore AcceleratorNotFoundException exception.
         if (accelerator == null && isDelete) {
-            return ProgressEvent.defaultSuccessHandler(model)
+            return ProgressEvent.defaultSuccessHandler(null)
         }
 
         return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
             logger.debug("Accelerator is deployed. arn: ${accelerator.acceleratorArn}")
-            ProgressEvent.defaultSuccessHandler(model)
+            // Delete contract expects no model to be returned upon delete success
+            var resourceModel: ResourceModel? = model
+            if (isDelete) {
+                resourceModel = null
+            }
+            ProgressEvent.defaultSuccessHandler(resourceModel)
         } else {
             ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model)
         }

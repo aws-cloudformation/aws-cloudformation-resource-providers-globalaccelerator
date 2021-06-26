@@ -5,6 +5,7 @@ import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
 import com.amazonaws.services.globalaccelerator.model.DeleteAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.UpdateAcceleratorRequest
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
+import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
@@ -23,7 +24,7 @@ class DeleteHandler : BaseHandler<CallbackContext?>() {
         val inferredCallbackContext = callbackContext ?: CallbackContext(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
         val model = request.desiredResourceState
         val foundAccelerator = HandlerCommons.getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
-                ?: return ProgressEvent.defaultSuccessHandler(model)
+                ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Accelerator Not Found")
         if (foundAccelerator.enabled) {
             disableAccelerator(foundAccelerator.acceleratorArn, proxy, agaClient, logger)
         } else if (foundAccelerator.status == AcceleratorStatus.DEPLOYED.toString()) {
@@ -49,8 +50,11 @@ class DeleteHandler : BaseHandler<CallbackContext?>() {
                 throw RuntimeException(HandlerCommons.TIMED_OUT_MESSAGE)
             }
             val accelerator = HandlerCommons.getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
-            return accelerator?.let { ProgressEvent.defaultInProgressHandler(newCallbackContext, HandlerCommons.CALLBACK_DELAY_IN_SECONDS, model) }
-                    ?: ProgressEvent.defaultSuccessHandler(model)
+            if (accelerator != null) {
+                return ProgressEvent.defaultInProgressHandler(newCallbackContext, HandlerCommons.CALLBACK_DELAY_IN_SECONDS, model)
+            } else {
+                return ProgressEvent.defaultSuccessHandler(null)
+            }
         }
 
         private fun disableAccelerator(arn: String,

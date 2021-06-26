@@ -22,7 +22,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import java.util.ArrayList
 
 import org.junit.jupiter.api.Assertions
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import java.util.function.Function
@@ -52,10 +51,10 @@ class ReadHandlerTest {
                         .withProtocol(Protocol.TCP.toString())
                         .withClientAffinity(ClientAffinity.SOURCE_IP)
                         .withPortRanges(com.amazonaws.services.globalaccelerator.model.PortRange().withFromPort(90).withToPort(90)))
-        doReturn(describeListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeListenerRequest::class.java), ArgumentMatchers.any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeListenerRequest::class.java), any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val portRanges = ArrayList<PortRange>()
-        portRanges.add(software.amazon.globalaccelerator.listener.PortRange(90, 91))
+        portRanges.add(PortRange(90, 91))
         val model = ResourceModel.builder()
                 .listenerArn("LISTENER_ARN")
                 .acceleratorArn("ACCELERATOR_ARN")

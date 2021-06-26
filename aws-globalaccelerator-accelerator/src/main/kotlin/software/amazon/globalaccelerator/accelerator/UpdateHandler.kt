@@ -143,7 +143,11 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
     }
 
     private fun byoipIPsUpdated(currentModel: ResourceModel, previousModel: ResourceModel): Boolean {
-        return currentModel.ipAddresses != previousModel.ipAddresses
+        var ipAddressesUpdated = false
+        if  (currentModel.ipAddresses != null && currentModel.ipAddresses != previousModel.ipAddresses) {
+            ipAddressesUpdated = true
+        }
+        return ipAddressesUpdated
     }
 
 }

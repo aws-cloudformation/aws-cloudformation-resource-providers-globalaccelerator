@@ -23,17 +23,21 @@
       "required": [
         "FromPort",
         "ToPort"
-      ]
+      ],
+      "additionalProperties": false
     }
   },
   "properties": {
     "ListenerArn": {
       "description": "The Amazon Resource Name (ARN) of the listener.",
-      "type": "string"
+      "type": "string",
+      "pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):(\\w+)::(\\d{12}):(accelerator)/([0-9a-f-]+)/listener/([0-9a-f-]+)$"
+
     },
     "AcceleratorArn": {
       "description": "The Amazon Resource Name (ARN) of the accelerator.",
-      "type": "string"
+      "type": "string",
+      "pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):(\\w+)::(\\d{12}):(accelerator)/([0-9a-f-]+)$"
     },
     "PortRanges": {
       "type": "array",

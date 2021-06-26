@@ -2,7 +2,6 @@ package software.amazon.globalaccelerator.endpointgroup
 
 import com.amazonaws.AmazonWebServiceResult
 import com.amazonaws.ResponseMetadata
-import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
 import com.amazonaws.services.globalaccelerator.model.Accelerator
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Captor
 import org.mockito.Mock
@@ -87,9 +85,9 @@ class UpdateHandlerTest {
 
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.getStatus(), OperationStatus.FAILED)
-        Assertions.assertEquals(response.getErrorCode(), HandlerErrorCode.NotFound)
-        Assertions.assertNull(response.getResourceModel())
+        Assertions.assertEquals(response.status, OperationStatus.FAILED)
+        Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
+        Assertions.assertEquals(response.resourceModel, desiredModel)
     }
 
     @Test
@@ -105,8 +103,8 @@ class UpdateHandlerTest {
         val updateEndpointGroupResult = UpdateEndpointGroupResult()
                 .withEndpointGroup(EndpointGroup().withEndpointGroupArn("ENDPOINTGROUP_ARN"))
 
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest::class.java), any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(UpdateEndpointGroupRequest::class.java), any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
@@ -129,17 +127,12 @@ class UpdateHandlerTest {
         val handler = UpdateHandler()
         val desiredModel = createTestResourceModel()
 
-        val describeEndpointGroupResult = DescribeEndpointGroupResult()
-                .withEndpointGroup(EndpointGroup()
-                        .withEndpointGroupArn("ENDPOINTGROUP_ARN"))
-
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
                         .withAcceleratorArn("ACCELERATOR_ARN")
                         .withStatus(AcceleratorStatus.DEPLOYED.toString()))
 
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<java.util.function.Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
@@ -166,11 +159,6 @@ class UpdateHandlerTest {
                 .desiredResourceState(desiredModel)
                 .build()
 
-        val describeEndpointGroupResult = DescribeEndpointGroupResult()
-                .withEndpointGroup(EndpointGroup()
-                        .withEndpointGroupArn("ENDPOINTGROUP_ARN"))
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-
         val context = CallbackContext(0, true)
 
         val exception = Assertions.assertThrows(RuntimeException::class.java) {
@@ -194,8 +182,8 @@ class UpdateHandlerTest {
         val updateEndpointGroupResult = UpdateEndpointGroupResult()
                 .withEndpointGroup(EndpointGroup().withEndpointGroupArn("ENDPOINTGROUP_ARN"))
 
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest::class.java), any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(UpdateEndpointGroupRequest::class.java), any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
@@ -231,8 +219,8 @@ class UpdateHandlerTest {
         val updateEndpointGroupResult = UpdateEndpointGroupResult()
                 .withEndpointGroup(EndpointGroup().withEndpointGroupArn("ENDPOINTGROUP_ARN"))
 
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest::class.java), any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(UpdateEndpointGroupRequest::class.java), any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
@@ -267,8 +255,8 @@ class UpdateHandlerTest {
         val updateEndpointGroupResult = UpdateEndpointGroupResult()
                 .withEndpointGroup(EndpointGroup().withEndpointGroupArn("ENDPOINTGROUP_ARN"))
 
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest::class.java), any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(UpdateEndpointGroupRequest::class.java), any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
@@ -305,8 +293,8 @@ class UpdateHandlerTest {
         val updateEndpointGroupResult = UpdateEndpointGroupResult()
                 .withEndpointGroup(EndpointGroup().withEndpointGroupArn("ENDPOINTGROUP_ARN"))
 
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest::class.java), any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(updateEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(UpdateEndpointGroupRequest::class.java), any<Function<UpdateEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(desiredModel)
