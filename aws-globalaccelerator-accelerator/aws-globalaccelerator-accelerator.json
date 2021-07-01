@@ -68,8 +68,7 @@
     },
     "AcceleratorArn": {
       "description": "The Amazon Resource Name (ARN) of the accelerator.",
-      "type": "string",
-      "pattern": "^arn:(aws|aws-cn|aws-us-gov|aws-iso|aws-iso-b):(\\w+)::(\\d{12}):(accelerator)/([0-9a-f-]+)$"
+      "type": "string"
     },
     "Tags": {
       "type": "array",
