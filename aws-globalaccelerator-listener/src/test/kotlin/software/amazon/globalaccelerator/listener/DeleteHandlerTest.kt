@@ -96,7 +96,7 @@ class DeleteHandlerTest {
         Assertions.assertNull(response.callbackContext)
         Assertions.assertEquals(response.resourceModel, model)
         Assertions.assertNotNull(response.resourceModel)
-        Assertions.assertEquals(response.message, "Listener Not Found")
+        Assertions.assertEquals(response.message, "Listener not found.")
         Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
         Assertions.assertNull(response.resourceModels)
     }
