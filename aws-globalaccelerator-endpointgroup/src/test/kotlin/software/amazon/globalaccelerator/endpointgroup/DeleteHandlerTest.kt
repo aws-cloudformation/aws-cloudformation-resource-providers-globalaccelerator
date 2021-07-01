@@ -124,7 +124,7 @@ class DeleteHandlerTest {
         Assertions.assertEquals(response.status, OperationStatus.FAILED)
         Assertions.assertEquals(response.callbackDelaySeconds, 0)
         Assertions.assertNull(response.callbackContext)
-        Assertions.assertEquals(response.message, "Endpoint Group Not Found")
+        Assertions.assertEquals(response.message, "Endpoint Group not found.")
         Assertions.assertNull(response.resourceModels)
         Assertions.assertEquals(response.resourceModel, model)
     }
