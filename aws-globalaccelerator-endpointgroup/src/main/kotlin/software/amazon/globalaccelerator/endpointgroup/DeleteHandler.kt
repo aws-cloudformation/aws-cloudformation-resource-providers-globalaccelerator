@@ -23,7 +23,7 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
         val model = request.desiredResourceState
         return if (!inferredCallbackContext.pendingStabilization) {
             HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
-                    ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Endpoint Group Not Found")
+                    ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Endpoint Group not found.")
             deleteEndpointGroup(model, proxy, agaClient)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger, isDelete = true)

@@ -25,7 +25,7 @@ object HandlerCommons {
     fun waitForSynchronizedStep(context: CallbackContext, model: ResourceModel, proxy: AmazonWebServicesClientProxy, agaClient: AWSGlobalAccelerator, logger: Logger):
             ProgressEvent<ResourceModel, CallbackContext?> {
 
-        logger.debug("Waiting for accelerator to be deployed. arn: ${model.acceleratorArn}. " +
+        logger.debug("Waiting for accelerator to be deployed with arn: [${model.acceleratorArn}]. " +
                 "Stabilization retries remaining ${context.stabilizationRetriesRemaining}")
 
         val newCallbackContext = context.copy(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1)
@@ -35,7 +35,7 @@ object HandlerCommons {
 
         val accelerator = getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
         return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
-            logger.debug("Accelerator is deployed. arn: ${accelerator.acceleratorArn}")
+            logger.debug("Accelerator with arn: [${accelerator.acceleratorArn}] is deployed.")
             ProgressEvent.defaultSuccessHandler(model)
         } else {
             ProgressEvent.defaultInProgressHandler(newCallbackContext, CALLBACK_DELAY_IN_SECONDS, model)
@@ -53,7 +53,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.debug("Accelerator not found. arn: $arn")
+            logger.debug("Accelerator with arn: [$arn] not found.")
             null
         }
     }
@@ -68,7 +68,7 @@ object HandlerCommons {
             val request = ListTagsForResourceRequest().withResourceArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::listTagsForResource).tags
         } catch (ex: Exception) {
-            logger.error("Exception while getting tags for accelerator with arn $arn")
+            logger.error("Exception while getting tags for accelerator with arn: [$arn].")
             emptyList()
         }
     }

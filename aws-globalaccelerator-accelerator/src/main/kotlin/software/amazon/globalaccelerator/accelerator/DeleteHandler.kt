@@ -24,7 +24,7 @@ class DeleteHandler : BaseHandler<CallbackContext?>() {
         val inferredCallbackContext = callbackContext ?: CallbackContext(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
         val model = request.desiredResourceState
         val foundAccelerator = HandlerCommons.getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
-                ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Accelerator Not Found")
+                ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Accelerator not found.")
         if (foundAccelerator.enabled) {
             disableAccelerator(foundAccelerator.acceleratorArn, proxy, agaClient, logger)
         } else if (foundAccelerator.status == AcceleratorStatus.DEPLOYED.toString()) {
@@ -42,7 +42,7 @@ class DeleteHandler : BaseHandler<CallbackContext?>() {
                                        proxy: AmazonWebServicesClientProxy,
                                        agaClient: AWSGlobalAccelerator,
                                        logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-            logger.debug("Waiting for accelerator with arn ${model.acceleratorArn} to be deleted")
+            logger.debug("Waiting for accelerator with arn: [${model.acceleratorArn}] to be deleted.")
 
             // check to see if we have exceeded what we are allowed to do
             val newCallbackContext = CallbackContext(context.stabilizationRetriesRemaining - 1)
@@ -61,7 +61,7 @@ class DeleteHandler : BaseHandler<CallbackContext?>() {
                                        proxy: AmazonWebServicesClientProxy,
                                        agaClient: AWSGlobalAccelerator,
                                        logger: Logger) {
-            logger.debug("Disabling accelerator with arn $arn")
+            logger.debug("Disabling accelerator with arn: [$arn].")
             val request = UpdateAcceleratorRequest().withAcceleratorArn(arn).withEnabled(false)
             proxy.injectCredentialsAndInvoke(request, agaClient::updateAccelerator).accelerator
         }
@@ -70,7 +70,7 @@ class DeleteHandler : BaseHandler<CallbackContext?>() {
                                       proxy: AmazonWebServicesClientProxy,
                                       agaClient: AWSGlobalAccelerator,
                                       logger: Logger) {
-            logger.debug("Deleting accelerator with arn $arn")
+            logger.debug("Deleting accelerator with arn: [$arn].")
             val request = DeleteAcceleratorRequest().withAcceleratorArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::deleteAccelerator)
         }

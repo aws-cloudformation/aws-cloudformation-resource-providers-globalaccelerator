@@ -30,7 +30,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         val model = request.desiredResourceState
         val previousModel = request.previousResourceState
         getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
-                ?: return ProgressEvent.defaultFailureHandler(Exception("Failed to find accelerator with arn:[${model.acceleratorArn}]"), HandlerErrorCode.NotFound)
+                ?: return ProgressEvent.defaultFailureHandler(Exception("Failed to find accelerator. arn: [${model.acceleratorArn}]"), HandlerErrorCode.NotFound)
         if (byoipIPsUpdated(model, previousModel)) {
             logger.error("Failed attempt to update BYOIP IPs.")
             return ProgressEvent.defaultFailureHandler(
@@ -56,7 +56,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                                              proxy: AmazonWebServicesClientProxy,
                                              agaClient: AWSGlobalAccelerator,
                                              logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
-        logger.debug("Desired updated state model $model")
+        logger.debug("Desired updated state model: $model")
         if (!validateTags(model)) {
             return ProgressEvent.defaultFailureHandler(
                     Exception("Invalid tag format in template"),
@@ -84,7 +84,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                                   proxy: AmazonWebServicesClientProxy,
                                   agaClient: AWSGlobalAccelerator,
                                   logger: Logger): Accelerator {
-        logger.debug("Updating accelerator with arn ${model.acceleratorArn}")
+        logger.debug("Updating accelerator with arn: [${model.acceleratorArn}].")
         val request = UpdateAcceleratorRequest()
                 .withAcceleratorArn(model.acceleratorArn)
                 .withEnabled(model.enabled)
@@ -99,7 +99,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                            proxy: AmazonWebServicesClientProxy,
                            agaClient: AWSGlobalAccelerator,
                            logger: Logger) {
-        logger.debug("Updating tags for accelerator with arn: ${model.acceleratorArn}")
+        logger.debug("Updating tags for accelerator with arn: [${model.acceleratorArn}].")
         val previousStateTags = getPreviousStateTags(previousModel)
         val newTags = model.tags?.map { Tag().withKey(it.key).withValue(it.value) }
         deleteOldMissingTags(previousStateTags, newTags, accelerator, proxy, agaClient, logger)
@@ -119,7 +119,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         val newTagsMap = newTags?.map { it.key to it.value }?.toMap() ?: mapOf<String, String>()
         val keysToDelete = previousTags?.map { x -> x.key }?.minus(newTagsMap.keys)
         if (!keysToDelete.isNullOrEmpty()) {
-            logger.debug("Untagging tags: [$keysToDelete.toString()] for accelerator [${accelerator.acceleratorArn}]")
+            logger.debug("Untagging tags: [$keysToDelete.toString()] for accelerator with arn: [${accelerator.acceleratorArn}].")
             val untagRequest = UntagResourceRequest().withResourceArn(accelerator.acceleratorArn).withTagKeys(keysToDelete)
             proxy.injectCredentialsAndInvoke(untagRequest,agaClient::untagResource)
         }
@@ -144,7 +144,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
 
     private fun byoipIPsUpdated(currentModel: ResourceModel, previousModel: ResourceModel): Boolean {
         var ipAddressesUpdated = false
-        if  (currentModel.ipAddresses != null && currentModel.ipAddresses != previousModel.ipAddresses) {
+        if (currentModel.ipAddresses != null && currentModel.ipAddresses != previousModel.ipAddresses) {
             ipAddressesUpdated = true
         }
         return ipAddressesUpdated

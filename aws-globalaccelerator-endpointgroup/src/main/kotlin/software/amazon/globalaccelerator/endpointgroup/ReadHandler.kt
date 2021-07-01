@@ -21,7 +21,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         val endpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
         val endpointGroupResourceModel = convertEndpointGroupToResourceModel(endpointGroup, model)
         return if (endpointGroupResourceModel == null) {
-            logger.debug("Endpoint group with ARN [${model.endpointGroupArn}] not found")
+            logger.debug("Endpoint group with arn: [${model.endpointGroupArn}] not found.")
             ProgressEvent.defaultFailureHandler(Exception("Endpoint group not found."), HandlerErrorCode.NotFound)
         } else {
             ProgressEvent.defaultSuccessHandler(endpointGroupResourceModel)
@@ -41,7 +41,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
                 this.endpointGroupRegion = endpointGroup.endpointGroupRegion
                 this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
                 this.portOverrides = getPortOverrides(endpointGroup.portOverrides)
-                this.listenerArn =currentModel.listenerArn
+                this.listenerArn = currentModel.listenerArn
             }
         } else {
             null

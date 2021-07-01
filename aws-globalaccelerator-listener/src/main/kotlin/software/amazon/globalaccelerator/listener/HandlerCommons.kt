@@ -30,7 +30,7 @@ object HandlerCommons {
                                 logger: Logger,
                                 isDelete: Boolean = false): ProgressEvent<ResourceModel, CallbackContext?> {
 
-        logger.debug("Waiting for accelerator to be deployed. arn: ${model.acceleratorArn}. " +
+        logger.debug("Waiting for accelerator with arn: [${model.acceleratorArn}] to be deployed. " +
                 "Stabilization retries remaining ${context.stabilizationRetriesRemaining}")
 
         val newCallbackContext = context.copy(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1)
@@ -48,7 +48,7 @@ object HandlerCommons {
         }
 
         return if (accelerator!!.status == AcceleratorStatus.DEPLOYED.toString()) {
-            logger.debug("Accelerator is deployed. arn: ${accelerator.acceleratorArn}")
+            logger.debug("Accelerator with arn: [${accelerator.acceleratorArn}] is deployed.")
             // Delete contract expects no model to be returned upon delete success
             var resourceModel: ResourceModel? = model
             if (isDelete) {
@@ -71,7 +71,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.error("Accelerator not found. arn: $arn")
+            logger.error("Accelerator with arn: [$arn] not found.")
             null
         }
     }
@@ -86,7 +86,7 @@ object HandlerCommons {
             val request = DescribeListenerRequest().withListenerArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
         } catch (ex: ListenerNotFoundException) {
-            logger.debug("Listener not found. arn: [$arn]")
+            logger.debug("Listener  with arn: [$arn] not found.")
             null
         }
     }

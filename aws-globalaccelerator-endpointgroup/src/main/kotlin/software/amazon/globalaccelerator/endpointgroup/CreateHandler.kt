@@ -44,7 +44,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         // Make sure accelerator exists
         HandlerCommons.getAccelerator(listenerArn.acceleratorArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception("Could not find accelerator for listener [${model.listenerArn}]"),
+                        Exception("Could not find accelerator for listener with arn: [${model.listenerArn}]."),
                         HandlerErrorCode.NotFound)
         val endpointGroup = createEndpointGroup(model, handlerRequest, proxy, agaClient)
         model.apply {

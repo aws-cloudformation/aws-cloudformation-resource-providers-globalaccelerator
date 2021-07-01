@@ -25,7 +25,7 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
 
         return if (!inferredCallbackContext.pendingStabilization) {
             HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
-                    ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Listener Not Found")
+                    ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Listener not found.")
             deleteListener(model, proxy, agaClient)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger, isDelete = true)

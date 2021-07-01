@@ -35,7 +35,7 @@ object HandlerCommons {
                                 isDelete: Boolean = false): ProgressEvent<ResourceModel, CallbackContext?> {
 
         val acceleratorArn = ListenerArn(model.listenerArn).acceleratorArn
-        logger.debug("Waiting for accelerator to be deployed. arn: $acceleratorArn. " +
+        logger.debug("Waiting for accelerator with arn: [$acceleratorArn] to be deployed. " +
                 "Stabilization retries remaining ${context.stabilizationRetriesRemaining}")
 
         val newCallbackContext = context.copy(stabilizationRetriesRemaining = context.stabilizationRetriesRemaining - 1)
@@ -75,7 +75,7 @@ object HandlerCommons {
             val request = DescribeAcceleratorRequest().withAcceleratorArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeAccelerator).accelerator
         } catch (ex: AcceleratorNotFoundException) {
-            logger.error("Did not find accelerator with arn [$arn]")
+            logger.error("Did not find accelerator with arn: [$arn].")
             null
         }
     }
@@ -90,7 +90,7 @@ object HandlerCommons {
             val request = DescribeListenerRequest().withListenerArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeListener).listener
         } catch (ex: ListenerNotFoundException) {
-            logger.error("Did not find listener with arn [$arn]")
+            logger.error("Did not find listener with arn: [$arn].")
             null
         }
     }
@@ -105,7 +105,7 @@ object HandlerCommons {
             val request = DescribeEndpointGroupRequest().withEndpointGroupArn(arn)
             proxy.injectCredentialsAndInvoke(request, agaClient::describeEndpointGroup).endpointGroup
         } catch (ex: EndpointGroupNotFoundException) { // Should we be throwing this instead?
-            logger.debug("Did not find endpoint group with arn [$arn]")
+            logger.debug("Did not find endpoint group with arn: [$arn].")
             null
         }
     }
