@@ -15,12 +15,8 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
 import java.util.ArrayList
 
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatExceptionOfType
 import org.junit.jupiter.api.Assertions
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito
 import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 

@@ -53,7 +53,7 @@ class UpdateHandlerTest {
 
     private fun createTestResourceModel(): ResourceModel {
         val portRanges = ArrayList<software.amazon.globalaccelerator.listener.PortRange>()
-        portRanges.add(software.amazon.globalaccelerator.listener.PortRange(80, 81))
+        portRanges.add(PortRange(80, 81))
         return ResourceModel.builder()
                 .listenerArn("LISTENER_ARN")
                 .acceleratorArn("ACCELERATOR_ARN")
@@ -65,6 +65,18 @@ class UpdateHandlerTest {
 
     @Test
     fun handleRequest_InitialUpdate_ReturnsInProgress() {
+        // Because we need to check for listener existence first
+        // we expect a call to describe
+        val describeListenerResult = DescribeListenerResult()
+                .withListener(Listener()
+                        .withListenerArn("LISTENER_ARN")
+                        .withClientAffinity(ClientAffinity.SOURCE_IP.toString())
+                        .withProtocol(Protocol.TCP.toString())
+                        .withPortRanges(PortRange().withFromPort(80).withToPort(81)))
+
+
+        doReturn(describeListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeListenerRequest::class.java), ArgumentMatchers.any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+
 
         // we expect a call to update
         val updateListenerResult = UpdateListenerResult()

@@ -24,6 +24,7 @@ import org.mockito.Mockito.doReturn
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.doThrow
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
+import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
@@ -91,12 +92,12 @@ class DeleteHandlerTest {
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertEquals(response.status, OperationStatus.FAILED)
         Assertions.assertNull(response.callbackContext)
         Assertions.assertEquals(response.resourceModel, model)
         Assertions.assertNotNull(response.resourceModel)
-        Assertions.assertNull(response.message)
-        Assertions.assertNull(response.errorCode)
+        Assertions.assertEquals(response.message, "Listener not found.")
+        Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
         Assertions.assertNull(response.resourceModels)
     }
 
@@ -146,7 +147,7 @@ class DeleteHandlerTest {
                 .build()
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
 
-        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<java.util.function.Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val response = handler.handleRequest(proxy!!, request, context, logger!!)
 
@@ -202,8 +203,7 @@ class DeleteHandlerTest {
         Assertions.assertNotNull(response)
         Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
         Assertions.assertNull(response.callbackContext)
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.resourceModel)
         Assertions.assertNull(response.message)
         Assertions.assertNull(response.errorCode)
         Assertions.assertNull(response.resourceModels)
