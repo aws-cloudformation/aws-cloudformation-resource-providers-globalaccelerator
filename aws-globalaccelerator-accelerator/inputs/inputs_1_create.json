@@ -1,0 +1,5 @@
+{
+  "Name": "TestAccelerator",
+  "Enabled": true,
+  "IpAddressType": "IPV4"
+}
