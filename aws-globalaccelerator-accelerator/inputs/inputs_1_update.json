@@ -1,5 +1,5 @@
 {
-        "Name": "UpdatedTestAccelerator",
-        "Enabled": false,
-        "IpAddressType": "IPV4"
+  "Name": "UpdatedTestAccelerator",
+  "Enabled": false,
+  "IpAddressType": "IPV4"
 }

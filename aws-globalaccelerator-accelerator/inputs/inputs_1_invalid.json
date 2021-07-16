@@ -1,5 +1,5 @@
 {
-	"Name": "@Invalid.Accelerator",
-        "Enabled": true,
-        "IpAddressType": "IPV4"
+  "Name": "@Invalid.Accelerator",
+  "Enabled": true,
+  "IpAddressType": "IPV4"
 }

@@ -1,3 +1,8 @@
 {
-        "PortRanges": [{"FromPort": -1, "ToPort": 81}]
+  "PortRanges": [
+    {
+      "FromPort": -1,
+      "ToPort": 81
+    }
+  ]
 }
