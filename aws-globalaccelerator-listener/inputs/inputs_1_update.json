@@ -1,0 +1,10 @@
+{
+  "AcceleratorArn": "{{AcceleratorArn}}",
+  "PortRanges": [
+    {
+      "FromPort": 4242,
+      "ToPort": 4243
+    }
+  ],
+  "Protocol": "TCP"
+}

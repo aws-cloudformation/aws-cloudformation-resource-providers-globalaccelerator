@@ -1,0 +1,5 @@
+{
+  "ListenerArn": "{{ListenerArn}}",
+  "EndpointGroupRegion": "us-west-2",
+  "TrafficDialPercentage": 42
+}
