@@ -43,7 +43,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-core</artifactId>
-            <version>1.11.749</version>
+            <version>1.12.62</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/org.projectlombok/lombok -->
@@ -86,7 +86,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-globalaccelerator</artifactId>
-            <version>1.11.749</version>
+            <version>1.12.62</version>
         </dependency>
     </dependencies>
 
