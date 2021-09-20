@@ -3,7 +3,6 @@ package software.amazon.globalaccelerator.endpointgroup
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
 import com.amazonaws.services.globalaccelerator.model.CreateEndpointGroupRequest
 import com.amazonaws.services.globalaccelerator.model.EndpointConfiguration
-import com.amazonaws.services.globalaccelerator.model.EndpointDescription
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup
 import com.amazonaws.services.globalaccelerator.model.PortOverride
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
@@ -23,7 +22,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                                logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         logger.debug("Create new EndpointGroup request: $request")
         val agaClient = AcceleratorClientBuilder.client
-        val inferredCallbackContext = callbackContext ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
+        val inferredCallbackContext = callbackContext ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
         val model = request.desiredResourceState
         return when (model.endpointGroupArn) {
             null -> createEndpointGroupStep(model, request, proxy, agaClient, logger)
@@ -45,7 +44,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         // Make sure accelerator exists
         HandlerCommons.getAccelerator(listenerArn.acceleratorArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(
-                        Exception("Could not find accelerator for listener [${model.listenerArn}]"),
+                        Exception("Could not find accelerator for listener with arn: [${model.listenerArn}]."),
                         HandlerErrorCode.NotFound)
         val endpointGroup = createEndpointGroup(model, handlerRequest, proxy, agaClient)
         model.apply {
@@ -59,7 +58,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
             this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
             this.portOverrides = getPortOverrides(endpointGroup.portOverrides)
         }
-        val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES);
+        val callbackContext = CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)
     }
 
@@ -85,6 +84,6 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                 .withEndpointConfigurations(convertedEndpointConfigurations)
                 .withPortOverrides(portOverrides)
                 .withIdempotencyToken(handlerRequest.clientRequestToken)
-        return proxy.injectCredentialsAndInvoke(createEndpointGroupRequest, agaClient::createEndpointGroup).endpointGroup;
+        return proxy.injectCredentialsAndInvoke(createEndpointGroupRequest, agaClient::createEndpointGroup).endpointGroup
     }
 }

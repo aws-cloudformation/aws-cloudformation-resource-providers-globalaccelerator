@@ -34,6 +34,8 @@ class ReadHandlerTest {
 
     private val portOverrides = listOf(PortOverride(80, 8080))
 
+    private val listenerArn = "arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234"
+
     @BeforeEach
     fun setup() {
         proxy = mock(AmazonWebServicesClientProxy::class.java)
@@ -47,7 +49,6 @@ class ReadHandlerTest {
         return ResourceModel.builder()
                 .endpointGroupArn("ENDPOINTGROUP_ARN")
                 .endpointGroupRegion("us-west-2")
-                .listenerArn("LISTENER_ARN")
                 .healthCheckPort(10)
                 .thresholdCount(100)
                 .endpointConfigurations(endpointConfigurations)
@@ -55,7 +56,7 @@ class ReadHandlerTest {
                 .trafficDialPercentage(100.0)
                 .healthCheckIntervalSeconds(10)
                 .healthCheckProtocol("TCP")
-                .listenerArn("arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234")
+                .listenerArn(listenerArn)
                 .portOverrides(portOverrides)
                 .build()
     }
@@ -102,6 +103,7 @@ class ReadHandlerTest {
         Assertions.assertEquals(response.resourceModel.portOverrides.size, 1)
         Assertions.assertEquals(response.resourceModel.portOverrides[0].listenerPort, portOverrides[0].listenerPort)
         Assertions.assertEquals(response.resourceModel.portOverrides[0].endpointPort, portOverrides[0].endpointPort)
+        Assertions.assertEquals(response.resourceModel.listenerArn, listenerArn)
     }
 
     @Test

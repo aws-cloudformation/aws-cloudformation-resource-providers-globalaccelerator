@@ -1,8 +1,6 @@
 package software.amazon.globalaccelerator.endpointgroup
 
-import com.amazonaws.services.globalaccelerator.model.EndpointDescription
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup
-import com.amazonaws.services.globalaccelerator.model.PortOverride
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
@@ -21,16 +19,16 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         val model = request.desiredResourceState
         val agaClient = AcceleratorClientBuilder.client
         val endpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
-        val endpointGroupResourceModel = convertEndpointGroupToResourceModel(endpointGroup)
+        val endpointGroupResourceModel = convertEndpointGroupToResourceModel(endpointGroup, model)
         return if (endpointGroupResourceModel == null) {
-            logger.debug("Endpoint group with ARN [${model.endpointGroupArn}] not found")
+            logger.debug("Endpoint group with arn: [${model.endpointGroupArn}] not found.")
             ProgressEvent.defaultFailureHandler(Exception("Endpoint group not found."), HandlerErrorCode.NotFound)
         } else {
             ProgressEvent.defaultSuccessHandler(endpointGroupResourceModel)
         }
     }
 
-    private fun convertEndpointGroupToResourceModel(endpointGroup: EndpointGroup?): ResourceModel? {
+    private fun convertEndpointGroupToResourceModel(endpointGroup: EndpointGroup?, currentModel: ResourceModel): ResourceModel? {
         return if (endpointGroup != null) {
             ResourceModel().apply {
                 this.endpointGroupArn = endpointGroup.endpointGroupArn
@@ -43,6 +41,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
                 this.endpointGroupRegion = endpointGroup.endpointGroupRegion
                 this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
                 this.portOverrides = getPortOverrides(endpointGroup.portOverrides)
+                this.listenerArn = currentModel.listenerArn
             }
         } else {
             null

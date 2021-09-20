@@ -3,6 +3,7 @@ package software.amazon.globalaccelerator.listener
 import com.amazonaws.services.globalaccelerator.AWSGlobalAccelerator
 import com.amazonaws.services.globalaccelerator.model.DeleteListenerRequest
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
+import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
@@ -19,12 +20,12 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
         logger.debug("Delete Listener Request [$request]")
         val agaClient = AcceleratorClientBuilder.client
         val inferredCallbackContext = callbackContext
-                ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false);
+                ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false)
         val model = request.desiredResourceState
 
         return if (!inferredCallbackContext.pendingStabilization) {
             HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
-                    ?: return ProgressEvent.defaultSuccessHandler(model)
+                    ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Listener not found.")
             deleteListener(model, proxy, agaClient)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger, isDelete = true)
@@ -35,7 +36,7 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
                                proxy: AmazonWebServicesClientProxy,
                                agaClient: AWSGlobalAccelerator): ProgressEvent<ResourceModel, CallbackContext?> {
         val request = DeleteListenerRequest().withListenerArn(model.listenerArn)
-        proxy.injectCredentialsAndInvoke(request, agaClient::deleteListener);
+        proxy.injectCredentialsAndInvoke(request, agaClient::deleteListener)
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = (HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES),
                 pendingStabilization = true)
         return ProgressEvent.defaultInProgressHandler(callbackContext, 0, model)

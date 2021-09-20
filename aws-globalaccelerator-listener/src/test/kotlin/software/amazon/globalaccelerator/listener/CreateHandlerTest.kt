@@ -18,7 +18,6 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import java.util.ArrayList
 
 import org.junit.jupiter.api.Assertions
-import org.mockito.ArgumentMatchers
 import org.mockito.ArgumentMatchers.any
 import org.mockito.Mockito.*
 import java.util.function.Function
@@ -72,16 +71,16 @@ class CreateHandlerTest {
                         .withProtocol(Protocol.TCP.toString())
                         .withClientAffinity(ClientAffinity.SOURCE_IP.toString())
                         .withPortRanges(PortRange().withFromPort(80).withToPort(81)))
-        doReturn(createListenerResult).`when`(proxy ?: return).injectCredentialsAndInvoke(ArgumentMatchers.any(CreateListenerRequest::class.java), ArgumentMatchers.any<Function<CreateListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(createListenerResult).`when`(proxy ?: return).injectCredentialsAndInvoke(any(CreateListenerRequest::class.java), any<Function<CreateListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
                         .withAcceleratorArn("ACCELERATOR_ARN")
                         .withStatus(AcceleratorStatus.IN_PROGRESS.toString()))
-        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeAcceleratorRequest::class.java), ArgumentMatchers.any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         // create the input
         val portRanges = ArrayList<software.amazon.globalaccelerator.listener.PortRange>()
-        portRanges.add(software.amazon.globalaccelerator.listener.PortRange(80, 81))
+        portRanges.add(PortRange(80, 81))
 
         val model = ResourceModel.builder()
                 .acceleratorArn("ACCELERATOR_ARN")

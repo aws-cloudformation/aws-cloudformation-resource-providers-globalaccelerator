@@ -10,6 +10,9 @@ There are a couple options for building and testing the project.
 ##### Files:
 
 1. `aws-globalaccelerator-listener.json` - This file contains the schema definition for the listener resource.  It also drives auto generated classes from rpdk.
+2. `inputs/inputs_1_create.json` - This file is used during the contract tests which are run when using the "cfn submit" or "cfn test" commands.  When running either of those commands, replace {{AcceleratorArn}} in this file with a valid Global Accelerator Arn from your aws account.
+3. `inputs/inputs_1_invalid.json` - This file is used during the contract tests which are run when using the "cfn submit" or "cfn test" commands.
+4. `inputs/inputs_1_update.json` - This file is used during the contract tests which are run when using the "cfn submit" or "cfn test" commands.  When running either of those commands, replace {{AcceleratorArn}} in this file with a valid Global Accelerator Arn from your aws account.
 
 
 #### How to test locally

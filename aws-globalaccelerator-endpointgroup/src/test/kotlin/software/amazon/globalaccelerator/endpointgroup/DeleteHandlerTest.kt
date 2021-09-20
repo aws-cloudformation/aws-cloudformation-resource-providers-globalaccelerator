@@ -60,8 +60,8 @@ class DeleteHandlerTest {
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val handler = DeleteHandler()
 
-        doReturn(DeleteEndpointGroupResult()).`when`(proxy!!).injectCredentialsAndInvoke(any(DeleteEndpointGroupRequest::class.java), any<java.util.function.Function<DeleteEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest::class.java), any<java.util.function.Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(DeleteEndpointGroupResult()).`when`(proxy!!).injectCredentialsAndInvoke(any(DeleteEndpointGroupRequest::class.java), any<Function<DeleteEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest::class.java), any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val response = handler.handleRequest(proxy!!, request, null, logger!!)
 
@@ -90,7 +90,7 @@ class DeleteHandlerTest {
         val handler = DeleteHandler()
         val context = CallbackContext(2, pendingStabilization = true)
 
-        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<java.util.function.Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
         val response = handler.handleRequest(proxy!!, request, context, logger!!)
 
@@ -114,18 +114,17 @@ class DeleteHandlerTest {
                 .build()
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val handler = DeleteHandler()
-        val context = CallbackContext(2)
 
         doThrow(EndpointGroupNotFoundException("NOT FOUND")).`when`(proxy)!!.injectCredentialsAndInvoke(any(DescribeEndpointGroupRequest::class.java),
                 any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
 
-        val response = handler.handleRequest(proxy!!, request, context, logger!!)
+        val response = handler.handleRequest(proxy!!, request, null, logger!!)
 
         Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
+        Assertions.assertEquals(response.status, OperationStatus.FAILED)
         Assertions.assertEquals(response.callbackDelaySeconds, 0)
         Assertions.assertNull(response.callbackContext)
-        Assertions.assertNull(response.message)
+        Assertions.assertEquals(response.message, "Endpoint Group not found.")
         Assertions.assertNull(response.resourceModels)
         Assertions.assertEquals(response.resourceModel, model)
     }
@@ -184,8 +183,7 @@ class DeleteHandlerTest {
         Assertions.assertNotNull(response)
         Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
         Assertions.assertNull(response.callbackContext)
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
+        Assertions.assertNull(response.resourceModel)
         Assertions.assertNull(response.message)
         Assertions.assertNull(response.errorCode)
         Assertions.assertNull(response.resourceModels)

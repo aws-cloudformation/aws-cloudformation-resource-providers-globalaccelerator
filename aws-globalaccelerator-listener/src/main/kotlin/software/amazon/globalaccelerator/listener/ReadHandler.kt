@@ -24,7 +24,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         return if (convertedModel != null) {
             ProgressEvent.defaultSuccessHandler(convertedModel)
         } else {
-            logger.error("Listener  not found. arn:  ${model.listenerArn}")
+            logger.error("Listener with arn: [${model.listenerArn}] not found.")
             ProgressEvent.defaultFailureHandler(Exception("Listener not found."), HandlerErrorCode.NotFound)
         }
     }

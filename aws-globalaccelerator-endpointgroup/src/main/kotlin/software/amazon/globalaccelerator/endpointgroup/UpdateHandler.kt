@@ -24,13 +24,10 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
         val inferredCallbackContext = callbackContext
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false)
         val model = request.desiredResourceState
-        HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
-                ?: return ProgressEvent.defaultFailureHandler(
-                        Exception("Failed to find endpoint group with arn:[${model.endpointGroupArn}]"),
-                        HandlerErrorCode.NotFound
-                )
         return if (!inferredCallbackContext.pendingStabilization) {
-            updateEndpointGroup(model, request.previousResourceState, proxy, agaClient, logger)
+            HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
+                    ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Endpoint Group not found.")
+            updateEndpointGroup(model, request.previousResourceState, proxy, agaClient)
         } else {
             HandlerCommons.waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         }
@@ -39,8 +36,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
     private fun updateEndpointGroup(model: ResourceModel,
                                     previousModel: ResourceModel,
                                     proxy: AmazonWebServicesClientProxy,
-                                    agaClient: AWSGlobalAccelerator,
-                                    logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+                                    agaClient: AWSGlobalAccelerator): ProgressEvent<ResourceModel, CallbackContext?> {
         val convertedEndpointConfigurations = model.endpointConfigurations?.map {
             EndpointConfiguration()
                     .withEndpointId(it.endpointId).withWeight(it.weight)
