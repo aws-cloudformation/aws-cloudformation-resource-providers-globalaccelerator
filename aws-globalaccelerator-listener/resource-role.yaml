@@ -27,6 +27,7 @@ Resources:
                 - "globalaccelerator:DeleteListener"
                 - "globalaccelerator:DescribeAccelerator"
                 - "globalaccelerator:DescribeListener"
+                - "globalaccelerator:ListListeners"
                 - "globalaccelerator:UpdateListener"
                 Resource: "*"
 Outputs:

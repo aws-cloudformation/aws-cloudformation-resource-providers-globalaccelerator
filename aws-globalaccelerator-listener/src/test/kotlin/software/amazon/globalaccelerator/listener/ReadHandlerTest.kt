@@ -1,102 +1,97 @@
 package software.amazon.globalaccelerator.listener
 
-import com.amazonaws.AmazonWebServiceResult
-import com.amazonaws.ResponseMetadata
 import com.amazonaws.services.globalaccelerator.model.ClientAffinity
 import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult
 import com.amazonaws.services.globalaccelerator.model.Listener
 import com.amazonaws.services.globalaccelerator.model.ListenerNotFoundException
 import com.amazonaws.services.globalaccelerator.model.Protocol
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
-
 import java.util.ArrayList
 
-import org.junit.jupiter.api.Assertions
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.*
-import java.util.function.Function
 
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class ReadHandlerTest {
+    @MockK
+    lateinit var proxy: AmazonWebServicesClientProxy
 
-    @Mock
-    private var proxy: AmazonWebServicesClientProxy? = null
-
-    @Mock
-    private var logger: Logger? = null
+    @MockK(relaxed = true)
+    lateinit var logger: Logger
 
     @BeforeEach
-    fun setup() {
-        proxy = mock(AmazonWebServicesClientProxy::class.java)
-        logger = mock(Logger::class.java)
-    }
+    fun setup() = MockKAnnotations.init(this)
+
+    private val acceleratorArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d"
+    private val listenerArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d/listener/ee7358c2"
 
     @Test
     fun handleRequest_Read_ReturnsCorrectlyMappedModel() {
-        // All we really care about is what describe returns to confirm the mapping is
-        // working as expected
         val describeListenerResult = DescribeListenerResult()
                 .withListener(Listener()
-                        .withListenerArn("LISTENER_ARN")
+                        .withListenerArn(listenerArn)
                         .withProtocol(Protocol.TCP.toString())
                         .withClientAffinity(ClientAffinity.SOURCE_IP)
                         .withPortRanges(com.amazonaws.services.globalaccelerator.model.PortRange().withFromPort(90).withToPort(90)))
-        doReturn(describeListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeListenerRequest::class.java), any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeListener>()) } returns describeListenerResult
 
         val portRanges = ArrayList<PortRange>()
         portRanges.add(PortRange(90, 91))
         val model = ResourceModel.builder()
-                .listenerArn("LISTENER_ARN")
-                .acceleratorArn("ACCELERATOR_ARN")
+                .listenerArn(listenerArn)
+                .acceleratorArn(acceleratorArn)
                 .portRanges(portRanges)
                 .build()
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
-        val response = ReadHandler().handleRequest(proxy!!, request, null, logger!!)
+        val response = ReadHandler().handleRequest(proxy, request, null, logger)
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
-        Assertions.assertNull(response.callbackContext)
-        Assertions.assertNull(response.resourceModels)
-        Assertions.assertNull(response.message)
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertNull(response.callbackContext)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
 
-        Assertions.assertNotNull(response.resourceModel)
-        Assertions.assertEquals(response.resourceModel.acceleratorArn, "ACCELERATOR_ARN")
-        Assertions.assertEquals(response.resourceModel.protocol, Protocol.TCP.toString())
-        Assertions.assertEquals(response.resourceModel.clientAffinity, ClientAffinity.SOURCE_IP.toString())
+        assertNotNull(response.resourceModel)
+        assertEquals(acceleratorArn, response.resourceModel.acceleratorArn)
+        assertEquals(Protocol.TCP.toString(), response.resourceModel.protocol)
+        assertEquals(ClientAffinity.SOURCE_IP.toString(), response.resourceModel.clientAffinity)
 
     }
 
     @Test
     fun handleRequest_MissingListener_ReturnsFailureAndNullModel() {
-
-        doThrow(ListenerNotFoundException("NOT FOUND")).`when`(proxy)!!.injectCredentialsAndInvoke(any(DescribeListenerRequest::class.java),
-                any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeListener>()) } throws(ListenerNotFoundException("NOT FOUND"))
 
         val portRanges = ArrayList<PortRange>()
         portRanges.add(PortRange(90, 91))
         val model = ResourceModel.builder()
-                .listenerArn("LISTENER_ARN")
-                .acceleratorArn("ACCELERATOR_ARN")
+                .listenerArn(listenerArn)
+                .acceleratorArn(acceleratorArn)
                 .portRanges(portRanges)
                 .build()
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
-        val response = ReadHandler().handleRequest(proxy!!, request, null, logger!!)
+        val response = ReadHandler().handleRequest(proxy, request, null, logger)
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.FAILED)
-        Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
-        Assertions.assertNull(response.resourceModel)
+        assertNotNull(response)
+        assertEquals(OperationStatus.FAILED, response.status)
+        assertEquals(HandlerErrorCode.NotFound, response.errorCode)
+        assertNull(response.resourceModel)
     }
 }
+

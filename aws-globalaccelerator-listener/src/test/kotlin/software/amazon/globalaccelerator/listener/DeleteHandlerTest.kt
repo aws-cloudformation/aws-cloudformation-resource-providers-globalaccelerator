@@ -1,7 +1,5 @@
 package software.amazon.globalaccelerator.listener
 
-import com.amazonaws.AmazonWebServiceResult
-import com.amazonaws.ResponseMetadata
 import com.amazonaws.services.globalaccelerator.model.Accelerator
 import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundException
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
@@ -13,122 +11,118 @@ import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult
 import com.amazonaws.services.globalaccelerator.model.Listener
 import com.amazonaws.services.globalaccelerator.model.ListenerNotFoundException
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
-import org.junit.jupiter.api.Assertions
-import org.mockito.ArgumentMatchers.any
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.doThrow
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
-import java.util.function.Function
 
-@ExtendWith(MockitoExtension::class)
+
+@ExtendWith(MockKExtension::class)
 class DeleteHandlerTest {
+    @MockK
+    lateinit var proxy: AmazonWebServicesClientProxy
 
-    @Mock
-    private var proxy: AmazonWebServicesClientProxy? = null
-
-    @Mock
-    private var logger: Logger? = null
+    @MockK(relaxed = true)
+    lateinit var logger: Logger
 
     @BeforeEach
-    fun setup() {
-        proxy = mock(AmazonWebServicesClientProxy::class.java)
-        logger = mock(Logger::class.java)
-    }
+    fun setup() = MockKAnnotations.init(this)
+
+    private val acceleratorArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d"
+    private val listenerArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d/listener/ee7358c2"
 
     @Test
     fun handleRequest_DeleteListener() {
-        val handler = DeleteHandler()
         val model = ResourceModel.builder()
-                .listenerArn("TEST_LISTENER_ARN")
-                .acceleratorArn("TEST_ACCELERATOR_ARN")
+                .listenerArn(listenerArn)
+                .acceleratorArn(acceleratorArn)
                 .build()
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(model)
                 .previousResourceState(model)
                 .build()
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = false)
-        val listener = DescribeListenerResult().withListener(Listener().withListenerArn("TEST_LISTENER_ARN"))
+        val describeListenerResult = DescribeListenerResult().withListener(Listener().withListenerArn(listenerArn))
 
-        doReturn(listener).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeListenerRequest::class.java),
-                any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-        doReturn(DeleteListenerResult()).`when`(proxy!!).injectCredentialsAndInvoke(any(DeleteListenerRequest::class.java),
-                any<Function<DeleteListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeListener>()) } returns describeListenerResult
 
-        val response = handler.handleRequest(proxy!!, request, context, logger!!)
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDeleteListener>()) } returns DeleteListenerResult()
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
-        Assertions.assertNull(response.message)
-        Assertions.assertNull(response.errorCode)
-        Assertions.assertNull(response.resourceModels)
+        val response = DeleteHandler().handleRequest(proxy, request, context, logger)
+
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(model, response.resourceModel)
+        assertNotNull(response.resourceModel)
+        assertNull(response.message)
+        assertNull(response.errorCode)
+        assertNull(response.resourceModels)
     }
 
     @Test
     fun handleRequest_AlreadyDeletedListener() {
-        val handler = DeleteHandler()
         val model = ResourceModel.builder()
-                .listenerArn("TEST_LISTENER_ARN")
+                .listenerArn(listenerArn)
                 .build()
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(model)
                 .previousResourceState(model)
                 .build()
 
-        doThrow(ListenerNotFoundException("NOT FOUND")).`when`(proxy)!!.injectCredentialsAndInvoke(any(DescribeListenerRequest::class.java),
-                any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeListener>()) } throws(ListenerNotFoundException("NOT FOUND"))
 
-        val response = handler.handleRequest(proxy!!, request, null, logger!!)
+        val response = DeleteHandler().handleRequest(proxy, request, null, logger)
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.FAILED)
-        Assertions.assertNull(response.callbackContext)
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
-        Assertions.assertEquals(response.message, "Listener not found.")
-        Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
-        Assertions.assertNull(response.resourceModels)
+        assertNotNull(response)
+        assertEquals(OperationStatus.FAILED, response.status)
+        assertNull(response.callbackContext)
+        assertEquals(model, response.resourceModel)
+        assertNotNull(response.resourceModel)
+        assertEquals("Listener not found.", response.message)
+        assertEquals(HandlerErrorCode.NotFound, response.errorCode)
+        assertNull(response.resourceModels)
     }
 
     @Test
     fun handleRequest_DeleteInProgressListener() {
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
-                        .withAcceleratorArn("ACCELERATOR_ARN")
+                        .withAcceleratorArn(acceleratorArn)
                         .withStatus(AcceleratorStatus.IN_PROGRESS))
-        val handler = DeleteHandler()
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
+
         val model = ResourceModel.builder()
-                .listenerArn("TEST_LISTENER_ARN")
-                .acceleratorArn("TEST_ACCELERATOR_ARN")
+                .listenerArn(listenerArn)
+                .acceleratorArn(acceleratorArn)
                 .build()
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(model)
                 .previousResourceState(model)
                 .build()
+
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
+        val response = DeleteHandler().handleRequest(proxy, request, context, logger)
 
-        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-
-        val response = handler.handleRequest(proxy!!, request, context, logger!!)
-
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
-        Assertions.assertNull(response.message)
-        Assertions.assertNull(response.errorCode)
-        Assertions.assertNull(response.resourceModels)
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(model, response.resourceModel)
+        assertNotNull(response.resourceModel)
+        assertNull(response.message)
+        assertNull(response.errorCode)
+        assertNull(response.resourceModels)
     }
 
     @Test
@@ -136,76 +130,74 @@ class DeleteHandlerTest {
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
                         .withStatus(AcceleratorStatus.IN_PROGRESS))
-        val handler = DeleteHandler()
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
+
         val model = ResourceModel.builder()
-                .listenerArn("TEST_LISTENER_ARN")
-                .acceleratorArn("TEST_ACCELERATOR_ARN")
+                .listenerArn(listenerArn)
+                .acceleratorArn(acceleratorArn)
                 .build()
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(model)
                 .previousResourceState(model)
                 .build()
+
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
+        val response = DeleteHandler().handleRequest(proxy, request, context, logger)
 
-        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java), any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-
-        val response = handler.handleRequest(proxy!!, request, context, logger!!)
-
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
-        Assertions.assertNull(response.message)
-        Assertions.assertNull(response.errorCode)
-        Assertions.assertNull(response.resourceModels)
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(model, response.resourceModel)
+        assertNotNull(response.resourceModel)
+        assertNull(response.message)
+        assertNull(response.errorCode)
+        assertNull(response.resourceModels)
     }
 
     @Test
     fun handleRequest_ThresholdTimeExceeded() {
-
-        val handler = DeleteHandler()
         val model = ResourceModel.builder()
-                .listenerArn("TEST_LISTENER_ARN")
-                .acceleratorArn("TEST_ACCELERATOR_ARN")
+                .listenerArn(listenerArn)
+                .acceleratorArn(acceleratorArn)
                 .build()
+
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(model)
                 .previousResourceState(model)
                 .build()
         val context = CallbackContext(stabilizationRetriesRemaining = 0, pendingStabilization = true)
 
-        val exception = Assertions.assertThrows(RuntimeException::class.java) {
-            handler.handleRequest(proxy!!, request, context, logger!!)
+        val handler = DeleteHandler()
+        val exception = assertThrows(RuntimeException::class.java) {
+            handler.handleRequest(proxy, request, context, logger)
         }
 
-        Assertions.assertEquals("Timed out waiting for listener to be deployed.", exception.message)
+        assertEquals("Timed out waiting for listener to be deployed.", exception.message)
     }
 
     @Test
     fun handleRequest_AcceleratorDoesntExist() {
-
-        val handler = DeleteHandler()
         val model = ResourceModel.builder()
                 .listenerArn("TEST_LISTENER_ARN")
                 .acceleratorArn("TEST_ACCELERATOR_ARN")
                 .build()
+
         val request = ResourceHandlerRequest.builder<ResourceModel>()
                 .desiredResourceState(model)
                 .previousResourceState(model)
                 .build()
+
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } throws(AcceleratorNotFoundException("NOT FOUND"))
+
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
+        val response = DeleteHandler().handleRequest(proxy, request, context, logger)
 
-        doThrow(AcceleratorNotFoundException("NOT FOUND")).`when`(proxy)!!.injectCredentialsAndInvoke(any(DescribeAcceleratorRequest::class.java),
-                any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-
-        val response = handler.handleRequest(proxy!!, request, context, logger!!)
-
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
-        Assertions.assertNull(response.callbackContext)
-        Assertions.assertNull(response.resourceModel)
-        Assertions.assertNull(response.message)
-        Assertions.assertNull(response.errorCode)
-        Assertions.assertNull(response.resourceModels)
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertNull(response.callbackContext)
+        assertNull(response.resourceModel)
+        assertNull(response.message)
+        assertNull(response.errorCode)
+        assertNull(response.resourceModels)
     }
 }
+

@@ -6,6 +6,8 @@ import com.amazonaws.services.globalaccelerator.model.DeleteAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DeleteAcceleratorResult
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
+import com.amazonaws.services.globalaccelerator.model.ListAcceleratorsRequest
+import com.amazonaws.services.globalaccelerator.model.ListAcceleratorsResult
 import com.amazonaws.services.globalaccelerator.model.TagResourceRequest
 import com.amazonaws.services.globalaccelerator.model.TagResourceResult
 import com.amazonaws.services.globalaccelerator.model.UntagResourceRequest
@@ -18,5 +20,6 @@ typealias ProxyDescribeAccelerator = Function<DescribeAcceleratorRequest, Descri
 typealias ProxyUpdateAccelerator = Function<UpdateAcceleratorRequest, UpdateAcceleratorResult>
 typealias ProxyCreateAccelerator = Function<CreateAcceleratorRequest, CreateAcceleratorResult>
 typealias ProxyDeleteAccelerator = Function<DeleteAcceleratorRequest, DeleteAcceleratorResult>
+typealias ProxyListAccelerators = Function<ListAcceleratorsRequest, ListAcceleratorsResult>
 typealias ProxyTagResourceRequest = Function<TagResourceRequest, TagResourceResult>
 typealias ProxyUntagResourceRequest = Function<UntagResourceRequest, UntagResourceResult>

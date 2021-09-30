@@ -1,14 +1,21 @@
 package software.amazon.globalaccelerator.endpointgroup
 
-import com.amazonaws.AmazonWebServiceResult
-import com.amazonaws.ResponseMetadata
-import com.amazonaws.services.globalaccelerator.model.*
-import org.junit.jupiter.api.Assertions
+import com.amazonaws.services.globalaccelerator.model.EndpointGroup
+import com.amazonaws.services.globalaccelerator.model.DescribeEndpointGroupRequest
+import com.amazonaws.services.globalaccelerator.model.DescribeEndpointGroupResult
+import com.amazonaws.services.globalaccelerator.model.EndpointDescription
+import com.amazonaws.services.globalaccelerator.model.EndpointGroupNotFoundException
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
 import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
@@ -17,38 +24,30 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
 import java.util.ArrayList
 
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.doThrow
-import java.util.function.Function
-
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class ReadHandlerTest {
+    @MockK
+    lateinit var proxy: AmazonWebServicesClientProxy
 
-    @Mock
-    private var proxy: AmazonWebServicesClientProxy? = null
-
-    @Mock
-    private var logger: Logger? = null
-
-    private val portOverrides = listOf(PortOverride(80, 8080))
-
-    private val listenerArn = "arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234"
+    @MockK(relaxed = true)
+    lateinit var logger: Logger
 
     @BeforeEach
-    fun setup() {
-        proxy = mock(AmazonWebServicesClientProxy::class.java)
-        logger = mock(Logger::class.java)
-    }
+    fun setup() = MockKAnnotations.init(this)
+
+    private val endpointGroupRegion = "us-west-2"
+    private val listenerArn = "arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234"
+    private val endpointGroupArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d/listener/ee7358c2/endpoint-group/de69a4b45005"
+    private val portOverrides = listOf(PortOverride(80, 8080))
+
 
     private fun createTestResourceModel(): ResourceModel {
         val endpointConfigurations = ArrayList<EndpointConfiguration>()
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").build())
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
         return ResourceModel.builder()
-                .endpointGroupArn("ENDPOINTGROUP_ARN")
-                .endpointGroupRegion("us-west-2")
+                .endpointGroupArn(endpointGroupArn)
+                .endpointGroupRegion(endpointGroupRegion)
                 .healthCheckPort(10)
                 .thresholdCount(100)
                 .endpointConfigurations(endpointConfigurations)
@@ -84,39 +83,39 @@ class ReadHandlerTest {
         val returnedPortOverrides = com.amazonaws.services.globalaccelerator.model.PortOverride().withListenerPort(80).withEndpointPort(8080)
         val describeEndpointGroupResult = DescribeEndpointGroupResult()
                 .withEndpointGroup(EndpointGroup()
-                        .withEndpointGroupArn("ENDPOINTGROUP_ARN")
-                        .withEndpointGroupRegion("us-west-2")
+                        .withEndpointGroupArn(endpointGroupArn)
+                        .withEndpointGroupRegion(endpointGroupRegion)
                         .withTrafficDialPercentage(50.0f)
                         .withEndpointDescriptions(createEndpointDescription())
                         .withPortOverrides(returnedPortOverrides))
 
-        doReturn(describeEndpointGroupResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java), ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeEndpointGroup>()) } returns describeEndpointGroupResult
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
-        val response = ReadHandler().handleRequest(proxy!!, request, null, logger!!)
+        val response = ReadHandler().handleRequest(proxy, request, null, logger)
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
-        Assertions.assertNotNull(response.resourceModel)
-        Assertions.assertNull(response.callbackContext)
-        Assertions.assertEquals(response.resourceModel.endpointGroupArn, "ENDPOINTGROUP_ARN")
-        Assertions.assertEquals(response.resourceModel.endpointGroupRegion, "us-west-2")
-        Assertions.assertEquals(response.resourceModel.portOverrides.size, 1)
-        Assertions.assertEquals(response.resourceModel.portOverrides[0].listenerPort, portOverrides[0].listenerPort)
-        Assertions.assertEquals(response.resourceModel.portOverrides[0].endpointPort, portOverrides[0].endpointPort)
-        Assertions.assertEquals(response.resourceModel.listenerArn, listenerArn)
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertNotNull(response.resourceModel)
+        assertNull(response.callbackContext)
+        assertEquals(endpointGroupArn, response.resourceModel.endpointGroupArn)
+        assertEquals(endpointGroupRegion, response.resourceModel.endpointGroupRegion)
+        assertEquals(1, response.resourceModel.portOverrides.size)
+        assertEquals(portOverrides[0].listenerPort, response.resourceModel.portOverrides[0].listenerPort)
+        assertEquals(portOverrides[0].endpointPort, response.resourceModel.portOverrides[0].endpointPort)
+        assertEquals(listenerArn, response.resourceModel.listenerArn)
     }
 
     @Test
     fun handleRequest_nonExistingEndpointGroup() {
         val model = createTestResourceModel()
-        doThrow(EndpointGroupNotFoundException("NOT FOUND")).`when`(proxy)!!.injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeEndpointGroupRequest::class.java),
-                ArgumentMatchers.any<Function<DescribeEndpointGroupRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeEndpointGroup>()) } throws(EndpointGroupNotFoundException("NOT FOUND"))
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
-        val response = ReadHandler().handleRequest(proxy!!, request, null, logger!!)
+        val response = ReadHandler().handleRequest(proxy, request, null, logger)
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.FAILED)
-        Assertions.assertEquals(response.errorCode, HandlerErrorCode.NotFound)
-        Assertions.assertNull(response.resourceModel)
+        assertNotNull(response)
+        assertEquals(OperationStatus.FAILED, response.status)
+        assertEquals(HandlerErrorCode.NotFound, response.errorCode)
+        assertNull(response.resourceModel)
     }
 }
+
