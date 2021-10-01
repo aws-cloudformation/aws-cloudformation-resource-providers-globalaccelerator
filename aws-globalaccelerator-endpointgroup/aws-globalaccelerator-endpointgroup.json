@@ -164,7 +164,7 @@
     },
     "list": {
       "permissions": [
-	"globalaccelerator:ListEndpointGroups"
+        "globalaccelerator:ListEndpointGroups"
       ]
     }
   },

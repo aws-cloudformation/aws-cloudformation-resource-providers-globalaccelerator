@@ -103,7 +103,7 @@
     },
     "list": {
       "permissions": [
-	"globalaccelerator:ListListeners"
+        "globalaccelerator:ListListeners"
       ]
     }
   },

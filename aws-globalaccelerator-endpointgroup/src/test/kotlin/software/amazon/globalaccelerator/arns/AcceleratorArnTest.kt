@@ -40,4 +40,3 @@ class AcceleratorArnTest {
         assertEquals("Accelerator ARN cannot be null or empty $arn", exception.message)
     }
 }
-

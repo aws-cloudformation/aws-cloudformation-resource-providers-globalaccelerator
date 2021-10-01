@@ -185,4 +185,3 @@ class DeleteHandlerTest {
         assertNull(response.resourceModels)
     }
 }
-

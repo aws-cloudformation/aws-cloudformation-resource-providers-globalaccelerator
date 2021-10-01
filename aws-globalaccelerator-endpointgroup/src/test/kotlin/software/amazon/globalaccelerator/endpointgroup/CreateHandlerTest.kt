@@ -283,4 +283,3 @@ class CreateHandlerTest {
         assertEquals(returnedPortOverrides.endpointPort, response.resourceModel.portOverrides[0].endpointPort)
     }
 }
-

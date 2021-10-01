@@ -108,9 +108,9 @@
     },
     "list": {
       "permissions": [
-	"globalaccelerator:ListAccelerators"
+        "globalaccelerator:ListAccelerators"
       ]
-   }
+    }
   },
   "readOnlyProperties": [
     "/properties/AcceleratorArn",

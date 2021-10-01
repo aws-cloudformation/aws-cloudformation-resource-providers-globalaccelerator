@@ -23,4 +23,3 @@ typealias ProxyUpdateEndpointGroup = Function<UpdateEndpointGroupRequest, Update
 typealias ProxyCreateEndpointGroup = Function<CreateEndpointGroupRequest, CreateEndpointGroupResult>
 typealias ProxyDeleteEndpointGroup = Function<DeleteEndpointGroupRequest, DeleteEndpointGroupResult>
 typealias ProxyListEndpointGroups = Function<ListEndpointGroupsRequest, ListEndpointGroupsResult>
-

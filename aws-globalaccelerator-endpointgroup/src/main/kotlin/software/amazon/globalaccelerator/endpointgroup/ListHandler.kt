@@ -50,5 +50,3 @@ class ListHandler : BaseHandler<CallbackContext?>() {
                 }
     }
 }
-
-

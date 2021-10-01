@@ -94,4 +94,3 @@ class ReadHandlerTest {
         assertNull(response.resourceModel)
     }
 }
-

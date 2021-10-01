@@ -31,7 +31,7 @@ class ListHandler : BaseHandler<CallbackContext?>() {
                 .nextToken(listListenersResult.nextToken)
                 .build()
     }
-    
+
     fun convertListenerList(listeners: List<Listener>, acceleratorArn: String): List<ResourceModel> {
         return listeners
                 .map { ResourceModel.builder()
@@ -45,4 +45,3 @@ class ListHandler : BaseHandler<CallbackContext?>() {
                 }
     }
 }
-

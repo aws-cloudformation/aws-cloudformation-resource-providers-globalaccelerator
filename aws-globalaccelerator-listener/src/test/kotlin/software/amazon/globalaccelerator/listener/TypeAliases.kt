@@ -20,4 +20,3 @@ typealias ProxyUpdateListener = Function<UpdateListenerRequest, UpdateListenerRe
 typealias ProxyCreateListener = Function<CreateListenerRequest, CreateListenerResult>
 typealias ProxyDeleteListener = Function<DeleteListenerRequest, DeleteListenerResult>
 typealias ProxyListListeners = Function<ListListenersRequest, ListListenersResult>
-

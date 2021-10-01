@@ -177,4 +177,3 @@ class ListHandlerTest {
         assertEquals(endpointGroupArn1, response.resourceModels[0].endpointGroupArn)
     }
 }
-

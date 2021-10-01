@@ -162,4 +162,3 @@ class UpdateHandlerTest {
         assertEquals("Timed out waiting for listener to be deployed.", exception.message)
     }
 }
-

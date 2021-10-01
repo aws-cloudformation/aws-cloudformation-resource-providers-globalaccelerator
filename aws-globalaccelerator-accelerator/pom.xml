@@ -67,7 +67,7 @@
             <version>5.5.0-M1</version>
             <scope>test</scope>
         </dependency>
-	
+
 	<!-- https://mvnrepository.com/artifact/io.mockk/mockk -->
         <dependency>
             <groupId>io.mockk</groupId>
