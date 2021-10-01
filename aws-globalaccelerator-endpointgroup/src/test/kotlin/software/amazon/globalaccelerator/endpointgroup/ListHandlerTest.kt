@@ -1,10 +1,12 @@
 package software.amazon.globalaccelerator.endpointgroup
 
 import com.amazonaws.services.globalaccelerator.model.EndpointGroup
+import com.amazonaws.services.globalaccelerator.model.ListEndpointGroupsRequest
 import com.amazonaws.services.globalaccelerator.model.ListEndpointGroupsResult
 import com.amazonaws.services.globalaccelerator.model.EndpointDescription
 import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.slot
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -146,6 +148,7 @@ class ListHandlerTest {
 
     @Test
     fun handleRequest_returnsMappedEndpointGroupsWithToken() {
+	val sentNextToken = "next_token"
         val expectedNextToken = "This_token_is_expected"
         val model = createTestResourceModel(endpointGroupArn1, endpointId1_1, endpointId1_2, portOverrides1)
         val returnedPortOverrides = com.amazonaws.services.globalaccelerator.model.PortOverride()
@@ -159,14 +162,18 @@ class ListHandlerTest {
                         .withEndpointDescriptions(createEndpointDescription(endpointId1_1, endpointId1_2))
                         .withPortOverrides(returnedPortOverrides)
         )
+
+	val listEndpointGroupsRequestSlot = slot<ListEndpointGroupsRequest>()
         val listEndpointGroupsResult = ListEndpointGroupsResult()
                 .withEndpointGroups(endpointGroups)
                 .withNextToken(expectedNextToken)
-        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyListEndpointGroups>()) } returns listEndpointGroupsResult
-        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken("next_token").build()
+        every { proxy.injectCredentialsAndInvoke(capture(listEndpointGroupsRequestSlot), ofType<ProxyListEndpointGroups>()) } returns listEndpointGroupsResult
+
+	val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken(sentNextToken).build()
         val response = ListHandler().handleRequest(proxy, request, null, logger)
         assertNotNull(response)
         assertEquals(OperationStatus.SUCCESS, response.status)
+	assertEquals(sentNextToken, listEndpointGroupsRequestSlot.captured.nextToken)
         assertNull(response.callbackContext)
         assertNull(response.resourceModel)
         assertNull(response.message)

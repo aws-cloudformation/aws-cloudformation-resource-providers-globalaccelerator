@@ -48,13 +48,13 @@ class ListHandlerTest {
 
     private fun createTestResourceModel(arn: String, ipAddresses: List<String>, name: String, dnsName: String): ResourceModel {
         return ResourceModel.builder()
-                .acceleratorArn(arn)
-                .enabled(true)
-                .name(name)
+		.acceleratorArn(arn)
+		.enabled(true)
+		.name(name)
 		.dnsName(dnsName)
-                .ipAddresses(ipAddresses)
-                .ipAddressType(ipFamily)
-                .build()
+		.ipAddresses(ipAddresses)
+		.ipAddressType(ipFamily)
+		.build()
     }
 
     @Test
@@ -125,8 +125,8 @@ class ListHandlerTest {
 	val sentNextToken = "next_token"
         val expectedNextToken = "This_token_is_expected"
         val accelerators = mutableListOf(
-                Accelerator()
-                        .withAcceleratorArn(acceleratorArn1)
+		Accelerator()
+			.withAcceleratorArn(acceleratorArn1)
                         .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
                         .withEnabled(true)
                         .withIpAddressType(ipFamily)

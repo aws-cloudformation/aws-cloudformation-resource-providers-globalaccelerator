@@ -1,10 +1,12 @@
 package software.amazon.globalaccelerator.listener
 
 import com.amazonaws.services.globalaccelerator.model.Listener
+import com.amazonaws.services.globalaccelerator.model.ListListenersRequest
 import com.amazonaws.services.globalaccelerator.model.ListListenersResult
 import com.amazonaws.services.globalaccelerator.model.Protocol
 import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.slot
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -115,6 +117,7 @@ class ListHandlerTest {
 
     @Test
     fun handleRequest_returnsMappedListenersWithToken() {
+	val sentNextToken = "next_token"
         val expectedNextToken = "This_token_is_expected"
         val model = createTestResourceModel(listenerArn1, fromPort1, toPort1, protocol1, clientAffinity1)
         val listeners = mutableListOf(
@@ -124,14 +127,18 @@ class ListHandlerTest {
                     .withProtocol(protocol1)
                     .withClientAffinity(clientAffinity1)
         )
+
+	val listListenersRequestSlot = slot<ListListenersRequest>()
         val listListenersResult = ListListenersResult()
                 .withListeners(listeners)
                 .withNextToken(expectedNextToken)
-        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyListListeners>()) } returns listListenersResult
-        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken("next_token").build()
+        every { proxy.injectCredentialsAndInvoke(capture(listListenersRequestSlot), ofType<ProxyListListeners>()) } returns listListenersResult
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken(sentNextToken).build()
         val response = ListHandler().handleRequest(proxy, request, null, logger)
         assertNotNull(response)
         assertEquals(OperationStatus.SUCCESS, response.status)
+	assertEquals(sentNextToken, listListenersRequestSlot.captured.nextToken)
         assertNull(response.callbackContext)
         assertNull(response.resourceModel)
         assertNull(response.message)
