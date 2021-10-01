@@ -123,36 +123,36 @@ class ListHandlerTest {
     @Test
     fun handleRequest_returnsMappedAcceleratorsWithToken() {
 	val sentNextToken = "next_token"
-        val expectedNextToken = "This_token_is_expected"
-        val accelerators = mutableListOf(
+	val expectedNextToken = "This_token_is_expected"
+	val accelerators = mutableListOf(
 		Accelerator()
 			.withAcceleratorArn(acceleratorArn1)
-                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
-                        .withEnabled(true)
-                        .withIpAddressType(ipFamily)
-                        .withName(name1)
-                        .withDnsName(dnsName1)
-                        .withIpSets(ipSet1)
-        )
+			.withStatus(AcceleratorStatus.IN_PROGRESS.toString())
+			.withEnabled(true)
+			.withIpAddressType(ipFamily)
+			.withName(name1)
+			.withDnsName(dnsName1)
+			.withIpSets(ipSet1)
+	)
 
-        val listAcceleratorsRequestSlot = slot<ListAcceleratorsRequest>()
-        val listAcceleratorsResult = ListAcceleratorsResult()
-                .withAccelerators(accelerators)
-                .withNextToken(expectedNextToken)
-        every { proxy.injectCredentialsAndInvoke(capture(listAcceleratorsRequestSlot), ofType<ProxyListAccelerators>()) } returns listAcceleratorsResult
+	val listAcceleratorsRequestSlot = slot<ListAcceleratorsRequest>()
+	val listAcceleratorsResult = ListAcceleratorsResult()
+		.withAccelerators(accelerators)
+		.withNextToken(expectedNextToken)
+	every { proxy.injectCredentialsAndInvoke(capture(listAcceleratorsRequestSlot), ofType<ProxyListAccelerators>()) } returns listAcceleratorsResult
 
-        val request = ResourceHandlerRequest.builder<ResourceModel>().nextToken(sentNextToken).build()
-        val response = ListHandler().handleRequest(proxy, request, null, logger)
-        assertNotNull(response)
-        assertEquals(OperationStatus.SUCCESS, response.status)
+	val request = ResourceHandlerRequest.builder<ResourceModel>().nextToken(sentNextToken).build()
+	val response = ListHandler().handleRequest(proxy, request, null, logger)
+	assertNotNull(response)
+	assertEquals(OperationStatus.SUCCESS, response.status)
 	assertEquals(sentNextToken, listAcceleratorsRequestSlot.captured.nextToken)
-        assertNull(response.callbackContext)
-        assertNull(response.resourceModel)
-        assertNull(response.message)
-        assertNotNull(response.resourceModels)
-        assertNotNull(response.nextToken)
-        assertEquals(expectedNextToken, response.nextToken)
-        assertEquals(1, response.resourceModels.size)
-        assertEquals(acceleratorArn1, response.resourceModels[0].acceleratorArn)
+	assertNull(response.callbackContext)
+	assertNull(response.resourceModel)
+	assertNull(response.message)
+	assertNotNull(response.resourceModels)
+	assertNotNull(response.nextToken)
+	assertEquals(expectedNextToken, response.nextToken)
+	assertEquals(1, response.resourceModels.size)
+	assertEquals(acceleratorArn1, response.resourceModels[0].acceleratorArn)
     }
 }

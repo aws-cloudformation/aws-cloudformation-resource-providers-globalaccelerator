@@ -118,24 +118,24 @@ class ListHandlerTest {
     @Test
     fun handleRequest_returnsMappedListenersWithToken() {
 	val sentNextToken = "next_token"
-        val expectedNextToken = "This_token_is_expected"
-        val model = createTestResourceModel(listenerArn1, fromPort1, toPort1, protocol1, clientAffinity1)
-        val listeners = mutableListOf(
-                Listener()
-                    .withListenerArn(listenerArn1)
-                    .withPortRanges(listOf(com.amazonaws.services.globalaccelerator.model.PortRange().withFromPort(fromPort1).withToPort(toPort1)))
-                    .withProtocol(protocol1)
-                    .withClientAffinity(clientAffinity1)
-        )
+	val expectedNextToken = "This_token_is_expected"
+	val model = createTestResourceModel(listenerArn1, fromPort1, toPort1, protocol1, clientAffinity1)
+	val listeners = mutableListOf(
+		Listener()
+			.withListenerArn(listenerArn1)
+			.withPortRanges(listOf(com.amazonaws.services.globalaccelerator.model.PortRange().withFromPort(fromPort1).withToPort(toPort1)))
+			.withProtocol(protocol1)
+			.withClientAffinity(clientAffinity1)
+	)
 
 	val listListenersRequestSlot = slot<ListListenersRequest>()
-        val listListenersResult = ListListenersResult()
-                .withListeners(listeners)
-                .withNextToken(expectedNextToken)
-        every { proxy.injectCredentialsAndInvoke(capture(listListenersRequestSlot), ofType<ProxyListListeners>()) } returns listListenersResult
+	val listListenersResult = ListListenersResult()
+		.withListeners(listeners)
+		.withNextToken(expectedNextToken)
+	every { proxy.injectCredentialsAndInvoke(capture(listListenersRequestSlot), ofType<ProxyListListeners>()) } returns listListenersResult
 
-        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken(sentNextToken).build()
-        val response = ListHandler().handleRequest(proxy, request, null, logger)
+	val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken(sentNextToken).build()
+	val response = ListHandler().handleRequest(proxy, request, null, logger)
 	assertNotNull(response)
 	assertEquals(OperationStatus.SUCCESS, response.status)
 	assertEquals(sentNextToken, listListenersRequestSlot.captured.nextToken)

@@ -149,38 +149,38 @@ class ListHandlerTest {
     @Test
     fun handleRequest_returnsMappedEndpointGroupsWithToken() {
 	val sentNextToken = "next_token"
-        val expectedNextToken = "This_token_is_expected"
-        val model = createTestResourceModel(endpointGroupArn1, endpointId1_1, endpointId1_2, portOverrides1)
-        val returnedPortOverrides = com.amazonaws.services.globalaccelerator.model.PortOverride()
-                .withListenerPort(portOverrides1[0].listenerPort)
-                .withEndpointPort(portOverrides1[0].endpointPort)
-        val endpointGroups = mutableListOf(
-                EndpointGroup()
-                        .withEndpointGroupArn(endpointGroupArn1)
-                        .withEndpointGroupRegion(endpointGroupRegion)
-                        .withTrafficDialPercentage(50.0f)
-                        .withEndpointDescriptions(createEndpointDescription(endpointId1_1, endpointId1_2))
-                        .withPortOverrides(returnedPortOverrides)
-        )
+	val expectedNextToken = "This_token_is_expected"
+	val model = createTestResourceModel(endpointGroupArn1, endpointId1_1, endpointId1_2, portOverrides1)
+	val returnedPortOverrides = com.amazonaws.services.globalaccelerator.model.PortOverride()
+        	.withListenerPort(portOverrides1[0].listenerPort)
+        	.withEndpointPort(portOverrides1[0].endpointPort)
+	val endpointGroups = mutableListOf(
+		EndpointGroup()
+			.withEndpointGroupArn(endpointGroupArn1)
+			.withEndpointGroupRegion(endpointGroupRegion)
+			.withTrafficDialPercentage(50.0f)
+			.withEndpointDescriptions(createEndpointDescription(endpointId1_1, endpointId1_2))
+			.withPortOverrides(returnedPortOverrides)
+	)
 
 	val listEndpointGroupsRequestSlot = slot<ListEndpointGroupsRequest>()
-        val listEndpointGroupsResult = ListEndpointGroupsResult()
-                .withEndpointGroups(endpointGroups)
-                .withNextToken(expectedNextToken)
-        every { proxy.injectCredentialsAndInvoke(capture(listEndpointGroupsRequestSlot), ofType<ProxyListEndpointGroups>()) } returns listEndpointGroupsResult
+	val listEndpointGroupsResult = ListEndpointGroupsResult()
+        	.withEndpointGroups(endpointGroups)
+        	.withNextToken(expectedNextToken)
+	every { proxy.injectCredentialsAndInvoke(capture(listEndpointGroupsRequestSlot), ofType<ProxyListEndpointGroups>()) } returns listEndpointGroupsResult
 
 	val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken(sentNextToken).build()
-        val response = ListHandler().handleRequest(proxy, request, null, logger)
-        assertNotNull(response)
-        assertEquals(OperationStatus.SUCCESS, response.status)
+	val response = ListHandler().handleRequest(proxy, request, null, logger)
+	assertNotNull(response)
+	assertEquals(OperationStatus.SUCCESS, response.status)
 	assertEquals(sentNextToken, listEndpointGroupsRequestSlot.captured.nextToken)
-        assertNull(response.callbackContext)
-        assertNull(response.resourceModel)
-        assertNull(response.message)
-        assertNotNull(response.resourceModels)
-        assertNotNull(response.nextToken)
-        assertEquals(expectedNextToken, response.nextToken)
-        assertEquals(1, response.resourceModels.size)
-        assertEquals(endpointGroupArn1, response.resourceModels[0].endpointGroupArn)
-    }
+	assertNull(response.callbackContext)
+	assertNull(response.resourceModel)
+	assertNull(response.message)
+	assertNotNull(response.resourceModels)
+	assertNotNull(response.nextToken)
+	assertEquals(expectedNextToken, response.nextToken)
+	assertEquals(1, response.resourceModels.size)
+	assertEquals(endpointGroupArn1, response.resourceModels[0].endpointGroupArn)
+   }
 }
