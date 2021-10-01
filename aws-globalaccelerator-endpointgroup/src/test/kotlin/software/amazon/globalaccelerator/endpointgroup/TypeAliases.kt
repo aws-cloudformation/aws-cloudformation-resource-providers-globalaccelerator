@@ -1,0 +1,25 @@
+package software.amazon.globalaccelerator.endpointgroup
+
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult
+import com.amazonaws.services.globalaccelerator.model.CreateEndpointGroupRequest
+import com.amazonaws.services.globalaccelerator.model.CreateEndpointGroupResult
+import com.amazonaws.services.globalaccelerator.model.DeleteEndpointGroupRequest
+import com.amazonaws.services.globalaccelerator.model.DeleteEndpointGroupResult
+import com.amazonaws.services.globalaccelerator.model.DescribeEndpointGroupRequest
+import com.amazonaws.services.globalaccelerator.model.DescribeEndpointGroupResult
+import com.amazonaws.services.globalaccelerator.model.ListEndpointGroupsRequest
+import com.amazonaws.services.globalaccelerator.model.ListEndpointGroupsResult
+import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupRequest
+import com.amazonaws.services.globalaccelerator.model.UpdateEndpointGroupResult
+import java.util.function.Function
+
+typealias ProxyDescribeAccelerator = Function<DescribeAcceleratorRequest, DescribeAcceleratorResult>
+typealias ProxyDescribeListener = Function<DescribeListenerRequest, DescribeListenerResult>
+typealias ProxyDescribeEndpointGroup = Function<DescribeEndpointGroupRequest, DescribeEndpointGroupResult>
+typealias ProxyUpdateEndpointGroup = Function<UpdateEndpointGroupRequest, UpdateEndpointGroupResult>
+typealias ProxyCreateEndpointGroup = Function<CreateEndpointGroupRequest, CreateEndpointGroupResult>
+typealias ProxyDeleteEndpointGroup = Function<DeleteEndpointGroupRequest, DeleteEndpointGroupResult>
+typealias ProxyListEndpointGroups = Function<ListEndpointGroupsRequest, ListEndpointGroupsResult>

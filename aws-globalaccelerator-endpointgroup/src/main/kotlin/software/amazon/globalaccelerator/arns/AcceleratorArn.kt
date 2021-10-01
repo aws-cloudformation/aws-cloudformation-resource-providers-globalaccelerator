@@ -23,7 +23,7 @@ open class AcceleratorArn(arn: String?) {
         }
         val pattern = Pattern.compile(EXPECTED_ARN_REGEX)
         val matcher = pattern.matcher(arn!!)
-        if (!matcher.find() || matcher.groupCount() !== 4) {
+        if (!matcher.find() || matcher.groupCount() != 4) {
             throw RuntimeException(String.format("Invalid Accelerator ARN %s", arn))
         }
         if (verifyNames(matcher.group(1), matcher.group(3))) {

@@ -1,0 +1,22 @@
+package software.amazon.globalaccelerator.listener
+
+import com.amazonaws.services.globalaccelerator.model.CreateListenerRequest
+import com.amazonaws.services.globalaccelerator.model.CreateListenerResult
+import com.amazonaws.services.globalaccelerator.model.DeleteListenerRequest
+import com.amazonaws.services.globalaccelerator.model.DeleteListenerResult
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorRequest
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult
+import com.amazonaws.services.globalaccelerator.model.ListListenersRequest
+import com.amazonaws.services.globalaccelerator.model.ListListenersResult
+import com.amazonaws.services.globalaccelerator.model.UpdateListenerRequest
+import com.amazonaws.services.globalaccelerator.model.UpdateListenerResult
+import java.util.function.Function
+
+typealias ProxyDescribeAccelerator = Function<DescribeAcceleratorRequest, DescribeAcceleratorResult>
+typealias ProxyDescribeListener = Function<DescribeListenerRequest, DescribeListenerResult>
+typealias ProxyUpdateListener = Function<UpdateListenerRequest, UpdateListenerResult>
+typealias ProxyCreateListener = Function<CreateListenerRequest, CreateListenerResult>
+typealias ProxyDeleteListener = Function<DeleteListenerRequest, DeleteListenerResult>
+typealias ProxyListListeners = Function<ListListenersRequest, ListListenersResult>
