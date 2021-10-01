@@ -26,21 +26,22 @@ class ListHandler : BaseHandler<CallbackContext?>() {
         val listListenersResult = proxy.injectCredentialsAndInvoke(listListenersRequest, agaClient::listListeners)
         val listenerList = convertListenerList(listListenersResult.listeners, model.acceleratorArn)
         return ProgressEvent.builder<ResourceModel, CallbackContext>()
-		.status(OperationStatus.SUCCESS)
-		.resourceModels(listenerList)
-		.nextToken(listListenersResult.nextToken)
-		.build()
+                .status(OperationStatus.SUCCESS)
+                .resourceModels(listenerList)
+                .nextToken(listListenersResult.nextToken)
+                .build()
     }
 
     fun convertListenerList(listeners: List<Listener>, acceleratorArn: String): List<ResourceModel> {
         return listeners
-                .map { ResourceModel.builder()
-                        .listenerArn(it.listenerArn)
-                        .acceleratorArn(acceleratorArn)
-                        .protocol(it.protocol)
-                        .clientAffinity(it.clientAffinity)
-                        .portRanges(it.portRanges.map{ x ->PortRange(x.fromPort, x.toPort)})
-                        .build()
+                .map {
+                    ResourceModel.builder()
+                            .listenerArn(it.listenerArn)
+                            .acceleratorArn(acceleratorArn)
+                            .protocol(it.protocol)
+                            .clientAffinity(it.clientAffinity)
+                            .portRanges(it.portRanges.map { x -> PortRange(x.fromPort, x.toPort) })
+                            .build()
                 }
     }
 }

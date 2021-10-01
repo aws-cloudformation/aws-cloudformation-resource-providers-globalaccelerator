@@ -45,7 +45,6 @@ class ListHandlerTest {
     private val protocol2 = "UDP"
     private val clientAffinity2 = "SOURCE_IP"
 
-
     private fun createTestResourceModel(arn: String, fromPort: Int, toPort: Int,
                                         protocol: String, clientAffinity: String): ResourceModel {
         return ResourceModel.builder()
@@ -56,10 +55,12 @@ class ListHandlerTest {
                 .clientAffinity(clientAffinity)
                 .build()
     }
+
     @Test
     fun handleRequest_returnsMappedListeners() {
         val model1 = createTestResourceModel(listenerArn1, fromPort1, toPort1, protocol1, clientAffinity1)
         val model2 = createTestResourceModel(listenerArn2, fromPort2, toPort2, protocol2, clientAffinity2)
+
         val listeners = mutableListOf(
                 Listener()
                         .withListenerArn(listenerArn1)
@@ -72,10 +73,13 @@ class ListHandlerTest {
                         .withProtocol(protocol2)
                         .withClientAffinity(clientAffinity2)
         )
+
         val listListenersResult = ListListenersResult().withListeners(listeners)
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyListListeners>()) } returns listListenersResult
+
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model1).build()
         val response = ListHandler().handleRequest(proxy, request, null, logger)
+
         assertNotNull(response)
         assertEquals(OperationStatus.SUCCESS, response.status)
         assertNull(response.callbackContext)
@@ -98,16 +102,18 @@ class ListHandlerTest {
         assertEquals(model2.portRanges[0].toPort, response.resourceModels[1].portRanges[0].toPort)
         assertEquals(model2.protocol, response.resourceModels[1].protocol)
         assertEquals(model2.clientAffinity, response.resourceModels[1].clientAffinity)
-
     }
 
     @Test
     fun handleRequest_noListeners() {
         val model = createTestResourceModel(listenerArn1, fromPort1, toPort1, protocol1, clientAffinity1)
+
         val listListenersResult = ListListenersResult().withListeners(emptyList())
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyListListeners>()) } returns listListenersResult
+
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
         val response = ListHandler().handleRequest(proxy, request, null, logger)
+
         assertNotNull(response)
         assertEquals(OperationStatus.SUCCESS, response.status)
         assertNotNull(response.resourceModels)
@@ -117,35 +123,37 @@ class ListHandlerTest {
 
     @Test
     fun handleRequest_returnsMappedListenersWithToken() {
-	val sentNextToken = "next_token"
-	val expectedNextToken = "This_token_is_expected"
-	val model = createTestResourceModel(listenerArn1, fromPort1, toPort1, protocol1, clientAffinity1)
-	val listeners = mutableListOf(
-		Listener()
-			.withListenerArn(listenerArn1)
-			.withPortRanges(listOf(com.amazonaws.services.globalaccelerator.model.PortRange().withFromPort(fromPort1).withToPort(toPort1)))
-			.withProtocol(protocol1)
-			.withClientAffinity(clientAffinity1)
-	)
+        val sentNextToken = "next_token"
+        val expectedNextToken = "This_token_is_expected"
 
-	val listListenersRequestSlot = slot<ListListenersRequest>()
-	val listListenersResult = ListListenersResult()
-		.withListeners(listeners)
-		.withNextToken(expectedNextToken)
-	every { proxy.injectCredentialsAndInvoke(capture(listListenersRequestSlot), ofType<ProxyListListeners>()) } returns listListenersResult
+        val model = createTestResourceModel(listenerArn1, fromPort1, toPort1, protocol1, clientAffinity1)
+        val listeners = mutableListOf(
+                Listener()
+                        .withListenerArn(listenerArn1)
+                        .withPortRanges(listOf(com.amazonaws.services.globalaccelerator.model.PortRange().withFromPort(fromPort1).withToPort(toPort1)))
+                        .withProtocol(protocol1)
+                        .withClientAffinity(clientAffinity1)
+        )
 
-	val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken(sentNextToken).build()
-	val response = ListHandler().handleRequest(proxy, request, null, logger)
-	assertNotNull(response)
-	assertEquals(OperationStatus.SUCCESS, response.status)
-	assertEquals(sentNextToken, listListenersRequestSlot.captured.nextToken)
-	assertNull(response.callbackContext)
-	assertNull(response.resourceModel)
-	assertNull(response.message)
-	assertNotNull(response.resourceModels)
-	assertNotNull(response.nextToken)
-	assertEquals(expectedNextToken, response.nextToken)
-	assertEquals(1, response.resourceModels.size)
-	assertEquals(listenerArn1, response.resourceModels[0].listenerArn)
+        val listListenersRequestSlot = slot<ListListenersRequest>()
+        val listListenersResult = ListListenersResult()
+                .withListeners(listeners)
+                .withNextToken(expectedNextToken)
+        every { proxy.injectCredentialsAndInvoke(capture(listListenersRequestSlot), ofType<ProxyListListeners>()) } returns listListenersResult
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).nextToken(sentNextToken).build()
+        val response = ListHandler().handleRequest(proxy, request, null, logger)
+
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertEquals(sentNextToken, listListenersRequestSlot.captured.nextToken)
+        assertNull(response.callbackContext)
+        assertNull(response.resourceModel)
+        assertNull(response.message)
+        assertNotNull(response.resourceModels)
+        assertNotNull(response.nextToken)
+        assertEquals(expectedNextToken, response.nextToken)
+        assertEquals(1, response.resourceModels.size)
+        assertEquals(listenerArn1, response.resourceModels[0].listenerArn)
     }
 }
