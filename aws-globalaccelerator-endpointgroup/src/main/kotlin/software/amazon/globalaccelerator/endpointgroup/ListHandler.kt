@@ -34,19 +34,20 @@ class ListHandler : BaseHandler<CallbackContext?>() {
 
     fun convertEndpointGroupList(endpointGroups: List<EndpointGroup>, listenerArn: String): List<ResourceModel> {
         return endpointGroups
-                .map { ResourceModel.builder()
-                        .listenerArn(listenerArn)
-                        .endpointGroupArn(it.endpointGroupArn)
-                        .healthCheckIntervalSeconds(it.healthCheckIntervalSeconds)
-                        .healthCheckPath(it.healthCheckPath)
-                        .healthCheckPort(it.healthCheckPort)
-                        .healthCheckProtocol(it.healthCheckProtocol)
-                        .thresholdCount(it.thresholdCount)
-                        .trafficDialPercentage(it.trafficDialPercentage.toDouble())
-                        .endpointGroupRegion(it.endpointGroupRegion)
-                        .endpointConfigurations(getEndpointConfigurations(it.endpointDescriptions))
-                        .portOverrides(getPortOverrides(it.portOverrides))
-                        .build()
+                .map {
+                    ResourceModel.builder()
+                            .listenerArn(listenerArn)
+                            .endpointGroupArn(it.endpointGroupArn)
+                            .healthCheckIntervalSeconds(it.healthCheckIntervalSeconds)
+                            .healthCheckPath(it.healthCheckPath)
+                            .healthCheckPort(it.healthCheckPort)
+                            .healthCheckProtocol(it.healthCheckProtocol)
+                            .thresholdCount(it.thresholdCount)
+                            .trafficDialPercentage(it.trafficDialPercentage.toDouble())
+                            .endpointGroupRegion(it.endpointGroupRegion)
+                            .endpointConfigurations(getEndpointConfigurations(it.endpointDescriptions))
+                            .portOverrides(getPortOverrides(it.portOverrides))
+                            .build()
                 }
     }
 }
