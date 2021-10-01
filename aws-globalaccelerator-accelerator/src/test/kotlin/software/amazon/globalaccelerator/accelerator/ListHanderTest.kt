@@ -48,13 +48,13 @@ class ListHandlerTest {
 
     private fun createTestResourceModel(arn: String, ipAddresses: List<String>, name: String, dnsName: String): ResourceModel {
         return ResourceModel.builder()
-		.acceleratorArn(arn)
-		.enabled(true)
-		.name(name)
-		.dnsName(dnsName)
-		.ipAddresses(ipAddresses)
-		.ipAddressType(ipFamily)
-		.build()
+                .acceleratorArn(arn)
+                .enabled(true)
+                .name(name)
+                .dnsName(dnsName)
+                .ipAddresses(ipAddresses)
+                .ipAddressType(ipFamily)
+                .build()
     }
 
     @Test
@@ -63,27 +63,30 @@ class ListHandlerTest {
         val model2 = createTestResourceModel(acceleratorArn2, ipAddresses2, name2, dnsName2)
         val accelerators = mutableListOf(
                 Accelerator()
-                    .withAcceleratorArn(acceleratorArn1)
-                    .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
-                    .withEnabled(true)
-                    .withIpAddressType(ipFamily)
-                    .withName(name1)
-                    .withDnsName(dnsName1)
-                    .withIpSets(ipSet1),
+                        .withAcceleratorArn(acceleratorArn1)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
+                        .withEnabled(true)
+                        .withIpAddressType(ipFamily)
+                        .withName(name1)
+                        .withDnsName(dnsName1)
+                        .withIpSets(ipSet1),
                 Accelerator()
-                    .withAcceleratorArn(acceleratorArn2)
-                    .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
-                    .withEnabled(true)
-                    .withIpAddressType(ipFamily)
-                    .withName(name2)
-                    .withDnsName(dnsName2)
-                    .withIpSets(ipSet2)
-                )
+                        .withAcceleratorArn(acceleratorArn2)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
+                        .withEnabled(true)
+                        .withIpAddressType(ipFamily)
+                        .withName(name2)
+                        .withDnsName(dnsName2)
+                        .withIpSets(ipSet2)
+        )
+
         val listAcceleratorsResult = ListAcceleratorsResult()
                 .withAccelerators(accelerators)
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyListAccelerators>()) } returns listAcceleratorsResult
+
         val request = ResourceHandlerRequest.builder<ResourceModel>().build()
         val response = ListHandler().handleRequest(proxy, request, null, logger)
+
         assertNotNull(response)
         assertEquals(OperationStatus.SUCCESS, response.status)
         assertNull(response.callbackContext)
@@ -113,6 +116,7 @@ class ListHandlerTest {
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().build()
         val response = ListHandler().handleRequest(proxy, request, null, logger)
+
         assertNotNull(response)
         assertEquals(OperationStatus.SUCCESS, response.status)
         assertNotNull(response.resourceModels)
@@ -122,37 +126,38 @@ class ListHandlerTest {
 
     @Test
     fun handleRequest_returnsMappedAcceleratorsWithToken() {
-	val sentNextToken = "next_token"
-	val expectedNextToken = "This_token_is_expected"
-	val accelerators = mutableListOf(
-		Accelerator()
-			.withAcceleratorArn(acceleratorArn1)
-			.withStatus(AcceleratorStatus.IN_PROGRESS.toString())
-			.withEnabled(true)
-			.withIpAddressType(ipFamily)
-			.withName(name1)
-			.withDnsName(dnsName1)
-			.withIpSets(ipSet1)
-	)
+        val sentNextToken = "next_token"
+        val expectedNextToken = "This_token_is_expected"
+        val accelerators = mutableListOf(
+                Accelerator()
+                        .withAcceleratorArn(acceleratorArn1)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
+                        .withEnabled(true)
+                        .withIpAddressType(ipFamily)
+                        .withName(name1)
+                        .withDnsName(dnsName1)
+                        .withIpSets(ipSet1)
+        )
 
-	val listAcceleratorsRequestSlot = slot<ListAcceleratorsRequest>()
-	val listAcceleratorsResult = ListAcceleratorsResult()
-		.withAccelerators(accelerators)
-		.withNextToken(expectedNextToken)
-	every { proxy.injectCredentialsAndInvoke(capture(listAcceleratorsRequestSlot), ofType<ProxyListAccelerators>()) } returns listAcceleratorsResult
+        val listAcceleratorsRequestSlot = slot<ListAcceleratorsRequest>()
+        val listAcceleratorsResult = ListAcceleratorsResult()
+                .withAccelerators(accelerators)
+                .withNextToken(expectedNextToken)
+        every { proxy.injectCredentialsAndInvoke(capture(listAcceleratorsRequestSlot), ofType<ProxyListAccelerators>()) } returns listAcceleratorsResult
 
-	val request = ResourceHandlerRequest.builder<ResourceModel>().nextToken(sentNextToken).build()
-	val response = ListHandler().handleRequest(proxy, request, null, logger)
-	assertNotNull(response)
-	assertEquals(OperationStatus.SUCCESS, response.status)
-	assertEquals(sentNextToken, listAcceleratorsRequestSlot.captured.nextToken)
-	assertNull(response.callbackContext)
-	assertNull(response.resourceModel)
-	assertNull(response.message)
-	assertNotNull(response.resourceModels)
-	assertNotNull(response.nextToken)
-	assertEquals(expectedNextToken, response.nextToken)
-	assertEquals(1, response.resourceModels.size)
-	assertEquals(acceleratorArn1, response.resourceModels[0].acceleratorArn)
+        val request = ResourceHandlerRequest.builder<ResourceModel>().nextToken(sentNextToken).build()
+        val response = ListHandler().handleRequest(proxy, request, null, logger)
+
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertEquals(sentNextToken, listAcceleratorsRequestSlot.captured.nextToken)
+        assertNull(response.callbackContext)
+        assertNull(response.resourceModel)
+        assertNull(response.message)
+        assertNotNull(response.resourceModels)
+        assertNotNull(response.nextToken)
+        assertEquals(expectedNextToken, response.nextToken)
+        assertEquals(1, response.resourceModels.size)
+        assertEquals(acceleratorArn1, response.resourceModels[0].acceleratorArn)
     }
 }
