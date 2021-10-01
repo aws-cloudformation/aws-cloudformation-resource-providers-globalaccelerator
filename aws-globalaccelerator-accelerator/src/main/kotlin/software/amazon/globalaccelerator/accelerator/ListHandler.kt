@@ -23,15 +23,15 @@ class ListHandler : BaseHandler<CallbackContext?>() {
         val agaClient = client
         val listAcceleratorsRequest = ListAcceleratorsRequest().withNextToken(request.nextToken)
         val listAcceleratorsResult = proxy.injectCredentialsAndInvoke(listAcceleratorsRequest, agaClient::listAccelerators)
-        val acceleratorList = convertAccleratorList(listAcceleratorsResult.accelerators)
+        val acceleratorList = convertAcceleratorList(listAcceleratorsResult.accelerators)
         return ProgressEvent.builder<ResourceModel, CallbackContext>()
-        	.status(OperationStatus.SUCCESS)
-		.resourceModels(acceleratorList)
-                .nextToken(listAcceleratorsResult.nextToken)
-                .build()
+        	 .status(OperationStatus.SUCCESS)
+		 .resourceModels(acceleratorList)
+                 .nextToken(listAcceleratorsResult.nextToken)
+                 .build()
     }
 
-    fun convertAccleratorList(accelerators: List<Accelerator>): List<ResourceModel> {
+    fun convertAcceleratorList(accelerators: List<Accelerator>): List<ResourceModel> {
         return accelerators
         	.map { ResourceModel.builder()
                 	.acceleratorArn(it.acceleratorArn)

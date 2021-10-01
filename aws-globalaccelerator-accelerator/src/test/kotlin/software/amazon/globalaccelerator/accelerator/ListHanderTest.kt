@@ -2,10 +2,12 @@ package software.amazon.globalaccelerator.accelerator
 
 import com.amazonaws.services.globalaccelerator.model.Accelerator
 import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
+import com.amazonaws.services.globalaccelerator.model.ListAcceleratorsRequest
 import com.amazonaws.services.globalaccelerator.model.ListAcceleratorsResult
 import com.amazonaws.services.globalaccelerator.model.IpSet
 import io.mockk.MockKAnnotations
 import io.mockk.every
+import io.mockk.slot
 import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -120,6 +122,7 @@ class ListHandlerTest {
 
     @Test
     fun handleRequest_returnsMappedAcceleratorsWithToken() {
+	val sentNextToken = "next_token"
         val expectedNextToken = "This_token_is_expected"
         val accelerators = mutableListOf(
                 Accelerator()
@@ -131,14 +134,18 @@ class ListHandlerTest {
                         .withDnsName(dnsName1)
                         .withIpSets(ipSet1)
         )
+
+        val listAcceleratorsRequestSlot = slot<ListAcceleratorsRequest>()
         val listAcceleratorsResult = ListAcceleratorsResult()
                 .withAccelerators(accelerators)
                 .withNextToken(expectedNextToken)
-        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyListAccelerators>()) } returns listAcceleratorsResult
-        val request = ResourceHandlerRequest.builder<ResourceModel>().nextToken("next_token").build()
+        every { proxy.injectCredentialsAndInvoke(capture(listAcceleratorsRequestSlot), ofType<ProxyListAccelerators>()) } returns listAcceleratorsResult
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>().nextToken(sentNextToken).build()
         val response = ListHandler().handleRequest(proxy, request, null, logger)
         assertNotNull(response)
         assertEquals(OperationStatus.SUCCESS, response.status)
+	assertEquals(sentNextToken, listAcceleratorsRequestSlot.captured.nextToken)
         assertNull(response.callbackContext)
         assertNull(response.resourceModel)
         assertNull(response.message)
