@@ -29,6 +29,7 @@ Resources:
                 - "globalaccelerator:DescribeEndpointGroup"
                 - "globalaccelerator:DescribeListener"
                 - "globalaccelerator:ListAccelerators"
+                - "globalaccelerator:ListEndpointGroups"
                 - "globalaccelerator:ListListeners"
                 - "globalaccelerator:UpdateEndpointGroup"
                 Resource: "*"

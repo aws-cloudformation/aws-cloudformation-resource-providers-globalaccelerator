@@ -1,42 +1,47 @@
 package software.amazon.globalaccelerator.listener
 
-import com.amazonaws.AmazonWebServiceResult
-import com.amazonaws.ResponseMetadata
-import com.amazonaws.services.globalaccelerator.model.*
+import com.amazonaws.services.globalaccelerator.model.AcceleratorStatus
+import com.amazonaws.services.globalaccelerator.model.DescribeAcceleratorResult
+import com.amazonaws.services.globalaccelerator.model.ClientAffinity
+import com.amazonaws.services.globalaccelerator.model.Protocol
 import com.amazonaws.services.globalaccelerator.model.PortRange
+import com.amazonaws.services.globalaccelerator.model.Accelerator
+import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult
+import com.amazonaws.services.globalaccelerator.model.Listener
+import com.amazonaws.services.globalaccelerator.model.UpdateListenerResult
+import io.mockk.MockKAnnotations
+import io.mockk.every
+import io.mockk.impl.annotations.MockK
+import io.mockk.junit5.MockKExtension
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
-import org.mockito.Mock
-import org.mockito.junit.jupiter.MockitoExtension
 import software.amazon.cloudformation.proxy.AmazonWebServicesClientProxy
+import software.amazon.cloudformation.proxy.HandlerErrorCode
 import software.amazon.cloudformation.proxy.Logger
 import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
-
 import java.util.ArrayList
 import java.util.HashMap
 
-import org.junit.jupiter.api.Assertions
-import org.mockito.ArgumentMatchers
-import org.mockito.Mockito.doReturn
-import org.mockito.Mockito.mock
-import java.util.function.Function
-
-@ExtendWith(MockitoExtension::class)
+@ExtendWith(MockKExtension::class)
 class UpdateHandlerTest {
+    @MockK
+    lateinit var proxy: AmazonWebServicesClientProxy
 
-    @Mock
-    private var proxy: AmazonWebServicesClientProxy? = null
-
-    @Mock
-    private var logger: Logger? = null
+    @MockK(relaxed = true)
+    lateinit var logger: Logger
 
     @BeforeEach
-    fun setup() {
-        proxy = mock(AmazonWebServicesClientProxy::class.java)
-        logger = mock(Logger::class.java)
-    }
+    fun setup() = MockKAnnotations.init(this)
+
+    private val acceleratorArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d"
+    private val listenerArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d/listener/ee7358c2"
 
     /**
      * Sets up expectation that describe accelerator will be called on our test mock
@@ -46,61 +51,54 @@ class UpdateHandlerTest {
         // we expect a call to get the accelerator status
         val describeAcceleratorResult = DescribeAcceleratorResult()
                 .withAccelerator(Accelerator()
-                        .withAcceleratorArn("ACCELERATOR_ARN")
+                        .withAcceleratorArn(acceleratorArn)
                         .withStatus(acceleratorStatus.toString()))
-        doReturn(describeAcceleratorResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeAcceleratorRequest::class.java), ArgumentMatchers.any<Function<DescribeAcceleratorRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
     }
 
     private fun createTestResourceModel(): ResourceModel {
         val portRanges = ArrayList<software.amazon.globalaccelerator.listener.PortRange>()
-        portRanges.add(PortRange(80, 81))
+        portRanges.add(software.amazon.globalaccelerator.listener.PortRange(80, 81))
         return ResourceModel.builder()
-                .listenerArn("LISTENER_ARN")
-                .acceleratorArn("ACCELERATOR_ARN")
-                .clientAffinity("SOURCE_IP")
-                .protocol("TCP")
+                .listenerArn(listenerArn)
+                .acceleratorArn(acceleratorArn)
+                .clientAffinity(ClientAffinity.SOURCE_IP.toString())
+                .protocol(Protocol.TCP.toString())
                 .portRanges(portRanges)
                 .build()
     }
 
     @Test
     fun handleRequest_InitialUpdate_ReturnsInProgress() {
-        // Because we need to check for listener existence first
-        // we expect a call to describe
         val describeListenerResult = DescribeListenerResult()
                 .withListener(Listener()
-                        .withListenerArn("LISTENER_ARN")
+                        .withListenerArn(listenerArn)
                         .withClientAffinity(ClientAffinity.SOURCE_IP.toString())
                         .withProtocol(Protocol.TCP.toString())
                         .withPortRanges(PortRange().withFromPort(80).withToPort(81)))
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeListener>()) } returns describeListenerResult
 
-
-        doReturn(describeListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(DescribeListenerRequest::class.java), ArgumentMatchers.any<Function<DescribeListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
-
-
-        // we expect a call to update
         val updateListenerResult = UpdateListenerResult()
                 .withListener(Listener()
-                        .withListenerArn("LISTENER_ARN")
+                        .withListenerArn(listenerArn)
                         .withClientAffinity(ClientAffinity.SOURCE_IP.toString())
                         .withProtocol(Protocol.TCP.toString())
                         .withPortRanges(PortRange().withFromPort(80).withToPort(81)))
-
-        doReturn(updateListenerResult).`when`(proxy!!).injectCredentialsAndInvoke(ArgumentMatchers.any(UpdateListenerRequest::class.java), ArgumentMatchers.any<Function<UpdateListenerRequest, AmazonWebServiceResult<ResponseMetadata>>>())
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateListener>()) } returns updateListenerResult
 
         val model = createTestResourceModel()
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
-        val response = UpdateHandler().handleRequest(proxy!!, request, null, logger!!)
+        val response = UpdateHandler().handleRequest(proxy, request, null, logger)
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.callbackDelaySeconds, 0)
-        Assertions.assertNotNull(response.callbackContext)
-        Assertions.assertNull(response.resourceModels)
-        Assertions.assertNull(response.message)
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(0, response.callbackDelaySeconds)
+        assertNotNull(response.callbackContext)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
 
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
+        assertNotNull(response.resourceModel)
+        assertEquals(model, response.resourceModel)
     }
 
     @Test
@@ -115,18 +113,18 @@ class UpdateHandlerTest {
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
-        val response = UpdateHandler().handleRequest(proxy!!, request, context, logger!!)
+        val response = UpdateHandler().handleRequest(proxy, request, context, logger)
 
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.IN_PROGRESS)
-        Assertions.assertEquals(response.callbackDelaySeconds, 1)
-        Assertions.assertNotNull(response.callbackContext)
-        Assertions.assertNull(response.resourceModels)
-        Assertions.assertNull(response.message)
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertEquals(1, response.callbackDelaySeconds)
+        assertNotNull(response.callbackContext)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
 
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
+        assertNotNull(response.resourceModel)
+        assertEquals(model, response.resourceModel)
     }
 
     @Test
@@ -140,16 +138,16 @@ class UpdateHandlerTest {
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
-        val response = UpdateHandler().handleRequest(proxy!!, request, context, logger!!)
+        val response = UpdateHandler().handleRequest(proxy, request, context, logger)
 
 
-        Assertions.assertNotNull(response)
-        Assertions.assertEquals(response.status, OperationStatus.SUCCESS)
-        Assertions.assertNull(response.resourceModels)
-        Assertions.assertNull(response.message)
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
 
-        Assertions.assertEquals(response.resourceModel, model)
-        Assertions.assertNotNull(response.resourceModel)
+        assertNotNull(response.resourceModel)
+        assertEquals(model, response.resourceModel)
     }
 
     @Test
@@ -158,9 +156,9 @@ class UpdateHandlerTest {
         val callbackContext = CallbackContext(stabilizationRetriesRemaining = 0, pendingStabilization = true)
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
-        val exception = Assertions.assertThrows(RuntimeException::class.java) {
-            UpdateHandler().handleRequest(proxy!!, request, callbackContext, logger!!)
+        val exception = assertThrows(RuntimeException::class.java) {
+            UpdateHandler().handleRequest(proxy, request, callbackContext, logger)
         }
-        Assertions.assertEquals("Timed out waiting for listener to be deployed.", exception.message)
+        assertEquals("Timed out waiting for listener to be deployed.", exception.message)
     }
 }
