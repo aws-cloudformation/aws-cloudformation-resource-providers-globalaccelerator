@@ -30,3 +30,6 @@ target/
 # test files
 stack.json
 aws-globalaccelerator-accelerator/pom.xml.versionsBackup
+
+# generates docs directory
+docs/

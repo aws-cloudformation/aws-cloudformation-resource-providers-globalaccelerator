@@ -43,6 +43,7 @@ class ReadHandler : BaseHandler<CallbackContext?>() {
                 this.dnsName = accelerator.dnsName
                 this.ipAddresses = accelerator.ipSets?.flatMap { it.ipAddresses }
                 this.tags = tags.map { Tag(it.key, it.value) }
+                this.ipv4Addresses = accelerator.ipSets?.filter { it.ipFamily.equals("IPV4", ignoreCase = true) }?.flatMap { it.ipAddresses }
             }
         } else {
             null
