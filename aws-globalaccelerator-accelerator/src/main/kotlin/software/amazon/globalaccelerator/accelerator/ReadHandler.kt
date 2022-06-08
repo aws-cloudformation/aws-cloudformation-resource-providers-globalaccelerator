@@ -10,6 +10,7 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import software.amazon.globalaccelerator.accelerator.AcceleratorClientBuilder.client
 import software.amazon.globalaccelerator.accelerator.HandlerCommons.getAccelerator
 import software.amazon.globalaccelerator.accelerator.HandlerCommons.getTags
+import software.amazon.globalaccelerator.accelerator.HandlerCommons.toResourceModel
 
 /**
  * Read handler implementation for accelerator resource.
@@ -34,18 +35,6 @@ class ReadHandler : BaseHandler<CallbackContext?>() {
     }
 
     private fun convertAcceleratorToResourceModel(accelerator: Accelerator?, tags: List<Tag>): ResourceModel? {
-        return if (accelerator != null) {
-            ResourceModel().apply {
-                this.acceleratorArn = accelerator.acceleratorArn
-                this.name = accelerator.name
-                this.enabled = accelerator.enabled
-                this.ipAddressType = accelerator.ipAddressType
-                this.dnsName = accelerator.dnsName
-                this.ipAddresses = accelerator.ipSets?.flatMap { it.ipAddresses }
-                this.tags = tags.map { Tag(it.key, it.value) }
-            }
-        } else {
-            null
-        }
+        return accelerator?.let { toResourceModel(it, tags) }
     }
 }

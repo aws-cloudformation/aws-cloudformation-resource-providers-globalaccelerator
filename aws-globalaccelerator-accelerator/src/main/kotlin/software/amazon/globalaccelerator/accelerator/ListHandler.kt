@@ -10,6 +10,7 @@ import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ProgressEvent
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import software.amazon.globalaccelerator.accelerator.AcceleratorClientBuilder.client
+import software.amazon.globalaccelerator.accelerator.HandlerCommons.toResourceModel
 
 /**
  * List handler implementation for accelerator resource.
@@ -32,16 +33,6 @@ class ListHandler : BaseHandler<CallbackContext?>() {
     }
 
     fun convertAcceleratorList(accelerators: List<Accelerator>): List<ResourceModel> {
-        return accelerators
-                .map {
-                    ResourceModel.builder()
-                            .acceleratorArn(it.acceleratorArn)
-                            .name(it.name)
-                            .enabled(it.enabled)
-                            .ipAddressType(it.ipAddressType)
-                            .dnsName(it.dnsName)
-                            .ipAddresses(it.ipSets?.flatMap { it.ipAddresses })
-                            .build()
-                }
+        return accelerators.map { toResourceModel(it, emptyList()) }
     }
 }
