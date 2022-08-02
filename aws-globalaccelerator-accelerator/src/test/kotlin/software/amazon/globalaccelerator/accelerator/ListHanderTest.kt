@@ -138,7 +138,7 @@ class ListHandlerTest {
         assertEquals(model2.ipAddresses, response.resourceModels[1].ipAddresses)
         assertEquals(model2.ipAddresses, response.resourceModels[1].ipv4Addresses)
         assertEquals(arrayListOf<String>(), response.resourceModels[1].ipv6Addresses)
- 
+
         assertEquals(acceleratorArn3, response.resourceModels[2].acceleratorArn)
         assertEquals(model3.ipAddressType, response.resourceModels[2].ipAddressType)
         assertEquals(model3.name, response.resourceModels[2].name)
