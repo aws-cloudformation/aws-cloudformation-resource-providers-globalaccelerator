@@ -63,7 +63,7 @@
       "type": "boolean"
     },
     "DnsName": {
-      "description": "The Domain Name System (DNS) name that Global Accelerator creates that points to your accelerator's static IP addresses.",
+      "description": "The Domain Name System (DNS) name that Global Accelerator creates that points to your accelerator's static IPv4 addresses.",
       "type": "string"
     },
     "Ipv4Addresses": {
@@ -82,7 +82,7 @@
       }
     },
     "DualStackDnsName": {
-      "description": "The Domain Name System (DNS) name that Global Accelerator creates that points to your accelerator's static IPv6 addresses.",
+      "description": "The Domain Name System (DNS) name that Global Accelerator creates that points to your accelerator's static IPv4 and IPv6 addresses.",
       "type": "string"
     },
     "AcceleratorArn": {
