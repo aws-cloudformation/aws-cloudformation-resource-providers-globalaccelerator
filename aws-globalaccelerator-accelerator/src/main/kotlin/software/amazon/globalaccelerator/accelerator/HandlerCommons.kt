@@ -80,9 +80,11 @@ object HandlerCommons {
             this.enabled = accelerator.enabled
             this.ipAddressType = accelerator.ipAddressType
             this.dnsName = accelerator.dnsName
-            this.ipAddresses = accelerator.ipSets?.flatMap { it.ipAddresses }
+            this.dualStackDnsName = accelerator.dualStackDnsName
+            this.ipAddresses = accelerator.ipSets?.filter { it.ipFamily.equals("IPV4", ignoreCase = true) }?.flatMap { it.ipAddresses }
             this.tags = tags.map { Tag(it.key, it.value) }
             this.ipv4Addresses = accelerator.ipSets?.filter { it.ipFamily.equals("IPV4", ignoreCase = true) }?.flatMap { it.ipAddresses }
+            this.ipv6Addresses = accelerator.ipSets?.filter { it.ipFamily.equals("IPV6", ignoreCase = true) }?.flatMap { it.ipAddresses }
         }
     }
 }

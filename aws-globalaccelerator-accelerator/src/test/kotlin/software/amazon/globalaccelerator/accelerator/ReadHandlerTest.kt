@@ -37,7 +37,7 @@ class ReadHandlerTest {
     private var ipSet: IpSet? = null
     private fun createTestResourceModel(): ResourceModel {
         val ipAddresses = listOf("10.10.10.1", "10.10.10.2")
-        ipSet = IpSet().withIpAddresses(ipAddresses)
+        ipSet = IpSet().withIpAddresses(ipAddresses).withIpFamily("IPV4")
         return ResourceModel.builder()
                 .acceleratorArn(ACCELERATOR_ARN)
                 .enabled(true)
@@ -74,8 +74,55 @@ class ReadHandlerTest {
         assertEquals("IPV4", response.resourceModel.ipAddressType)
         assertEquals("Name", response.resourceModel.name)
         assertEquals("DNS_NAME_HERE", response.resourceModel.dnsName)
+        assertNull(response.resourceModel.dualStackDnsName)
         assertTrue(response.resourceModel.enabled)
         assertEquals(model.ipAddresses, response.resourceModel.ipAddresses)
+        assertEquals(model.ipAddresses, response.resourceModel.ipv4Addresses)
+        assertEquals(arrayListOf<String>(), response.resourceModel.ipv6Addresses)
+    }
+
+
+    @Test
+    fun handleRequest_returnsMappedDualStackAccelerator() {
+        val dualStackAddressType = "DUAL_STACK"
+        val ipv6Addresses = listOf("2600:9000:a16f:94b4:4352:4d16:11d5:561b", "2600:9000:a1f9:b20f:f92:8279:1e86:ae75")
+        val ipSet2 = IpSet().withIpAddresses(ipv6Addresses).withIpFamily("IPV6")
+        val dualStackDnsName = "DUAL_STACK_DNS_NAME_HERE"
+        val model = createTestResourceModel()
+        model.dualStackDnsName = dualStackDnsName
+        model.ipv6Addresses = ipv6Addresses
+        model.ipAddressType = dualStackAddressType
+
+        val describeAcceleratorResult = DescribeAcceleratorResult()
+                .withAccelerator(Accelerator()
+                        .withAcceleratorArn(ACCELERATOR_ARN)
+                        .withStatus(AcceleratorStatus.IN_PROGRESS.toString())
+                        .withEnabled(true)
+                        .withIpAddressType(dualStackAddressType)
+                        .withName("Name")
+                        .withDnsName("DNS_NAME_HERE")
+                        .withDualStackDnsName(dualStackDnsName)
+                        .withIpSets(arrayListOf(ipSet, ipSet2))
+                )
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeAccelerator>()) } returns describeAcceleratorResult
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
+        val response = ReadHandler().handleRequest(proxy, request, null, logger)
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertNull(response.callbackContext)
+        assertNull(response.resourceModels)
+        assertNull(response.message)
+        assertNotNull(response.resourceModel)
+        assertEquals(ACCELERATOR_ARN, response.resourceModel.acceleratorArn)
+        assertEquals(dualStackAddressType, response.resourceModel.ipAddressType)
+        assertEquals("Name", response.resourceModel.name)
+        assertEquals("DNS_NAME_HERE", response.resourceModel.dnsName)
+        assertEquals(dualStackDnsName, response.resourceModel.dualStackDnsName)
+        assertTrue(response.resourceModel.enabled)
+        assertEquals(model.ipAddresses, response.resourceModel.ipAddresses)
+        assertEquals(model.ipAddresses, response.resourceModel.ipv4Addresses)
+        assertEquals(model.ipv6Addresses, response.resourceModel.ipv6Addresses)
     }
 
     @Test
