@@ -41,6 +41,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         model.apply {
             this.acceleratorArn = acc.acceleratorArn
             this.dnsName = acc.dnsName
+            this.dualStackDnsName = acc.dualStackDnsName
             this.ipAddresses = acc.ipSets?.flatMap { it.ipAddresses }
         }
         val callbackContext: CallbackContext? = CallbackContext(HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
