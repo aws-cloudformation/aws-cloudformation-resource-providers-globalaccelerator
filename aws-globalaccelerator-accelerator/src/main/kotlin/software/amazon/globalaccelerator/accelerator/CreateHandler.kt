@@ -55,6 +55,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         val convertedTags = model.tags?.map { Tag().withKey(it.key).withValue(it.value) }
         val request = CreateAcceleratorRequest()
                 .withName(model.name)
+                .withIpAddressType(model.ipAddressType)
                 .withEnabled(model.enabled)
                 .withIpAddresses(model.ipAddresses)
                 .withTags(convertedTags)
