@@ -34,7 +34,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
             ResourceModel().apply {
                 this.listenerArn = listener.listenerArn
                 this.protocol = listener.protocol
-                this.acceleratorArn = currentModel.acceleratorArn
+                this.acceleratorArn = HandlerCommons.getAcceleratorArnFromListenerArn(currentModel.listenerArn)
                 this.clientAffinity = listener.clientAffinity
                 this.portRanges = listener.portRanges.map{ x ->
                     val portRange = PortRange()

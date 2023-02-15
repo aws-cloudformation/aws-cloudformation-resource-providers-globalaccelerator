@@ -1,0 +1,29 @@
+{
+  "CreateInputs": {
+    "ListenerArn": "{{ awsglobalacceleratorendpointgroupcto1 }}",
+    "EndpointGroupRegion": "us-west-2",
+    "EndpointConfigurations": [
+      {
+        "EndpointId": "{{ awsglobalacceleratorendpointgroupcto2 }}",
+        "Weight": 100,
+        "ClientIPPreservationEnabled": true
+      }
+    ],
+    "PortOverrides": [
+      {
+        "ListenerPort": 5342,
+        "EndpointPort": 80
+      }
+    ]
+  },
+  "PatchInputs": [
+    {
+      "op": "replace",
+      "path": "/TrafficDialPercentage",
+      "value": 42
+    }
+  ],
+  "ListInputs": {
+    "ListenerArn": "{{ awsglobalacceleratorendpointgroupcto1 }}"
+  }
+}

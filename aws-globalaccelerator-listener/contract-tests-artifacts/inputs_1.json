@@ -1,0 +1,27 @@
+{
+  "CreateInputs": {
+    "AcceleratorArn": "{{ awsglobalacceleratorlistenercto1 }}",
+    "PortRanges": [
+      {
+        "FromPort": 4242,
+        "ToPort": 4242
+      }
+    ],
+    "Protocol": "TCP"
+  },
+  "PatchInputs": [
+    {
+      "op": "replace",
+      "path": "/PortRanges",
+      "value": [
+        {
+          "FromPort": 4242,
+          "ToPort": 4243
+        }
+      ]
+    }
+  ],
+  "ListInputs": {
+    "AcceleratorArn": "{{ awsglobalacceleratorlistenercto1 }}"
+  }
+}

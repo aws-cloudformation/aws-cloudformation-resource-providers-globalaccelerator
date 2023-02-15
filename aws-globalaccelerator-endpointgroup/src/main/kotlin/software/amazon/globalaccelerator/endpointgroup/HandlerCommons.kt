@@ -81,7 +81,7 @@ object HandlerCommons {
     }
 
     /** Gets the listener with the specified ARN
-     *  @param arn ARN of the listener
+     * @param arn ARN of the listener
      * @return NULL if listener does not exist
      */
     fun getListener(arn: String, proxy: AmazonWebServicesClientProxy,
@@ -96,7 +96,7 @@ object HandlerCommons {
     }
 
     /** Gets the Endpoint Group with the specified ARN
-     *  @param arn ARN of the Endpoint Group
+     * @param arn ARN of the Endpoint Group
      * @return NULL if listener does not exist
      */
     fun getEndpointGroup(arn: String, proxy: AmazonWebServicesClientProxy,
@@ -108,5 +108,14 @@ object HandlerCommons {
             logger.debug("Did not find endpoint group with arn: [$arn].")
             null
         }
+    }
+
+    /** Gets the Listener arn by parsing the endpointGroupArn
+     * @param endpointGroupArn Arn of the Endpoint Group
+     * @return The Listener arn
+     */
+    fun getListenerArnFromEndpointGroupArn(endpointGroupArn: String) : String {
+        val ENDPOINTGROUP_SEPARATOR = "/endpoint-group/"
+        return endpointGroupArn.split(ENDPOINTGROUP_SEPARATOR)[0]
     }
 }

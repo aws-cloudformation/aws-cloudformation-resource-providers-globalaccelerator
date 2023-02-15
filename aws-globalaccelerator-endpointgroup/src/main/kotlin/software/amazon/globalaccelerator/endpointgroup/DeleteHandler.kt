@@ -21,6 +21,7 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
         val inferredCallbackContext = callbackContext
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES)
         val model = request.desiredResourceState
+        model.listenerArn = HandlerCommons.getListenerArnFromEndpointGroupArn(model.endpointGroupArn)
         return if (!inferredCallbackContext.pendingStabilization) {
             HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
                     ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Endpoint Group not found.")

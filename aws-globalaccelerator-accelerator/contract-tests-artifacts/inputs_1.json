@@ -1,0 +1,25 @@
+{
+  "CreateInputs": {
+    "Name": "ContractDualStackTestAccelerator",
+    "Enabled": true,
+    "IpAddressType": "DUAL_STACK",
+    "Tags": [
+      {
+        "Key": "Foo",
+        "Value": "Bar"
+      }
+    ]
+  },
+  "PatchInputs": [
+    {
+      "op": "replace",
+      "path": "/Name",
+      "value": "UpdatedTestAccelerator"
+    },
+    {
+      "op": "replace",
+      "path": "/Enabled",
+      "value": false
+    }
+  ]
+}

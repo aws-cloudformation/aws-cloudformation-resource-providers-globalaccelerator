@@ -41,7 +41,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
                 this.endpointGroupRegion = endpointGroup.endpointGroupRegion
                 this.endpointConfigurations = getEndpointConfigurations(endpointGroup.endpointDescriptions)
                 this.portOverrides = getPortOverrides(endpointGroup.portOverrides)
-                this.listenerArn = currentModel.listenerArn
+                this.listenerArn = HandlerCommons.getListenerArnFromEndpointGroupArn(endpointGroup.endpointGroupArn)
             }
         } else {
             null
