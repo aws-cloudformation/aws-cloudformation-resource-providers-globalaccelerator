@@ -40,6 +40,7 @@ class CreateHandler : BaseHandler<CallbackContext>() {
         logger.debug("Creating new listener with model: $model")
         val listener = createListener(model, handlerRequest, proxy, agaClient)
         model.apply {
+            this.acceleratorArn = model.acceleratorArn
             this.listenerArn = listener.listenerArn
             this.clientAffinity = listener.clientAffinity
             this.protocol = listener.protocol

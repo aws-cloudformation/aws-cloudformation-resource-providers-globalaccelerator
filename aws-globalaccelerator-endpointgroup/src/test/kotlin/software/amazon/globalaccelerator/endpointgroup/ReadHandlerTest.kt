@@ -37,7 +37,7 @@ class ReadHandlerTest {
 
     private val endpointGroupRegion = "us-west-2"
     private val listenerArn = "arn:aws:globalaccelerator::474880776455:accelerator/abcd1234/listener/12341234"
-    private val endpointGroupArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d/listener/ee7358c2/endpoint-group/de69a4b45005"
+    private val endpointGroupArn = listenerArn + "/endpoint-group/de69a4b45005"
     private val portOverrides = listOf(PortOverride(80, 8080))
 
 

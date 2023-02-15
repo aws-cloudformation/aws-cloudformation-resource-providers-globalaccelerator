@@ -90,4 +90,13 @@ object HandlerCommons {
             null
         }
     }
+
+    /** Gets the Accelerator arn by parsing the listenerArn
+     * @param listenerArn Arn of the Listener
+     * @return The Accelerator arn
+     */ 
+    fun getAcceleratorArnFromListenerArn(listenerArn: String) : String {
+        val LISTENER_SEPARATOR = "/listener/"
+        return listenerArn.split(LISTENER_SEPARATOR)[0]
+    }
 }

@@ -22,7 +22,7 @@ class DeleteHandler : BaseHandler<CallbackContext>() {
         val inferredCallbackContext = callbackContext
                 ?: CallbackContext(stabilizationRetriesRemaining = HandlerCommons.NUMBER_OF_STATE_POLL_RETRIES, pendingStabilization = false)
         val model = request.desiredResourceState
-
+        model.acceleratorArn = HandlerCommons.getAcceleratorArnFromListenerArn(model.listenerArn)
         return if (!inferredCallbackContext.pendingStabilization) {
             HandlerCommons.getListener(model.listenerArn, proxy, agaClient, logger)
                     ?: return ProgressEvent.failed(model, callbackContext, HandlerErrorCode.NotFound, "Listener not found.")

@@ -1,0 +1,15 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: Control Panel canary
+
+Resources:
+  ListenerAccelerator:
+    Type: AWS::GlobalAccelerator::Accelerator
+    Properties:
+      Name: CFNListenerAcclerator
+      IpAddressType: IPV4
+
+Outputs:
+  ListenerAccleratorArn:
+    Value: !GetAtt ListenerAccelerator.AcceleratorArn
+    Export:
+      Name: awsglobalacceleratorlistenercto1
