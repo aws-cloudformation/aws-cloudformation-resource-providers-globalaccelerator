@@ -113,7 +113,7 @@ object HandlerCommons {
     /** Gets the Listener arn by parsing the endpointGroupArn
      * @param endpointGroupArn Arn of the Endpoint Group
      * @return The Listener arn
-     */ 
+     */
     fun getListenerArnFromEndpointGroupArn(endpointGroupArn: String) : String {
         val ENDPOINTGROUP_SEPARATOR = "/endpoint-group/"
         return endpointGroupArn.split(ENDPOINTGROUP_SEPARATOR)[0]

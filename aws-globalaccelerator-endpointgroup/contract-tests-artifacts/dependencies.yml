@@ -11,9 +11,9 @@ Resources:
   EndpointGroupListener:
     Type: AWS::GlobalAccelerator::Listener
     Properties:
-      AcceleratorArn: !Ref EndpointGroupAccelerator
+      AcceleratorArn: Fn::Ref EndpointGroupAccelerator
       Protocol: TCP
-      PortRanges: 
+      PortRanges:
       - FromPort: 5342
         ToPort: 5343
 
@@ -29,18 +29,18 @@ Resources:
       EbsOptimized: True
       ImageId: ami-01fee56b22f308154
       InstanceType: t3.nano
-      KeyName: !Ref EndpointGroupEC2KeyPair
+      KeyName: Fn::Ref EndpointGroupEC2KeyPair
       Tags:
         - Key: Name
           Value: contract-test-endpoint-group-ec2
 
 Outputs:
   EndpointGroupListenerArn:
-    Value: !GetAtt EndpointGroupListener.ListenerArn
+    Value: Fn::GetAtt EndpointGroupListener.ListenerArn
     Export:
       Name: awsglobalacceleratorendpointgroupcto1
 
   EndpointGroupEC2InstanceId:
-    Value: !Ref EndpointGroupInstanceOne
+    Value: Fn::Ref EndpointGroupInstanceOne
     Export:
       Name: awsglobalacceleratorendpointgroupcto2

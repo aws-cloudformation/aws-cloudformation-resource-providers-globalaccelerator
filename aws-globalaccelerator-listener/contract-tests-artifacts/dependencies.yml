@@ -10,6 +10,6 @@ Resources:
 
 Outputs:
   ListenerAccleratorArn:
-    Value: !GetAtt ListenerAccelerator.AcceleratorArn
+    Value: Fn::GetAtt ListenerAccelerator.AcceleratorArn
     Export:
       Name: awsglobalacceleratorlistenercto1
