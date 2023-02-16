@@ -9,6 +9,9 @@
         "ClientIPPreservationEnabled": true
       }
     ],
+    "HealthCheckPath": "/foo",
+    "HealthCheckPort": 443,
+    "HealthCheckProtocol": "HTTPS",
     "PortOverrides": [
       {
         "ListenerPort": 5342,
