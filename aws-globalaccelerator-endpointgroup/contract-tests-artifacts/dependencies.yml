@@ -1,24 +1,25 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Control Panel canary
+Description: EndpointGroup Dependencies
 
 Resources:
   EndpointGroupAccelerator:
     Type: AWS::GlobalAccelerator::Accelerator
     Properties:
-      Name: CFNListenerAcclerator
+      Name: CFNEndpointGroupAccelerator
       IpAddressType: IPV4
 
   EndpointGroupListener:
     Type: AWS::GlobalAccelerator::Listener
     Properties:
-      AcceleratorArn: Fn::Ref EndpointGroupAccelerator
+      AcceleratorArn:
+        Ref: EndpointGroupAccelerator
       Protocol: TCP
       PortRanges:
-      - FromPort: 5342
-        ToPort: 5343
+        - FromPort: 5342
+          ToPort: 5343
 
   EndpointGroupEC2KeyPair:
-    Type: 'AWS::EC2::KeyPair'
+    Type: "AWS::EC2::KeyPair"
     Properties:
       KeyName: EndpointGroupEC2KeyPair
 
@@ -29,18 +30,21 @@ Resources:
       EbsOptimized: True
       ImageId: ami-01fee56b22f308154
       InstanceType: t3.nano
-      KeyName: Fn::Ref EndpointGroupEC2KeyPair
+      KeyName:
+        Ref: EndpointGroupEC2KeyPair
       Tags:
         - Key: Name
           Value: contract-test-endpoint-group-ec2
 
 Outputs:
   EndpointGroupListenerArn:
-    Value: Fn::GetAtt EndpointGroupListener.ListenerArn
+    Value:
+      Fn::GetAtt: [EndpointGroupListener, ListenerArn]
     Export:
       Name: awsglobalacceleratorendpointgroupcto1
 
   EndpointGroupEC2InstanceId:
-    Value: Fn::Ref EndpointGroupInstanceOne
+    Value:
+      Ref: EndpointGroupInstanceOne
     Export:
       Name: awsglobalacceleratorendpointgroupcto2

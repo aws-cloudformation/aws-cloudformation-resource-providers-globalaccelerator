@@ -1,15 +1,16 @@
 AWSTemplateFormatVersion: "2010-09-09"
-Description: Control Panel canary
+Description: Listener Dependencies
 
 Resources:
   ListenerAccelerator:
     Type: AWS::GlobalAccelerator::Accelerator
     Properties:
-      Name: CFNListenerAcclerator
+      Name: CFNListenerAccelerator
       IpAddressType: IPV4
 
 Outputs:
-  ListenerAccleratorArn:
-    Value: Fn::GetAtt ListenerAccelerator.AcceleratorArn
+  ListenerAcceleratorArn:
+    Value:
+      Fn::GetAtt: [ListenerAccelerator, AcceleratorArn]
     Export:
       Name: awsglobalacceleratorlistenercto1
