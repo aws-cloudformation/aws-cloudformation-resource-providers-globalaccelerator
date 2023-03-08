@@ -1,7 +1,7 @@
 {
   "CreateInputs": {
     "ListenerArn": "{{ awsglobalacceleratorendpointgroupcto1 }}",
-    "EndpointGroupRegion": "us-west-2",
+    "EndpointGroupRegion": "{{ awsglobalacceleratorendpointgroupcto3 }}",
     "EndpointConfigurations": [
       {
         "EndpointId": "{{ awsglobalacceleratorendpointgroupcto2 }}",
