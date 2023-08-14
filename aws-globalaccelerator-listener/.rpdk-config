@@ -14,5 +14,6 @@
         ],
         "protocolVersion": "2.0.0"
     },
+    "logProcessorEnabled": "true",
     "executableEntrypoint": "software.amazon.globalaccelerator.listener.HandlerWrapperExecutable"
 }
