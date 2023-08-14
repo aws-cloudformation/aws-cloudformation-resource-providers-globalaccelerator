@@ -19,7 +19,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         val model = request.desiredResourceState
         val agaClient = AcceleratorClientBuilder.client
         val endpointGroup = HandlerCommons.getEndpointGroup(model.endpointGroupArn, proxy, agaClient, logger)
-        val endpointGroupResourceModel = convertEndpointGroupToResourceModel(endpointGroup, model)
+        val endpointGroupResourceModel = convertEndpointGroupToResourceModel(endpointGroup)
         return if (endpointGroupResourceModel == null) {
             logger.debug("Endpoint group with arn: [${model.endpointGroupArn}] not found.")
             ProgressEvent.defaultFailureHandler(Exception("Endpoint group not found."), HandlerErrorCode.NotFound)
@@ -28,7 +28,7 @@ class ReadHandler : BaseHandler<CallbackContext>() {
         }
     }
 
-    private fun convertEndpointGroupToResourceModel(endpointGroup: EndpointGroup?, currentModel: ResourceModel): ResourceModel? {
+    private fun convertEndpointGroupToResourceModel(endpointGroup: EndpointGroup?): ResourceModel? {
         return if (endpointGroup != null) {
             ResourceModel().apply {
                 this.endpointGroupArn = endpointGroup.endpointGroupArn
