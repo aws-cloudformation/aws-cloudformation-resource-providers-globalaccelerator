@@ -334,5 +334,5 @@ class UpdateHandlerTest {
         assertTrue(response.callbackContext!!.pendingStabilization)
         assertEquals(3, response.resourceModel.endpointConfigurations.size)
         assertEquals(response.resourceModel.endpointConfigurations, endpointConfigurations)
-    }    
+    }
 }
