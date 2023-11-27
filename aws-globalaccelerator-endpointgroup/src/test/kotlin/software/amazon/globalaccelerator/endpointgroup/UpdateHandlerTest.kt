@@ -52,8 +52,8 @@ class UpdateHandlerTest {
 
     private fun createTestResourceModel(): ResourceModel {
         val endpointConfigurations = ArrayList<EndpointConfiguration>()
-        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").build())
-        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").weight(100).clientIPPreservationEnabled(true).build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").weight(100).clientIPPreservationEnabled(true).build())
 
         return ResourceModel.builder()
                 .endpointGroupArn(endpointGroupArn)
@@ -297,5 +297,42 @@ class UpdateHandlerTest {
         assertEquals(0, response.resourceModel.portOverrides.size)
         verify(exactly = 1) { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateEndpointGroup>()) }
         assertEquals(ArrayList<String>(), updateEndpointGroupRequestSlot.captured.portOverrides) // Empty array to clean port-overrides.
+    }
+
+    @Test
+    fun handleRequest_UpdateEndpointGroupWithUpdatedEndpointConfigurations() {
+        val previousModel = createTestResourceModel()
+        val desiredModel = createTestResourceModel()
+        val endpointConfigurations = ArrayList<EndpointConfiguration>()
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").weight(50).clientIPPreservationEnabled(false).build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").weight(50).clientIPPreservationEnabled(false).build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID3").weight(50).clientIPPreservationEnabled(true).build())
+        desiredModel.endpointConfigurations = endpointConfigurations
+
+        val describeEndpointGroupResult = DescribeEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup()
+                        .withEndpointGroupArn(endpointGroupArn))
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeEndpointGroup>()) } returns describeEndpointGroupResult
+
+        val updateEndpointGroupResult = UpdateEndpointGroupResult()
+                .withEndpointGroup(EndpointGroup().withEndpointGroupArn(endpointGroupArn))
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateEndpointGroup>()) } returns updateEndpointGroupResult
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+                .desiredResourceState(desiredModel)
+                .previousResourceState(previousModel)
+                .build()
+
+        val response = UpdateHandler().handleRequest(proxy, request, null, logger)
+
+        assertNotNull(response)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertNotNull(response.resourceModel)
+        assertNotNull(response.callbackContext)
+        assertEquals(0, response.callbackDelaySeconds)
+        assertEquals(endpointGroupArn, response.resourceModel.endpointGroupArn)
+        assertTrue(response.callbackContext!!.pendingStabilization)
+        assertEquals(3, response.resourceModel.endpointConfigurations.size)
+        assertEquals(response.resourceModel.endpointConfigurations, endpointConfigurations)
     }
 }
