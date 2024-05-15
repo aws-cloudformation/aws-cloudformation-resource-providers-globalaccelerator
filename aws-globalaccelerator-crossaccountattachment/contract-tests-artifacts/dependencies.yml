@@ -15,5 +15,3 @@ Outputs:
     Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/111111"
     Export:
       Name: awsglobalacceleratorcrossaccountattachmentcto2
-
-

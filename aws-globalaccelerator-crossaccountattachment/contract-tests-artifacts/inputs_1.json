@@ -1,10 +1,10 @@
 {
   "CreateInputs": {
     "Name": "ContractTestAttachment",
-    "Principals":[
+    "Principals": [
       "111498169222"
-    ] ,
-    "Resources":[
+    ],
+    "Resources": [
       {
         "EndpointId": "{{ awsglobalacceleratorcrossaccountattachmentcto1 }}"
       }

@@ -22,7 +22,7 @@ Resources:
       PortRanges:
         - FromPort: 5342
           ToPort: 5343
-  
+
   EndpointGroupLaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
