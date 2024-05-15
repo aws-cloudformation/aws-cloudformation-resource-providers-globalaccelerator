@@ -16,9 +16,9 @@ import software.amazon.cloudformation.proxy.ProgressEvent
  * Singleton class for common methods used by CRUD handlers
  */
 object HandlerCommons {
-    private const val CALLBACK_DELAY_IN_SECONDS = 1
-    const val NUMBER_OF_STATE_POLL_RETRIES = 60 / CALLBACK_DELAY_IN_SECONDS * 60 * 4 // 4 hours
-    private const val TIMED_OUT_MESSAGE = "Timed out waiting for listener to be deployed."
+    private final const val CALLBACK_DELAY_IN_SECONDS = 1
+    final const val NUMBER_OF_STATE_POLL_RETRIES = 60 / CALLBACK_DELAY_IN_SECONDS * 60 * 4 // 4 hours
+    private final const val TIMED_OUT_MESSAGE = "Timed out waiting for listener to be deployed."
 
     /**
      * Wait for accelerator to go in-sync (DEPLOYED)

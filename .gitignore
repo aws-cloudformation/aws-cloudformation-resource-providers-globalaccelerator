@@ -26,6 +26,14 @@ out/
 
 # auto-generated files
 target/
+*.zip
+.gradle
+build/
+build
+/buildSrc/build/
+.attach*
+gradlew*
+gradle-wrapper.*
 
 # test files
 stack.json

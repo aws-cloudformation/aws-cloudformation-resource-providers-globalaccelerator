@@ -4,6 +4,7 @@ import com.amazonaws.services.globalaccelerator.model.Listener
 import com.amazonaws.services.globalaccelerator.model.ListListenersRequest
 import com.amazonaws.services.globalaccelerator.model.ListListenersResult
 import com.amazonaws.services.globalaccelerator.model.Protocol
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.slot
@@ -23,6 +24,7 @@ import software.amazon.cloudformation.proxy.OperationStatus
 import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
 @ExtendWith(MockKExtension::class)
+@SuppressFBWarnings(value = ["NP_NONNULL_RETURN_VIOLATION"], justification = "MockK initialized lateinit variables")
 class ListHandlerTest {
     @MockK
     lateinit var proxy: AmazonWebServicesClientProxy

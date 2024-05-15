@@ -1,0 +1,19 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CrossAccountAttachment Dependencies
+
+Resources:
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+
+Outputs:
+  CrossAccountAttachmentNLBArn:
+    Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/222222"
+    Export:
+      Name: awsglobalacceleratorcrossaccountattachmentcto1
+
+  CrossAccountAttachmentNLBTwoArn:
+    Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/111111"
+    Export:
+      Name: awsglobalacceleratorcrossaccountattachmentcto2
+
+

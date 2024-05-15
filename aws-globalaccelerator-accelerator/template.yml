@@ -12,7 +12,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: software.amazon.globalaccelerator.accelerator.HandlerWrapper::handleRequest
-      Runtime: java8
+      Runtime: java17
       CodeUri: ./target/aws-globalaccelerator-accelerator-handler-1.0-SNAPSHOT.jar
       MemorySize: 512
 
@@ -20,6 +20,6 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       Handler: software.amazon.globalaccelerator.accelerator.HandlerWrapper::testEntrypoint
-      Runtime: java8
+      Runtime: java17
       CodeUri: ./target/aws-globalaccelerator-accelerator-handler-1.0-SNAPSHOT.jar
       MemorySize: 512

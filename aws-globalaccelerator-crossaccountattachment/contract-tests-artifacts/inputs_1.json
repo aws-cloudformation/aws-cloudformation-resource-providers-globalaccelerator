@@ -1,0 +1,46 @@
+{
+  "CreateInputs": {
+    "Name": "ContractTestAttachment",
+    "Principals":[
+      "111498169222"
+    ] ,
+    "Resources":[
+      {
+        "EndpointId": "{{ awsglobalacceleratorcrossaccountattachmentcto1 }}"
+      }
+    ],
+    "Tags": [
+      {
+        "Key": "Foo",
+        "Value": "Bar"
+      }
+    ]
+  },
+  "PatchInputs": [
+    {
+      "op": "replace",
+      "path": "/Name",
+      "value": "UpdatedTestAttachment"
+    },
+    {
+      "op": "replace",
+      "path": "/Principals",
+      "value": [
+        "333498169333",
+        "arn:aws:globalaccelerator::114051702999:accelerator/f7cfefe8-f5c2-4ec2-a1bf-c6e10e481929"
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "/Resources",
+      "value": [
+        {
+          "EndpointId": "{{ awsglobalacceleratorcrossaccountattachmentcto1 }}"
+        },
+        {
+          "EndpointId": "{{ awsglobalacceleratorcrossaccountattachmentcto2 }}"
+        }
+      ]
+    }
+  ]
+}

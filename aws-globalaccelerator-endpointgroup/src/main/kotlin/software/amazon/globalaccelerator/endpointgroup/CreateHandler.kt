@@ -68,7 +68,7 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
                                     agaClient: AWSGlobalAccelerator): EndpointGroup {
         // Mapping all endpoint configurations
         val convertedEndpointConfigurations = model.endpointConfigurations?.map {EndpointConfiguration()
-                    .withEndpointId(it.endpointId).withWeight(it.weight)
+                    .withEndpointId(it.endpointId).withWeight(it.weight).withAttachmentArn(it.attachmentArn)
                     .withClientIPPreservationEnabled(it.clientIPPreservationEnabled)}
         val trafficDialPercentage = model.trafficDialPercentage?.toFloat() ?: 100.0f
         val portOverrides = model.portOverrides?.map { PortOverride().withListenerPort(it.listenerPort).withEndpointPort(it.endpointPort) }

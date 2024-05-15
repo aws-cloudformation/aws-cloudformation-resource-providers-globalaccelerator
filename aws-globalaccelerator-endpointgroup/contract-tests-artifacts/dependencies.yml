@@ -22,6 +22,14 @@ Resources:
       PortRanges:
         - FromPort: 5342
           ToPort: 5343
+  
+  EndpointGroupLaunchTemplate:
+    Type: AWS::EC2::LaunchTemplate
+    Properties:
+      LaunchTemplateData:
+        MetadataOptions:
+          HttpTokens: required
+          HttpPutResponseHopLimit: 2
 
   EndpointGroupEC2KeyPair:
     Type: "AWS::EC2::KeyPair"
@@ -34,6 +42,9 @@ Resources:
       ImageId:
         Ref: LatestAmiId
       InstanceType: t3.nano
+      LaunchTemplate:
+        LaunchTemplateId: !Ref EndpointGroupLaunchTemplate
+        Version: !GetAtt EndpointGroupLaunchTemplate.LatestVersionNumber
       KeyName:
         Ref: EndpointGroupEC2KeyPair
       Tags:

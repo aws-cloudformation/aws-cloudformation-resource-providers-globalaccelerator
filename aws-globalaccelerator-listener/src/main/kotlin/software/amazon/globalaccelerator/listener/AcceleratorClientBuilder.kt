@@ -7,7 +7,7 @@ import com.amazonaws.services.globalaccelerator.AWSGlobalAcceleratorClientBuilde
  * Singleton class for AWS Global Accelerator client
  */
 object AcceleratorClientBuilder {
-    private const val SUPPORTED_REGION = "us-west-2"
-    internal val client: AWSGlobalAccelerator
+    private final const val SUPPORTED_REGION = "us-west-2"
+    internal final val client: AWSGlobalAccelerator
         get() = AWSGlobalAcceleratorClientBuilder.standard().withRegion(SUPPORTED_REGION).build()
 }

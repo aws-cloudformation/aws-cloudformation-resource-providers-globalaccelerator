@@ -2,7 +2,7 @@
     "artifact_type": "RESOURCE",
     "typeName": "AWS::GlobalAccelerator::Accelerator",
     "language": "java",
-    "runtime": "java8",
+    "runtime": "java17",
     "entrypoint": "software.amazon.globalaccelerator.accelerator.HandlerWrapper::handleRequest",
     "testEntrypoint": "software.amazon.globalaccelerator.accelerator.HandlerWrapper::testEntrypoint",
     "settings": {
@@ -15,5 +15,71 @@
         "protocolVersion": "2.0.0"
     },
     "logProcessorEnabled": "true",
-    "executableEntrypoint": "software.amazon.globalaccelerator.accelerator.HandlerWrapperExecutable"
+    "executableEntrypoint": "software.amazon.globalaccelerator.accelerator.HandlerWrapperExecutable",
+    "contractSettings": {
+        "ContractTestsIamPolicies": {
+            "LambdaRolePolicyDocument": {
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "cloudformation:*",
+                            "cloudwatch:*",
+                            "kms:*",
+                            "logs:*",
+                            "sts:*",
+                            "xray:*"
+                        ],
+                        "Resource": "*"
+                    }
+                ]
+            },
+            "CodeBuildRolePolicyDocument": {
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "cloudformation:*",
+                            "cloudwatch:*",
+                            "codebuild:createProject",
+                            "lambda:invoke",
+                            "logs:*",
+                            "s3:*"
+                        ],
+                        "Resource": "*"
+                    }
+                ]
+            },
+            "SfnRolePolicyDocument": {
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "cloudformation:*",
+                            "codebuild:*",
+                            "events:*",
+                            "lambda:*",
+                            "logs:*",
+                            "s3:*",
+                            "states:*",
+                            "xray:*"
+                        ],
+                        "Resource": "*"
+                    }
+                ]
+            },
+            "CloudWatchRolePolicyDocument": {
+                "Statement": [
+                    {
+                        "Effect": "Allow",
+                        "Action": [
+                            "cloudwatch:*",
+                            "logs:*"
+                        ],
+                        "Resource": "*"
+                    }
+                ]
+            }
+        }
+    }
 }

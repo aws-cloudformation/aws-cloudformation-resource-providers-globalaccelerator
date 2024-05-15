@@ -11,6 +11,7 @@ import com.amazonaws.services.globalaccelerator.model.DescribeListenerRequest
 import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult
 import com.amazonaws.services.globalaccelerator.model.Listener
 import com.amazonaws.services.globalaccelerator.model.ListenerNotFoundException
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -31,6 +32,7 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 
 
 @ExtendWith(MockKExtension::class)
+@SuppressFBWarnings(value = ["NP_NONNULL_RETURN_VIOLATION"], justification = "MockK initialized lateinit variables")
 class DeleteHandlerTest {
     @MockK
     lateinit var proxy: AmazonWebServicesClientProxy

@@ -9,6 +9,7 @@ import com.amazonaws.services.globalaccelerator.model.AcceleratorNotFoundExcepti
 import com.amazonaws.services.globalaccelerator.model.Protocol
 import com.amazonaws.services.globalaccelerator.model.ClientAffinity
 import com.amazonaws.services.globalaccelerator.model.PortRange
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -29,6 +30,7 @@ import software.amazon.cloudformation.proxy.ResourceHandlerRequest
 import java.util.ArrayList
 
 @ExtendWith(MockKExtension::class)
+@SuppressFBWarnings(value = ["NP_NONNULL_RETURN_VIOLATION"], justification = "MockK initialized lateinit variables")
 class CreateHandlerTest {
     @MockK
     lateinit var proxy: AmazonWebServicesClientProxy

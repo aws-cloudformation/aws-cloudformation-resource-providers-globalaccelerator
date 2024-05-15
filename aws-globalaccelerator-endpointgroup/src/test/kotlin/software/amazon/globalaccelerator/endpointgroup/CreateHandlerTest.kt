@@ -129,7 +129,7 @@ class CreateHandlerTest {
 
         // Create the model we will provide to our handler
         val endpointConfigurations = ArrayList<EndpointConfiguration>()
-        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").attachmentArn("ATT1").build())
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
         val model = ResourceModel.builder()
                 .endpointGroupRegion(endpointGroupRegion)
@@ -167,7 +167,7 @@ class CreateHandlerTest {
 
         // Create the model we will provide to our handler
         val endpointConfigurations = ArrayList<EndpointConfiguration>()
-        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").attachmentArn("ATT1").build())
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
         val model = ResourceModel.builder()
                 .endpointGroupRegion(endpointGroupRegion)
@@ -199,7 +199,7 @@ class CreateHandlerTest {
     fun handleRequest_ThresholdTimeExceeded() {
         // Create the model we will provide to our handler
         val endpointConfigurations = ArrayList<EndpointConfiguration>()
-        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").attachmentArn("ATT1").build())
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").build())
         val model = ResourceModel.builder()
                 .endpointGroupRegion(endpointGroupRegion)

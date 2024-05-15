@@ -9,6 +9,7 @@ import com.amazonaws.services.globalaccelerator.model.Accelerator
 import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult
 import com.amazonaws.services.globalaccelerator.model.Listener
 import com.amazonaws.services.globalaccelerator.model.UpdateListenerResult
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -30,6 +31,7 @@ import java.util.ArrayList
 import java.util.HashMap
 
 @ExtendWith(MockKExtension::class)
+@SuppressFBWarnings(value = ["NP_NONNULL_RETURN_VIOLATION"], justification = "MockK initialized lateinit variables")
 class UpdateHandlerTest {
     @MockK
     lateinit var proxy: AmazonWebServicesClientProxy
@@ -134,7 +136,6 @@ class UpdateHandlerTest {
         // create the that will go to our handler
         val model = createTestResourceModel()
         val callbackMap = HashMap<String, String>()
-        callbackMap[UpdateHandler.UPDATE_COMPLETED_KEY] = "true"
         val context = CallbackContext(stabilizationRetriesRemaining = 10, pendingStabilization = true)
 
         val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()

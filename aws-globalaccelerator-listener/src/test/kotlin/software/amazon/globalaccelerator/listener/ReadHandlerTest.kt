@@ -6,6 +6,7 @@ import com.amazonaws.services.globalaccelerator.model.DescribeListenerResult
 import com.amazonaws.services.globalaccelerator.model.Listener
 import com.amazonaws.services.globalaccelerator.model.ListenerNotFoundException
 import com.amazonaws.services.globalaccelerator.model.Protocol
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings
 import io.mockk.MockKAnnotations
 import io.mockk.every
 import io.mockk.impl.annotations.MockK
@@ -26,6 +27,7 @@ import java.util.ArrayList
 
 
 @ExtendWith(MockKExtension::class)
+@SuppressFBWarnings(value = ["NP_NONNULL_RETURN_VIOLATION"], justification = "MockK initialized lateinit variables")
 class ReadHandlerTest {
     @MockK
     lateinit var proxy: AmazonWebServicesClientProxy
