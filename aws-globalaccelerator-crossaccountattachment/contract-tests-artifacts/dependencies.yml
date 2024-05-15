@@ -7,11 +7,13 @@ Resources:
 
 Outputs:
   CrossAccountAttachmentNLBArn:
-    Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/222222"
+    Value:
+      Sub: "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/222222"
     Export:
       Name: awsglobalacceleratorcrossaccountattachmentcto1
 
   CrossAccountAttachmentNLBTwoArn:
-    Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/111111"
+    Value:
+      Sub: "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/111111"
     Export:
       Name: awsglobalacceleratorcrossaccountattachmentcto2
