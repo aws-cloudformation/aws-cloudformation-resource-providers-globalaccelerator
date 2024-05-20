@@ -82,6 +82,12 @@
             <artifactId>aws-java-sdk-globalaccelerator</artifactId>
             <version>1.12.621</version>
         </dependency>
+
+        <dependency>
+            <groupId>net.bytebuddy</groupId>
+            <artifactId>byte-buddy</artifactId>
+            <version>1.14.7</version>
+        </dependency>
     </dependencies>
 
     <build>
