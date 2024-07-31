@@ -25,10 +25,10 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
 
 
     private fun createAttachmentStep(model: ResourceModel,
-                                        handlerRequest: ResourceHandlerRequest<ResourceModel>,
-                                        proxy: AmazonWebServicesClientProxy,
-                                        agaClient: AWSGlobalAccelerator,
-                                        logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
+                                     handlerRequest: ResourceHandlerRequest<ResourceModel>,
+                                     proxy: AmazonWebServicesClientProxy,
+                                     agaClient: AWSGlobalAccelerator,
+                                     logger: Logger): ProgressEvent<ResourceModel, CallbackContext?> {
         logger.debug("Creating new cross account attachment with model: $model")
         val crossAccountAttachment = createCrossAccountAttachment(model, handlerRequest, proxy, agaClient)
         model.apply {
@@ -43,11 +43,11 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
 
 
     private fun createCrossAccountAttachment(model: ResourceModel,
-                                    handlerRequest: ResourceHandlerRequest<ResourceModel>,
-                                    proxy: AmazonWebServicesClientProxy,
-                                    agaClient: AWSGlobalAccelerator): Attachment {
+                                             handlerRequest: ResourceHandlerRequest<ResourceModel>,
+                                             proxy: AmazonWebServicesClientProxy,
+                                             agaClient: AWSGlobalAccelerator): Attachment {
         val convertedTags = model.tags?.map { Tag().withKey(it.key).withValue(it.value) }
-        val convertedResources = model.resources?.map {com.amazonaws.services.globalaccelerator.model.Resource().withEndpointId(it.endpointId).withRegion(it.region)}
+        val convertedResources = model.resources?.map {com.amazonaws.services.globalaccelerator.model.Resource().withEndpointId(it.endpointId).withCidr(it.cidr).withRegion(it.region)}
         val createAttachmentRequest = CreateCrossAccountAttachmentRequest()
                 .withName(model.name)
                 .withPrincipals(model.principals)

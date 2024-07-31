@@ -31,13 +31,6 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         val previousModel = request.previousResourceState
         getAccelerator(model.acceleratorArn, proxy, agaClient, logger)
                 ?: return ProgressEvent.defaultFailureHandler(Exception("Failed to find accelerator. arn: [${model.acceleratorArn}]"), HandlerErrorCode.NotFound)
-        if (byoipIPsUpdated(model, previousModel)) {
-            logger.error("Failed attempt to update BYOIP IPs.")
-            return ProgressEvent.defaultFailureHandler(
-                    // Global Accelerator APIs don't support updates of IPs so customer will need to create accelerator with updated IPs.
-                    Exception("Updates for BYOIP IP addresses is not a supported operation. Delete existing accelerator and create new accelerator with updated IPs."),
-                    HandlerErrorCode.InvalidRequest)
-        }
         return if (inferredCallbackContext.pendingStabilization) {
             waitForSynchronizedStep(inferredCallbackContext, model, proxy, agaClient, logger)
         } else {
@@ -90,6 +83,7 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
                 .withEnabled(model.enabled)
                 .withIpAddressType(model.ipAddressType)
                 .withName(model.name)
+                .withIpAddresses(model.ipAddresses)
         return proxy.injectCredentialsAndInvoke(request, agaClient::updateAccelerator).accelerator
     }
 
@@ -141,13 +135,4 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
     private fun getPreviousStateTags(previousModel: ResourceModel): List<Tag>? {
         return previousModel.tags?.map { Tag().withKey(it.key).withValue(it.value) }
     }
-
-    private fun byoipIPsUpdated(currentModel: ResourceModel, previousModel: ResourceModel): Boolean {
-        var ipAddressesUpdated = false
-        if (currentModel.ipAddresses != null && currentModel.ipAddresses != previousModel.ipAddresses) {
-            ipAddressesUpdated = true
-        }
-        return ipAddressesUpdated
-    }
-
 }

@@ -30,12 +30,14 @@ class CreateHandlerTest {
     private val endpointRegion = "us-west-2"
     private val acceleratorPrincipal = "arn:aws:globalaccelerator::474880776455:accelerator/abcd1234"
     private val accountPrincipal = "474880776455"
+    private val cidr = "1.2.3.4"
     private val endpointGroupArn = "arn:aws:globalaccelerator::444607872184:accelerator/88127aa5-01d8-484c-80a0-349daaefce1d/listener/ee7358c2/endpoint-group/de69a4b45005"
     private val endpointArn = "us-east-2b.my-load-balancer-1234567890abcdef.elb.us-east-2.amazonaws.com"
     private val attachmentName = "Test-Attachment-Name"
     private val attachmentARN = "ATTACHMENT_ARN"
     private var principals: List<String> = listOf(accountPrincipal, acceleratorPrincipal)
     private val resource = com.amazonaws.services.globalaccelerator.model.Resource().withEndpointId(endpointArn).withRegion(endpointRegion)
+    private val cidrResource = com.amazonaws.services.globalaccelerator.model.Resource().withCidr(cidr)
     private var resources = listOf(resource)
 
     @Test
@@ -56,6 +58,28 @@ class CreateHandlerTest {
         assertNotNull(response.resourceModel)
         assertEquals(attachmentARN, response.resourceModel.attachmentArn)
         assertEquals(1, response.resourceModel.resources.size)
+        assertEquals(2, response.resourceModel.principals.size)
+    }
+
+    @Test
+    fun handleRequest_CreateAttachment_cidr() {
+        var resourceList = resources + cidrResource
+        val result = CreateCrossAccountAttachmentResult().withCrossAccountAttachment(Attachment()
+            .withAttachmentArn(attachmentARN)
+            .withName(attachmentName)
+            .withPrincipals(principals)
+            .withResources(resourceList)
+        )
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyCreateCrossAccountAttachment>()) } returns result
+
+        val handler = CreateHandler()
+        val model = ResourceModel.builder().name(attachmentName).build()
+        val request = ResourceHandlerRequest.builder<ResourceModel>().desiredResourceState(model).build()
+        val response = handler.handleRequest(proxy, request, null, logger)
+        assertNotNull(response)
+        assertNotNull(response.resourceModel)
+        assertEquals(attachmentARN, response.resourceModel.attachmentArn)
+        assertEquals(2, response.resourceModel.resources.size)
         assertEquals(2, response.resourceModel.principals.size)
     }
 

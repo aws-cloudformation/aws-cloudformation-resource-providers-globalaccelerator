@@ -39,11 +39,11 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
      * Validates tags, updates attachment and updates tags
      */
     private fun validateAndUpdateAttachment(model: ResourceModel,
-                                             previousModel: ResourceModel,
-                                             proxy: AmazonWebServicesClientProxy,
-                                             agaClient: AWSGlobalAccelerator,
-                                             logger: Logger,
-                                             existingAttachment: Attachment): ProgressEvent<ResourceModel, CallbackContext?> {
+                                            previousModel: ResourceModel,
+                                            proxy: AmazonWebServicesClientProxy,
+                                            agaClient: AWSGlobalAccelerator,
+                                            logger: Logger,
+                                            existingAttachment: Attachment): ProgressEvent<ResourceModel, CallbackContext?> {
         logger.debug("Desired updated state model: $model")
         if (!validateTags(model)) {
             return ProgressEvent.defaultFailureHandler(
@@ -67,16 +67,15 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
     }
 
     private fun updateAttachment(model: ResourceModel,
-                                  proxy: AmazonWebServicesClientProxy,
-                                  agaClient: AWSGlobalAccelerator,
-                                  logger: Logger,
-                                  existingAttachment: Attachment): Attachment {
+                                 proxy: AmazonWebServicesClientProxy,
+                                 agaClient: AWSGlobalAccelerator,
+                                 logger: Logger,
+                                 existingAttachment: Attachment): Attachment {
         logger.debug("Updating attachment with arn: [${model.attachmentArn}].")
 
         updatedPrincipals(model, proxy, agaClient, logger, existingAttachment)
         return updateResources(model, proxy, agaClient, logger, existingAttachment)
     }
-
     private fun updatedPrincipals(model: ResourceModel,
                                   proxy: AmazonWebServicesClientProxy,
                                   agaClient: AWSGlobalAccelerator,
@@ -104,36 +103,52 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
     }
 
     private fun updateResources(model: ResourceModel,
-                                  proxy: AmazonWebServicesClientProxy,
-                                  agaClient: AWSGlobalAccelerator,
-                                  logger: Logger,
-                                  existingAttachment: Attachment) : Attachment {
+                                proxy: AmazonWebServicesClientProxy,
+                                agaClient: AWSGlobalAccelerator,
+                                logger: Logger,
+                                existingAttachment: Attachment) : Attachment {
         logger.debug("Updating attachment Resources for Attachment arn: [${model.attachmentArn}].")
         val resourceUpdateRequest = buildResourceRequest(model, existingAttachment, logger)
         return proxy.injectCredentialsAndInvoke(resourceUpdateRequest, agaClient::updateCrossAccountAttachment).crossAccountAttachment
     }
 
-     fun buildResourceRequest(model: ResourceModel, existingAttachment: Attachment, logger: Logger): UpdateCrossAccountAttachmentRequest {
-        val resourcesToAdd = if(model.resources != null && model.resources.size > 0) {
-            model.resources.filterNot {incomingResource -> existingAttachment.resources.any{it.endpointId.contains(incomingResource.endpointId)}}
-        } else {
-            emptyList()
-        }
+    fun buildResourceRequest(model: ResourceModel, existingAttachment: Attachment, logger: Logger): UpdateCrossAccountAttachmentRequest {
+        // existingAttachment.resources contains endpoint id do not resend request filter out
+        // existingAttachment.resources contains cidr do not resend request filter out
+        val resourcesToAdd = mutableListOf<software.amazon.globalaccelerator.crossaccountattachment.Resource>()
 
-        logger.debug("Updating attachment Resources for Attachment arn: [${model.attachmentArn}]. Adding: [${resourcesToAdd}] ")
+        if(model.resources != null && model.resources.size > 0) {
+            for (resource in model.resources) {
+                if (resource.endpointId != null && !existingAttachment.resources.any{it.endpointId != null && it.endpointId.contains(resource.endpointId)}) {
+                    resourcesToAdd.add(resource)
+                }
+                else if (resource.cidr != null && !existingAttachment.resources.any{it.cidr != null && it.cidr.contains(resource.cidr)}) {
+                    resourcesToAdd.add(resource)
+                }
+            }
+        }
 
         if (model.resources == null) {
             model.resources = emptyList()
         }
 
-        val resourcesToRemove = if(existingAttachment.resources != null && existingAttachment.resources.size > 0) {
-            existingAttachment.resources.filterNot {existingResource -> model.resources.any{existingResource.endpointId.contains(it.endpointId)}}
-        } else {
-            emptyList()
+        logger.debug("Updating attachment Resources for Attachment arn: [${model.attachmentArn}]. Adding: [${resourcesToAdd}] ")
+
+        val resourcesToRemove = mutableListOf<com.amazonaws.services.globalaccelerator.model.Resource>()
+
+        if(existingAttachment.resources != null && existingAttachment.resources.size > 0) {
+            for (resource in existingAttachment.resources) {
+                if (resource.endpointId != null && !model.resources.any{it.endpointId != null && resource.endpointId.contains(it.endpointId)}) {
+                    resourcesToRemove.add(resource)
+                }
+                else if (resource.cidr != null && !model.resources.any{it.cidr != null && resource.cidr.contains(it.cidr)}) {
+                    resourcesToRemove.add(resource)
+                }
+            }
         }
 
         logger.debug("Updating attachment Resources for Attachment arn: [${model.attachmentArn}]. Removing: [${resourcesToRemove}] ")
-        val convertedResourcesToAdd = resourcesToAdd.map {com.amazonaws.services.globalaccelerator.model.Resource().withEndpointId(it.endpointId).withRegion(it.region)}
+        val convertedResourcesToAdd = resourcesToAdd.map {com.amazonaws.services.globalaccelerator.model.Resource().withEndpointId(it.endpointId).withCidr(it.cidr).withRegion(it.region)}
 
         val resourceUpdateRequest = UpdateCrossAccountAttachmentRequest()
                 .withName(model.name)

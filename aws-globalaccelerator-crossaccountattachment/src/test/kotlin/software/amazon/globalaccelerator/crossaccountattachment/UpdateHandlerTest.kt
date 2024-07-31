@@ -39,6 +39,7 @@ class UpdateHandlerTest {
     private val endpointArn = "us-east-2b.my-load-balancer-1234567890abcdef.elb.us-east-2.amazonaws.com"
     private val endpointArnTwo = "arn:aws:elasticloadbalancing:us-east-2:123456789012:loadbalancer/net/my-load-balancer/1234567890123456"
     private val endpointArnThree = "arn:aws:elasticloadbalancing:us-east-2:123456789012:loadbalancer/net/my-load-balancer-Two/1234567890"
+    private val cidrOne = "1.1.1.0/24"
     private val attachmentName = "Test-Attachment-Name"
     private val attachmentNameTwo = "Test-Attachment-Name"
     private val attachmentNameThree = "Test-Attachment-Name"
@@ -60,6 +61,21 @@ class UpdateHandlerTest {
                 .principals(principals)
                 .resources(resources)
                 .build()
+    }
+
+    private fun createTestCidrResourceModel(attachmentArn: String, attachmentName: String): ResourceModel {
+        val resource= Resource()
+        resource.cidr = cidrOne
+
+        val principals: List<String> = listOf(accountPrincipal)
+        val resources = mutableListOf(resource)
+
+        return software.amazon.globalaccelerator.crossaccountattachment.ResourceModel.builder()
+            .attachmentArn(attachmentArn)
+            .name(attachmentName)
+            .principals(principals)
+            .resources(resources)
+            .build()
     }
 
     @Test
@@ -102,6 +118,35 @@ class UpdateHandlerTest {
         assertEquals(response.resourceModel.attachmentArn, attachmentARN)
         assertEquals(response.resourceModel.principals, updatedPrincipals)
         assertEquals(response.resourceModel.resources, updatedResources)
+    }
+
+    @Test
+    fun handleRequest_resend_same_resources() {
+        var initialAttachmentModel = createTestCidrResourceModel(attachmentARN, attachmentName)
+        var updatedAttachmentModel = createTestResourceModel(attachmentARN, attachmentName)
+
+        val convertedInitalResources = listOf(com.amazonaws.services.globalaccelerator.model.Resource().withCidr(cidrOne))
+        val convertedUpdatedResources = listOf(com.amazonaws.services.globalaccelerator.model.Resource().withCidr(cidrOne))
+
+        val describeAttachmentResult = DescribeCrossAccountAttachmentResult().withCrossAccountAttachment(Attachment().withAttachmentArn(attachmentARN).withName(attachmentName).withPrincipals(initialAttachmentModel.principals).withResources(convertedInitalResources))
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeCrossAccountAttachment>()) } returns describeAttachmentResult
+
+        val updateAttachmentResult = UpdateCrossAccountAttachmentResult().withCrossAccountAttachment(Attachment().withAttachmentArn(attachmentARN).withName(attachmentName).withPrincipals(updatedAttachmentModel.principals).withResources(convertedUpdatedResources))
+        every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateCrossAccountAttachment>()) } returns updateAttachmentResult
+
+        val request = ResourceHandlerRequest.builder<ResourceModel>()
+            .desiredResourceState(updatedAttachmentModel)
+            .previousResourceState(initialAttachmentModel)
+            .build()
+
+        val response = UpdateHandler().handleRequest(proxy, request, null, logger)
+
+        assertNotNull(response)
+        assertEquals(OperationStatus.SUCCESS, response.status)
+        assertNotNull(response.resourceModel)
+        assertNull(response.callbackContext)
+        assertEquals(response.resourceModel.name, attachmentName)
+        assertEquals(response.resourceModel.attachmentArn, attachmentARN)
     }
 
     @Test
@@ -314,6 +359,71 @@ class UpdateHandlerTest {
         assertEquals(resourceRequest.removeResources.size, 2)
         assertEquals(resourceRequest.addResources[0].endpointId, resourceThree.endpointId)
         assertEquals(resourceRequest.removeResources, listOf(resourceOne, resourceTwo))
+    }
+
+    fun handleRequest_UpdateAttachment_ResourceDelta_ResourceToResource_cidr_completeSwap() {
+        val resourceOne = com.amazonaws.services.globalaccelerator.model.Resource()
+        resourceOne.cidr = "1.2.3.4"
+
+        val resourceTwo = com.amazonaws.services.globalaccelerator.model.Resource()
+        resourceTwo.cidr = "1.2.3.5"
+
+        val principals = listOf(accountPrincipal, acceleratorPrincipal)
+        val existingResources = listOf(resourceOne, resourceTwo)
+        val existingAttachment = Attachment().withAttachmentArn(attachmentARN).withName(attachmentName). withPrincipals(principals).withResources(existingResources)
+
+        val resourceThree = Resource()
+        resourceThree.cidr = "1.2.3.6"
+
+        var updatedModel = createTestResourceModel(attachmentARN, attachmentName)
+        updatedModel.principals = principals
+        updatedModel.resources = listOf(resourceThree)
+
+        val resourceRequest = UpdateHandler().buildResourceRequest(updatedModel, existingAttachment, logger)
+
+        assertNotNull(resourceRequest)
+        assertEquals(resourceRequest.addResources.size, 1)
+        assertEquals(resourceRequest.removeResources.size, 2)
+        assertEquals(resourceRequest.addResources[0].endpointId, resourceThree.endpointId)
+        assertEquals(resourceRequest.removeResources, listOf(resourceOne, resourceTwo))
+    }
+
+
+    fun handleRequest_UpdateAttachment_ResourceDelta_ResourceToResource_mixed_completeSwap() {
+        val resourceOne = com.amazonaws.services.globalaccelerator.model.Resource()
+        resourceOne.endpointId = endpointArn
+        resourceOne.region = endpointRegion
+
+        val resourceTwo = com.amazonaws.services.globalaccelerator.model.Resource()
+        resourceTwo.endpointId = endpointArnTwo
+        resourceTwo.region = endpointRegion
+
+        val resourceFour = com.amazonaws.services.globalaccelerator.model.Resource()
+        resourceFour.cidr = "1.2.3.4"
+
+        val principals = listOf(accountPrincipal, acceleratorPrincipal)
+        val existingResources = listOf(resourceOne, resourceTwo, resourceFour)
+        val existingAttachment = Attachment().withAttachmentArn(attachmentARN).withName(attachmentName). withPrincipals(principals).withResources(existingResources)
+
+        val resourceThree = Resource()
+        resourceThree.endpointId = endpointArnThree
+        resourceThree.region = endpointRegion
+
+        val resourceFive = Resource()
+        resourceFive.cidr = "1.3.4.5"
+
+        var updatedModel = createTestResourceModel(attachmentARN, attachmentName)
+        updatedModel.principals = principals
+        updatedModel.resources = listOf(resourceThree, resourceFive)
+
+        val resourceRequest = UpdateHandler().buildResourceRequest(updatedModel, existingAttachment, logger)
+
+        assertNotNull(resourceRequest)
+        assertEquals(resourceRequest.addResources.size, 2)
+        assertEquals(resourceRequest.removeResources.size, 3)
+        assertEquals(resourceRequest.addResources[0].endpointId, resourceThree.endpointId)
+        assertEquals(resourceRequest.addResources[1].cidr, resourceFive.cidr)
+        assertEquals(resourceRequest.removeResources, listOf(resourceOne, resourceTwo, resourceFour))
     }
 
     @Test

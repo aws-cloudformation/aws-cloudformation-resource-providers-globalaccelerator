@@ -18,6 +18,7 @@ There are a couple options for building and testing the project.
 2 ways of testing:
 1. sam local invoke
 2. Deploy stack in your local (cfn submit and aws cloudformation create-stack)
+3. This test suite includes the usage of a BYOIP CIDR block shared with a cross-account attachment. In order to be able to successfully run this test locally, be sure to add your aws account ID to the developer cross account attachment in the 331523066813 account.
 
 Please don't modify files under `target/generated-sources/rpdk`, as they will be
 automatically overwritten.
