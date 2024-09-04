@@ -50,7 +50,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.4</version>
+            <version>1.18.34</version>
             <scope>provided</scope>
         </dependency>
 
@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.amazonaws</groupId>
             <artifactId>aws-java-sdk-globalaccelerator</artifactId>
-            <version>1.12.62</version>
+            <version>1.12.770</version>
         </dependency>
     </dependencies>
 
@@ -90,7 +90,7 @@
                 <plugin>
                     <groupId>org.projectlombok</groupId>
                     <artifactId>lombok-maven-plugin</artifactId>
-                    <version>1.18.12.0</version>
+                    <version>1.18.20.0</version>
                 </plugin>
             </plugins>
         </pluginManagement>
@@ -206,7 +206,7 @@
             <plugin>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok-maven-plugin</artifactId>
-                <version>1.18.12.0</version>
+                <version>1.18.20.0</version>
                 <executions>
                     <execution>
                         <phase>generate-sources</phase>
