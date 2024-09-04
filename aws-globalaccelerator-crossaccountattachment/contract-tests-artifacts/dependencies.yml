@@ -68,17 +68,17 @@ Mappings:
 
 Outputs:
   CrossAccountAttachmentNLBArn:
-    Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/222222"
+    Value: Fn:Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/222222"
     Export:
       Name: awsglobalacceleratorcrossaccountattachmentcto1
 
   CrossAccountAttachmentNLBTwoArn:
-    Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/111111"
+    Value: Fn:Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/111111"
     Export:
       Name: awsglobalacceleratorcrossaccountattachmentcto2
 
   AccountCIDR:
     Description: "CIDR Associated with the regional account"
-    Value: !FindInMap [ RegionMap, !Ref "AWS::Region", cidr ]
+    Value: Fn:FindInMap [ RegionMap, !Ref "AWS::Region", cidr ]
     Export:
       Name: accountcidrcto1

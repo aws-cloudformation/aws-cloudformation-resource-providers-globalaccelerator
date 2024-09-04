@@ -98,11 +98,11 @@ Mappings:
 Outputs:
   InitialIp:
     Description: "Byoip addresses for the accelerator"
-    Value: !FindInMap [ RegionMap, !Ref "AWS::Region", initialByoip ]
+    Value: Fn:FindInMap [ RegionMap, !Ref "AWS::Region", initialByoip ]
     Export:
       Name: initialIp
   UpdatedIp:
     Description: "Updated BYOIP IP Address for the updated accelerator"
-    Value: !FindInMap [ RegionMap, !Ref "AWS::Region", updatedByoip ]
+    Value: Fn:FindInMap [ RegionMap, !Ref "AWS::Region", updatedByoip ]
     Export:
       Name: updatedIp
