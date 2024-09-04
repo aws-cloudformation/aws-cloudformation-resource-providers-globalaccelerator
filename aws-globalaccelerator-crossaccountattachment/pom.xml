@@ -277,6 +277,8 @@
                         <exclude>**/BaseHandler*</exclude>
                         <exclude>**/HandlerWrapper*</exclude>
                         <exclude>**/ResourceModel*</exclude>
+                        <exclude>**/Tag*</exclude>
+                        <exclude>**/TypeConfigurationModel*</exclude>
                     </excludes>
                 </configuration>
                 <executions>
