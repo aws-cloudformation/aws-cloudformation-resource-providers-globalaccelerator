@@ -1,0 +1,108 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: "Accelerator Dependencies"
+
+Resources:
+  NullResource:
+    Type: AWS::CloudFormation::WaitConditionHandle
+
+Mappings:
+  RegionMap:
+    af-south-1:
+      initialByoip: "169.254.149.1"
+      updatedByoip: "169.254.149.2"
+    ap-east-1:
+      initialByoip: "169.254.149.3"
+      updatedByoip: "169.254.149.4"
+    ap-northeast-1:
+      initialByoip: "169.254.149.5"
+      updatedByoip: "169.254.149.6"
+    ap-northeast-2:
+      initialByoip: "169.254.149.7"
+      updatedByoip: "169.254.149.8"
+    ap-northeast-3:
+      initialByoip: "169.254.149.9"
+      updatedByoip: "169.254.149.10"
+    ap-southeast-1:
+      initialByoip: "169.254.149.11"
+      updatedByoip: "169.254.149.12"
+    ap-southeast-2:
+      initialByoip: "169.254.149.13"
+      updatedByoip: "169.254.149.14"
+    ap-southeast-3:
+      initialByoip: "169.254.149.15"
+      updatedByoip: "169.254.149.16"
+    ap-southeast-4:
+      initialByoip: "169.254.149.17"
+      updatedByoip: "169.254.149.18"
+    ap-south-1:
+      initialByoip: "169.254.149.19"
+      updatedByoip: "169.254.149.20"
+    ap-south-2:
+      initialByoip: "169.254.149.21"
+      updatedByoip: "169.254.149.22"
+    ca-central-1:
+      initialByoip: "169.254.149.23"
+      updatedByoip: "169.254.149.24"
+    ca-west-1:
+      initialByoip: "169.254.149.25"
+      updatedByoip: "169.254.149.26"
+    eu-central-1:
+      initialByoip: "169.254.149.27"
+      updatedByoip: "169.254.149.28"
+    eu-central-2:
+      initialByoip: "169.254.149.29"
+      updatedByoip: "169.254.149.30"
+    eu-north-1:
+      initialByoip: "169.254.149.31"
+      updatedByoip: "169.254.149.32"
+    eu-south-1:
+      initialByoip: "169.254.149.33"
+      updatedByoip: "169.254.149.34"
+    eu-south-2:
+      initialByoip: "169.254.149.35"
+      updatedByoip: "169.254.149.36"
+    eu-west-1:
+      initialByoip: "169.254.149.37"
+      updatedByoip: "169.254.149.38"
+    eu-west-2:
+      initialByoip: "169.254.149.39"
+      updatedByoip: "169.254.149.40"
+    eu-west-3:
+      initialByoip: "169.254.149.41"
+      updatedByoip: "169.254.149.42"
+    il-central-1:
+      initialByoip: "169.254.149.43"
+      updatedByoip: "169.254.149.44"
+    me-central-1:
+      initialByoip: "169.254.149.45"
+      updatedByoip: "169.254.149.46"
+    me-south-1:
+      initialByoip: "169.254.149.47"
+      updatedByoip: "169.254.149.48"
+    sa-east-1:
+      initialByoip: "169.254.149.49"
+      updatedByoip: "169.254.149.50"
+    us-east-1:
+      initialByoip: "169.254.149.51"
+      updatedByoip: "169.254.149.52"
+    us-east-2:
+      initialByoip: "169.254.149.53"
+      updatedByoip: "169.254.149.54"
+    us-west-1:
+      initialByoip: "169.254.149.53"
+      updatedByoip: "169.254.149.54"
+    us-west-2:
+      initialByoip: "169.254.149.55"
+      updatedByoip: "169.254.149.56"
+
+Outputs:
+  InitialIp:
+    Description: "Byoip addresses for the accelerator"
+    Value: !FindInMap [ RegionMap, !Ref "AWS::Region", initialByoip ]
+    Export:
+      Name: initialIp
+  UpdatedIp:
+    Description: "Updated BYOIP IP Address for the updated accelerator"
+    Value: !FindInMap [ RegionMap, !Ref "AWS::Region", updatedByoip ]
+    Export:
+      Name: updatedIp

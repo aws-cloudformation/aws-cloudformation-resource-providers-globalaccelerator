@@ -3,6 +3,9 @@
     "Name": "ContractDualStackTestAccelerator",
     "Enabled": true,
     "IpAddressType": "DUAL_STACK",
+    "IpAddresses": [
+      "{{ initialIp }}"
+    ],
     "Tags": [
       {
         "Key": "Foo",
@@ -15,6 +18,28 @@
       "op": "replace",
       "path": "/Name",
       "value": "UpdatedTestAccelerator"
+    },
+    {
+      "op": "replace",
+      "path": "/IpAddresses",
+      "value": [
+        "{{ updatedIp }}"
+      ]
+    },
+    {
+      "op": "replace",
+      "path": "/IpAddressType",
+      "value": "DUAL_STACK"
+    },
+    {
+      "op": "replace",
+      "path": "/Tags",
+      "value": [
+        {
+          "Key": "Bar",
+          "Value": "Baz"
+        }
+      ]
     },
     {
       "op": "replace",

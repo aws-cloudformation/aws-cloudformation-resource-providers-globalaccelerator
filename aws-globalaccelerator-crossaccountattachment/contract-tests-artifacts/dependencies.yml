@@ -1,0 +1,86 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: CrossAccountAttachment Dependencies
+
+Resources:
+  NullResource:
+    Type: AWS::CloudFormation::WaitConditionHandle
+
+Mappings:
+  RegionMap:
+    af-south-1:
+      cidr: 169.254.110.0/24
+    ap-east-1:
+      cidr: 169.254.111.0/24
+    ap-northeast-1:
+      cidr: 169.254.113.0/24
+    ap-northeast-2:
+      cidr: 169.254.114.0/24
+    ap-northeast-3:
+      cidr: 169.254.115.0/24
+    ap-south-1:
+      cidr: 169.254.116.0/24
+    ap-south-2:
+      cidr: 169.254.117.0/24
+    ap-southeast-1:
+      cidr: 169.254.118.0/24
+    ap-southeast-2:
+      cidr: 169.254.119.0/24
+    ap-southeast-3:
+      cidr: 169.254.120.0/24
+    ap-southeast-4:
+      cidr: 169.254.121.0/24
+    ca-central-1:
+      cidr: 169.254.122.0/24
+    ca-west-1:
+      cidr: 169.254.123.0/24
+    eu-central-1:
+      cidr: 169.254.124.0/24
+    eu-central-2:
+      cidr: 169.254.125.0/24
+    eu-north-1:
+      cidr: 169.254.126.0/24
+    eu-south-1:
+      cidr: 169.254.127.0/24
+    eu-south-2:
+      cidr: 169.254.128.0/24
+    eu-west-1:
+      cidr: 169.254.129.0/24
+    eu-west-2:
+      cidr: 169.254.130.0/24
+    eu-west-3:
+      cidr: 169.254.225.0/24
+    il-central-1:
+      cidr: 169.254.226.0/24
+    me-central-1:
+      cidr: 169.254.227.0/24
+    me-south-1:
+      cidr: 169.254.229.0/24
+    sa-east-1:
+      cidr: 169.254.230.0/24
+    us-east-1:
+      cidr: 169.254.231.0/24
+    us-east-2:
+      cidr: 169.254.232.0/24
+    us-west-1:
+      cidr: 169.254.233.0/24
+    us-west-2:
+      cidr: 169.254.147.0/24
+
+Outputs:
+  CrossAccountAttachmentNLBArn:
+    Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/222222"
+    Export:
+      Name: awsglobalacceleratorcrossaccountattachmentcto1
+
+  CrossAccountAttachmentNLBTwoArn:
+    Value: !Sub "arn:aws:elasticloadbalancing:${AWS::Region}:${AWS::AccountId}:loadbalancer/net/my-load-balancer/111111"
+    Export:
+      Name: awsglobalacceleratorcrossaccountattachmentcto2
+
+  AccountCIDR:
+    Description: "CIDR Associated with the regional account"
+    Value: !FindInMap [ RegionMap, !Ref "AWS::Region", cidr ]
+    Export:
+      Name: accountcidrcto1
+
+
