@@ -19,21 +19,12 @@
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
     </properties>
 
-    <properties>
-        <maven.compiler.source>17</maven.compiler.source>
-        <maven.compiler.target>17</maven.compiler.target>
-        <kotlin.version>1.8.21</kotlin.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-    </properties>
-
     <repositories>
         <repository>
             <id>central</id>
             <url>https://repo.maven.apache.org/maven2/</url>
         </repository>
     </repositories>
-
 
     <dependencies>
         <dependency>
@@ -80,7 +71,7 @@
         <!-- https://mvnrepository.com/artifact/io.mockk/mockk -->
         <dependency>
             <groupId>io.mockk</groupId>
-            <artifactId>mockk</artifactId>
+            <artifactId>mockk-jvm</artifactId>
             <version>1.13.12</version>
             <scope>test</scope>
         </dependency>
