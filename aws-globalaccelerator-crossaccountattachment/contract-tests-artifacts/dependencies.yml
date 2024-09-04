@@ -82,5 +82,3 @@ Outputs:
     Value: !FindInMap [ RegionMap, !Ref "AWS::Region", cidr ]
     Export:
       Name: accountcidrcto1
-
-
