@@ -56,11 +56,11 @@ class UpdateHandlerTest {
         val resources = listOf(resource2)
 
         return software.amazon.globalaccelerator.crossaccountattachment.ResourceModel.builder()
-                .attachmentArn(attachmentArn)
-                .name(attachmentName)
-                .principals(principals)
-                .resources(resources)
-                .build()
+            .attachmentArn(attachmentArn)
+            .name(attachmentName)
+            .principals(principals)
+            .resources(resources)
+            .build()
     }
 
     private fun createTestCidrResourceModel(attachmentArn: String, attachmentName: String): ResourceModel {
@@ -104,9 +104,9 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateCrossAccountAttachment>()) } returns updateAttachmentResult
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
-                .desiredResourceState(updatedAttachmentModel)
-                .previousResourceState(initialAttachmentModel)
-                .build()
+            .desiredResourceState(updatedAttachmentModel)
+            .previousResourceState(initialAttachmentModel)
+            .build()
 
         val response = UpdateHandler().handleRequest(proxy, request, null, logger)
 
@@ -175,9 +175,9 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateCrossAccountAttachment>()) } returns updateAttachmentResult
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
-                .desiredResourceState(updatedAttachmentModel)
-                .previousResourceState(initialAttachmentModel)
-                .build()
+            .desiredResourceState(updatedAttachmentModel)
+            .previousResourceState(initialAttachmentModel)
+            .build()
 
         val response = UpdateHandler().handleRequest(proxy, request, null, logger)
 
@@ -218,9 +218,9 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateCrossAccountAttachment>()) } returns updateAttachmentResult
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
-                .desiredResourceState(updatedAttachmentModel)
-                .previousResourceState(initialAttachmentModel)
-                .build()
+            .desiredResourceState(updatedAttachmentModel)
+            .previousResourceState(initialAttachmentModel)
+            .build()
 
         val response = UpdateHandler().handleRequest(proxy, request, null, logger)
 
@@ -257,9 +257,9 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateCrossAccountAttachment>()) } returns updateAttachmentResult
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
-                .desiredResourceState(updatedAttachmentModel)
-                .previousResourceState(initialAttachmentModel)
-                .build()
+            .desiredResourceState(updatedAttachmentModel)
+            .previousResourceState(initialAttachmentModel)
+            .build()
 
         val response = UpdateHandler().handleRequest(proxy, request, null, logger)
 
@@ -297,9 +297,9 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUpdateCrossAccountAttachment>()) } returns updateAttachmentResult
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
-                .desiredResourceState(updatedAttachmentModel)
-                .previousResourceState(initialAttachmentModel)
-                .build()
+            .desiredResourceState(updatedAttachmentModel)
+            .previousResourceState(initialAttachmentModel)
+            .build()
 
         val response = UpdateHandler().handleRequest(proxy, request, null, logger)
 
@@ -319,8 +319,8 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyDescribeCrossAccountAttachment>()) } throws AttachmentNotFoundException("NOT FOUND")
 
         val request = ResourceHandlerRequest.builder<software.amazon.globalaccelerator.crossaccountattachment.ResourceModel>()
-                .desiredResourceState(desiredModel)
-                .build()
+            .desiredResourceState(desiredModel)
+            .build()
 
         val response = UpdateHandler().handleRequest(proxy, request, null, logger)
         assertNotNull(response)
@@ -586,9 +586,9 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyTagCrossAccountAttachment>()) } returns null
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
-                .desiredResourceState(desiredModel)
-                .previousResourceState(desiredModel)
-                .build()
+            .desiredResourceState(desiredModel)
+            .previousResourceState(desiredModel)
+            .build()
 
         val response = UpdateHandler().handleRequest(proxy, request, null, logger)
         assertNotNull(response)
@@ -611,9 +611,9 @@ class UpdateHandlerTest {
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyUntagCrossAccountAttachment>()) } returns null
 
         val request = ResourceHandlerRequest.builder<ResourceModel>()
-                .desiredResourceState(desiredModel)
-                .previousResourceState(previousModel)
-                .build()
+            .desiredResourceState(desiredModel)
+            .previousResourceState(previousModel)
+            .build()
         val response = UpdateHandler().handleRequest(proxy, request, null, logger)
 
         assertNotNull(response)

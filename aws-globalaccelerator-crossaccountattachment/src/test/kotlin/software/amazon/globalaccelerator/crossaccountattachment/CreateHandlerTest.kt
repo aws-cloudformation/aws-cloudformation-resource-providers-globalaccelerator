@@ -43,10 +43,10 @@ class CreateHandlerTest {
     @Test
     fun handleRequest_CreateAttachment() {
         val result = CreateCrossAccountAttachmentResult().withCrossAccountAttachment(Attachment()
-                .withAttachmentArn(attachmentARN)
-                .withName(attachmentName)
-                .withPrincipals(principals)
-                .withResources(resources)
+            .withAttachmentArn(attachmentARN)
+            .withName(attachmentName)
+            .withPrincipals(principals)
+            .withResources(resources)
         )
         every { proxy.injectCredentialsAndInvoke(ofType(), ofType<ProxyCreateCrossAccountAttachment>()) } returns result
 

@@ -47,8 +47,8 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         logger.debug("Desired updated state model: $model")
         if (!validateTags(model)) {
             return ProgressEvent.defaultFailureHandler(
-                    Exception("Invalid tag format in template"),
-                    HandlerErrorCode.InvalidRequest
+                Exception("Invalid tag format in template"),
+                HandlerErrorCode.InvalidRequest
             )
         }
         val attachment = updateAttachment(model, proxy, agaClient, logger, existingAttachment)
@@ -95,10 +95,10 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         val principalsToRemove = (existingAttachment.principals.orEmpty() ?: listOf()) - model.principals.orEmpty()
         logger.debug("Updating attachment Principals for Attachment arn: [${model.attachmentArn}]. Removing: [${principalsToRemove}] ")
         val principalUpdateRequest = UpdateCrossAccountAttachmentRequest()
-                .withName(model.name)
-                .withAttachmentArn(model.attachmentArn)
-                .withAddPrincipals(principalsToAdd)
-                .withRemovePrincipals(principalsToRemove)
+            .withName(model.name)
+            .withAttachmentArn(model.attachmentArn)
+            .withAddPrincipals(principalsToAdd)
+            .withRemovePrincipals(principalsToRemove)
         return principalUpdateRequest
     }
 
@@ -151,10 +151,10 @@ class UpdateHandler : BaseHandler<CallbackContext?>() {
         val convertedResourcesToAdd = resourcesToAdd.map {com.amazonaws.services.globalaccelerator.model.Resource().withEndpointId(it.endpointId).withCidr(it.cidr).withRegion(it.region)}
 
         val resourceUpdateRequest = UpdateCrossAccountAttachmentRequest()
-                .withName(model.name)
-                .withAttachmentArn(model.attachmentArn)
-                .withAddResources(convertedResourcesToAdd)
-                .withRemoveResources(resourcesToRemove)
+            .withName(model.name)
+            .withAttachmentArn(model.attachmentArn)
+            .withAddResources(convertedResourcesToAdd)
+            .withRemoveResources(resourcesToRemove)
 
         return resourceUpdateRequest
     }

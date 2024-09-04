@@ -49,11 +49,11 @@ class CreateHandler : BaseHandler<CallbackContext?>() {
         val convertedTags = model.tags?.map { Tag().withKey(it.key).withValue(it.value) }
         val convertedResources = model.resources?.map {com.amazonaws.services.globalaccelerator.model.Resource().withEndpointId(it.endpointId).withCidr(it.cidr).withRegion(it.region)}
         val createAttachmentRequest = CreateCrossAccountAttachmentRequest()
-                .withName(model.name)
-                .withPrincipals(model.principals)
-                .withResources(convertedResources)
-                .withTags(convertedTags)
-                .withIdempotencyToken(handlerRequest.clientRequestToken)
+            .withName(model.name)
+            .withPrincipals(model.principals)
+            .withResources(convertedResources)
+            .withTags(convertedTags)
+            .withIdempotencyToken(handlerRequest.clientRequestToken)
 
         return proxy.injectCredentialsAndInvoke(createAttachmentRequest, agaClient::createCrossAccountAttachment).crossAccountAttachment
     }
