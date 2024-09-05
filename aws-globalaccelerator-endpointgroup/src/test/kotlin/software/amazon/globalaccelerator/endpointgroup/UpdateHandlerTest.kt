@@ -52,7 +52,7 @@ class UpdateHandlerTest {
 
     private fun createTestResourceModel(): ResourceModel {
         val endpointConfigurations = ArrayList<EndpointConfiguration>()
-        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").weight(100).clientIPPreservationEnabled(true).build())
+        endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID1").weight(100).attachmentArn("ATT1").clientIPPreservationEnabled(true).build())
         endpointConfigurations.add(EndpointConfiguration.builder().endpointId("EPID2").weight(100).clientIPPreservationEnabled(true).build())
 
         return ResourceModel.builder()
