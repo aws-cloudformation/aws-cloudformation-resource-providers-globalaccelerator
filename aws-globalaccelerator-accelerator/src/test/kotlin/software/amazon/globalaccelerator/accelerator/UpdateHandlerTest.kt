@@ -11,6 +11,7 @@ import io.mockk.impl.annotations.MockK
 import io.mockk.junit5.MockKExtension
 import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertIterableEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -293,8 +294,10 @@ class UpdateHandlerTest {
                 .build()
         val response = handler.handleRequest(proxy, request, null, logger)
         assertNotNull(response)
-        assertEquals(OperationStatus.FAILED, response.status)
-        assertEquals(HandlerErrorCode.InvalidRequest, response.errorCode)
+        assertEquals(OperationStatus.IN_PROGRESS, response.status)
+        assertNotNull(response.resourceModel)
+        assertEquals(ACCELERATOR_ARN, response.resourceModel.acceleratorArn)
+        assertIterableEquals(desiredModel.ipAddresses, response.resourceModel.ipAddresses)
     }
 
 }

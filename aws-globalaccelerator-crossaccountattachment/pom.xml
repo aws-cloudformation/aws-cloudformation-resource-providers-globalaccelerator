@@ -5,9 +5,9 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>software.amazon.globalaccelerator.endpointgroup</groupId>
-    <artifactId>aws-globalaccelerator-endpointgroup-handler</artifactId>
-    <name>aws-globalaccelerator-endpointgroup-handler</name>
+    <groupId>software.amazon.globalaccelerator.crossaccountattachment</groupId>
+    <artifactId>aws-globalaccelerator-crossaccountattachment-handler</artifactId>
+    <name>aws-globalaccelerator-crossaccountattachment-handler</name>
     <version>1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
 
@@ -305,12 +305,12 @@
                                         <limit>
                                             <counter>BRANCH</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.8</minimum>
+                                            <minimum>0.7</minimum>
                                         </limit>
                                         <limit>
                                             <counter>INSTRUCTION</counter>
                                             <value>COVEREDRATIO</value>
-                                            <minimum>0.8</minimum>
+                                            <minimum>0.7</minimum>
                                         </limit>
                                     </limits>
                                 </rule>

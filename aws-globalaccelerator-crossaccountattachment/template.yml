@@ -11,15 +11,15 @@ Resources:
   TypeFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: software.amazon.globalaccelerator.accelerator.HandlerWrapper::handleRequest
+      Handler: software.amazon.globalaccelerator.crossaccountattachment.HandlerWrapper::handleRequest
       Runtime: java17
-      CodeUri: ./target/aws-globalaccelerator-accelerator-handler-1.0-SNAPSHOT.jar
+      CodeUri: ./target/aws-globalaccelerator-crossaccountattachment-handler-1.0-SNAPSHOT.jar
       MemorySize: 512
 
   TestEntrypoint:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: software.amazon.globalaccelerator.accelerator.HandlerWrapper::testEntrypoint
+      Handler: software.amazon.globalaccelerator.crossaccountattachment.HandlerWrapper::testEntrypoint
       Runtime: java17
-      CodeUri: ./target/aws-globalaccelerator-accelerator-handler-1.0-SNAPSHOT.jar
+      CodeUri: ./target/aws-globalaccelerator-crossaccountattachment-handler-1.0-SNAPSHOT.jar
       MemorySize: 512
