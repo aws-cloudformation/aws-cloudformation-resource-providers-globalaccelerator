@@ -39,7 +39,7 @@ class UpdateHandler : BaseHandler<CallbackContext>() {
                                     agaClient: AWSGlobalAccelerator): ProgressEvent<ResourceModel, CallbackContext?> {
         val convertedEndpointConfigurations = model.endpointConfigurations?.map {
             EndpointConfiguration()
-                    .withEndpointId(it.endpointId).withWeight(it.weight).withClientIPPreservationEnabled(it.clientIPPreservationEnabled)
+                    .withEndpointId(it.endpointId).withWeight(it.weight).withClientIPPreservationEnabled(it.clientIPPreservationEnabled).withAttachmentArn(it.attachmentArn)
         }
         val trafficDialPercentage = model.trafficDialPercentage?.toFloat() ?: 100.0f
         val request = UpdateEndpointGroupRequest()
